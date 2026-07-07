@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title class="">WisdomAI - Learning Path</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .path-node-active {
+            box-shadow: 0 4px 0 0 rgba(0, 73, 102, 0.3);
+        }
+        html.dark .path-node-active {
+            box-shadow: 0 4px 0 0 rgba(42, 188, 253, 0.3);
+        }
+        .path-node-completed {
+            box-shadow: 0 4px 0 0 rgba(0, 87, 135, 0.3);
+        }
+        html.dark .path-node-completed {
+            box-shadow: 0 4px 0 0 rgba(0, 112, 173, 0.3);
+        }
+        .squishy-button {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .squishy-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 0 transparent !important;
+        }
+        .serpentine-path {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding: 40px 0;
+        }
+        
+        .progress-line {
+            position: absolute;
+            width: 4px;
+            background: repeating-linear-gradient(to bottom, #dfe3e6 0, #dfe3e6 10px, transparent 10px, transparent 20px);
+            z-index: 0;
+            top: 0;
+            bottom: 0;
+        }
+        html.dark .progress-line {
+            background: repeating-linear-gradient(to bottom, #374151 0, #374151 10px, transparent 10px, transparent 20px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#c5e7ff",
+                      "on-tertiary-fixed-variant": "#1f5100",
+                      "on-surface-variant": "#404750",
+                      "surface-variant": "#dfe3e6",
+                      "surface-bright": "#f6fafd",
+                      "on-secondary-container": "#004966",
+                      "surface-container-low": "#f0f4f7",
+                      "outline": "#707881",
+                      "error-container": "#ffdad6",
+                      "primary": "#005787",
+                      "primary-fixed-dim": "#95ccff",
+                      "on-primary-fixed": "#001d32",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed": "#082100",
+                      "secondary-fixed-dim": "#80d0ff",
+                      "on-primary-container": "#e0eeff",
+                      "on-background": "#171c1f",
+                      "surface-container-high": "#e5e9ec",
+                      "primary-container": "#0070ad",
+                      "on-secondary": "#ffffff",
+                      "on-surface": "#171c1f",
+                      "tertiary-fixed": "#87fe45",
+                      "on-secondary-fixed": "#001e2d",
+                      "on-primary-fixed-variant": "#004a75",
+                      "inverse-primary": "#95ccff",
+                      "error": "#ba1a1a",
+                      "secondary": "#00658c",
+                      "inverse-on-surface": "#edf1f4",
+                      "on-tertiary-container": "#bbff92",
+                      "tertiary-container": "#327a00",
+                      "surface-tint": "#00639a",
+                      "tertiary": "#255f00",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed": "#cde5ff",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#d6dbdd",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-surface": "#2c3134",
+                      "tertiary-fixed-dim": "#6be026",
+                      "surface": "#f6fafd",
+                      "secondary-container": "#2abcfd",
+                      "on-primary": "#ffffff",
+                      "outline-variant": "#c0c7d1",
+                      "on-secondary-fixed-variant": "#004c6a",
+                      "surface-container": "#eaeef1",
+                      "background": "#f6fafd",
+                      "surface-container-highest": "#dfe3e6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-gap": "20px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-desktop": "40px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Hanken Grotesk"],
+                      "label-md": ["JetBrains Mono"],
+                      "display-lg": ["Hanken Grotesk"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "stats-number": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background dark:bg-gray-950 text-on-background dark:text-gray-100 font-body-md min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface dark:bg-gray-900 border-b border-outline-variant dark:border-gray-800 md:ml-64 md:w-[calc(100%-16rem)]">
+<div class="flex items-center gap-8"><button class="md:hidden p-2 dark:text-gray-300"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline dark:text-gray-400">search</span><input class="bg-surface-container-low dark:bg-gray-800 border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary dark:text-gray-100 text-sm h-10" placeholder="Search..." type="text"/></div></div>
+<div class="flex items-center gap-4"><div class="hidden lg:flex items-center gap-4 mr-4"><div class="flex flex-col items-center"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low dark:bg-gray-800 border border-outline-variant dark:border-gray-700 rounded-full"><span class="material-symbols-outlined text-primary dark:text-secondary-fixed text-sm" style="font-variation-settings: 'FILL' 1;">military_tech</span><span class="font-stats-number text-sm text-on-surface dark:text-gray-200">2.4k</span></div></div></div><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary dark:border-secondary-fixed object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY"/></div></div>
+</header>
+<div class="flex max-w-[1440px] mx-auto">
+<!-- SideNavBar (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant dark:border-gray-800 bg-surface-container-low dark:bg-gray-900 z-40 min-h-screen">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"/><span class="font-headline-md text-headline-md font-extrabold text-primary dark:text-secondary-fixed">WisdomAI</span></div><nav class="flex-1 space-y-2"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-gray-400 hover:bg-surface-container-high dark:hover:bg-gray-800 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-primary-container text-on-secondary-container dark:text-white rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#"><span class="material-symbols-outlined">route</span><span class="font-label-md text-label-md">Learning Path</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-gray-400 hover:bg-surface-container-high dark:hover:bg-gray-800 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">folder</span><span class="font-label-md text-label-md">Knowledge Vault</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-gray-400 hover:bg-surface-container-high dark:hover:bg-gray-800 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Support</span></a></nav>
+<div class="mt-auto pt-6 border-t border-outline-variant dark:border-gray-800"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-gray-400 hover:bg-surface-container-high dark:hover:bg-gray-800 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></a></div></div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-background dark:bg-gray-950 min-h-[calc(100vh-4rem)]">
+<!-- Learning Path Central Column -->
+<div class="xl:col-span-8 flex flex-col items-center">
+<!-- Path Header -->
+<div class="w-full mb-12 text-center lg:text-left">
+<div class="flex items-center gap-2 mb-4 justify-center lg:justify-start">
+<span class="bg-primary dark:bg-primary text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Active Path</span>
+<span class="text-on-surface-variant dark:text-gray-400 text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+                            Cloud Architecture &amp; DevOps
+                        </span>
+</div>
+<h2 class="font-display-lg text-display-lg text-on-surface dark:text-gray-100 mb-4">Cloud Digital Leader Certification</h2>
+<p class="text-body-lg text-on-surface-variant dark:text-gray-400 max-w-2xl">Master the fundamentals of cloud infrastructure, managed services, and modern security protocols to lead digital transformations.</p>
+</div>
+<!-- Serpentine Learning Path -->
+<div class="relative w-full flex flex-col items-center">
+<div class="progress-line"></div>
+<!-- Section Header -->
+<div class="relative z-10 w-full max-w-lg mb-8">
+<div class="bg-primary dark:bg-gray-900 text-on-primary dark:text-gray-100 p-6 rounded-2xl border-b-4 border-blue-900 dark:border-primary flex justify-between items-center shadow-lg">
+<div>
+<p class="font-label-md text-xs opacity-80 dark:text-gray-400 uppercase tracking-widest">Section 1, Module 3</p>
+<h3 class="font-headline-md text-white dark:text-gray-100">Cloud Fundamentals &amp; Global Scale</h3>
+</div>
+<span class="material-symbols-outlined text-3xl">cloud_done</span>
+</div>
+</div>
+<!-- Path Nodes -->
+<div class="serpentine-path w-full">
+<!-- Completed Node -->
+<div class="relative flex flex-col items-center">
+<div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white path-node-completed squishy-button cursor-pointer border-4 border-white dark:border-gray-950">
+<span class="material-symbols-outlined text-3xl">check</span>
+</div>
+<span class="mt-3 font-bold text-on-surface-variant dark:text-gray-300 text-sm">The Shared Responsibility Model</span>
+</div>
+<!-- Active Node -->
+<div class="relative flex flex-col items-center group">
+<div class="absolute -top-12 bg-secondary-container dark:bg-primary-container text-on-secondary-container dark:text-white px-3 py-1 rounded-lg text-xs font-bold animate-bounce shadow-md border border-secondary dark:border-primary">
+                                START HERE
+                            </div>
+<div class="w-24 h-24 rounded-full bg-secondary-container dark:bg-primary-container flex items-center justify-center text-on-secondary-container dark:text-white path-node-active squishy-button cursor-pointer border-4 border-white dark:border-gray-950 ring-secondary-container/30 dark:ring-primary-container/30">
+<span class="material-symbols-outlined text-4xl" style='font-variation-settings: "FILL" 1;'>rocket_launch</span>
+</div>
+<span class="mt-3 font-bold text-primary dark:text-secondary-fixed text-sm bg-secondary-fixed dark:bg-primary/20 px-3 py-1 rounded-full">Compute &amp; Storage Basics</span>
+</div>
+<!-- Locked Node -->
+<div class="relative flex flex-col items-center opacity-40">
+<div class="w-20 h-20 rounded-full bg-surface-variant dark:bg-gray-800 flex items-center justify-center text-on-surface-variant dark:text-gray-400 border-4 border-white dark:border-gray-950 cursor-not-allowed">
+<span class="material-symbols-outlined text-3xl">lock</span>
+</div>
+<span class="mt-3 font-bold text-on-surface-variant dark:text-gray-300 text-sm">Identity &amp; Access Management</span>
+</div>
+<!-- Mini Boss/Assessment Node -->
+<div class="relative flex flex-col items-center opacity-40">
+<div class="w-24 h-24 rounded-2xl rotate-45 bg-surface-variant dark:bg-gray-800 flex items-center justify-center text-on-surface-variant dark:text-gray-400 border-4 border-white dark:border-gray-950 cursor-not-allowed overflow-hidden">
+<span class="material-symbols-outlined text-4xl -rotate-45">verified</span>
+</div>
+<span class="mt-3 font-bold text-on-surface-variant dark:text-gray-300 text-sm">Module Quiz: Infra Foundations</span>
+</div>
+<!-- Section 2 Header -->
+<div class="relative z-10 w-full max-w-lg my-12">
+<div class="bg-surface-container-high dark:bg-gray-900 border border-outline-variant dark:border-gray-800 p-6 rounded-2xl flex justify-between items-center opacity-50 grayscale dark:grayscale-0 dark:opacity-80">
+<div>
+<p class="font-label-md text-xs text-on-surface-variant dark:text-gray-400 uppercase tracking-widest">Section 2</p>
+<h3 class="font-headline-md text-on-surface dark:text-gray-100">Data Management &amp; Modern Databases</h3>
+</div>
+<span class="material-symbols-outlined text-3xl text-on-surface-variant dark:text-gray-400">database</span>
+</div>
+</div>
+<!-- Locked Node -->
+<div class="relative flex flex-col items-center opacity-40">
+<div class="w-20 h-20 rounded-full bg-surface-variant dark:bg-gray-800 flex items-center justify-center text-on-surface-variant dark:text-gray-400 border-4 border-white dark:border-gray-950 cursor-not-allowed">
+<span class="material-symbols-outlined text-3xl">lock</span>
+</div>
+<span class="mt-3 font-bold text-on-surface-variant dark:text-gray-300 text-sm">Relational vs Non-Relational</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Path Stats Sidebar -->
+<div class="xl:col-span-4 space-y-6">
+<!-- Progress Card -->
+<section class="bg-surface-container-lowest dark:bg-gray-900 border border-outline-variant dark:border-gray-800 rounded-2xl p-6">
+<h4 class="font-headline-md text-on-surface dark:text-gray-100 mb-4">Path Stats</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-on-surface-variant dark:text-gray-400 text-sm">Overall Progress</span>
+<span class="font-stats-number text-primary dark:text-secondary-fixed">34%</span>
+</div>
+<div class="w-full bg-surface-container-high dark:bg-gray-800 h-3 rounded-full overflow-hidden">
+<div class="bg-primary dark:bg-primary h-full rounded-full w-[34%] transition-all duration-1000"></div>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-6">
+<div class="bg-surface-container-low dark:bg-gray-800 p-3 rounded-xl">
+<p class="text-xs text-on-surface-variant dark:text-gray-400 uppercase font-bold mb-1">Time Invested</p>
+<p class="font-stats-number text-on-surface dark:text-gray-100">12.5h</p>
+</div>
+<div class="bg-surface-container-low dark:bg-gray-800 p-3 rounded-xl">
+<p class="text-xs text-on-surface-variant dark:text-gray-400 uppercase font-bold mb-1">Remaining</p>
+<p class="font-stats-number text-on-surface dark:text-gray-100">28h</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Certification Info -->
+<!-- Weekly Goal -->
+<section class="bg-tertiary-container dark:bg-tertiary-container/20 text-on-tertiary-container dark:text-tertiary-fixed rounded-2xl p-6 border-b-4 border-on-tertiary-fixed-variant dark:border-tertiary-fixed/50">
+<div class="flex justify-between items-start mb-4">
+<h4 class="font-headline-md font-bold">Weekly Goal</h4>
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<p class="text-sm mb-4 opacity-90 dark:text-gray-300">Keep it up! 3 more modules to reach your goal of 4 hours per week.</p>
+<div class="flex gap-2">
+<div class="flex-1 h-2 bg-on-tertiary-container/20 dark:bg-tertiary-fixed/20 rounded-full"><div class="h-full bg-white dark:bg-tertiary-fixed rounded-full w-full"></div></div>
+<div class="flex-1 h-2 bg-on-tertiary-container/20 dark:bg-tertiary-fixed/20 rounded-full"><div class="h-full bg-white dark:bg-tertiary-fixed rounded-full w-[40%]"></div></div>
+<div class="flex-1 h-2 bg-on-tertiary-container/20 dark:bg-tertiary-fixed/20 rounded-full"></div>
+<div class="flex-1 h-2 bg-on-tertiary-container/20 dark:bg-tertiary-fixed/20 rounded-full"></div>
+<div class="flex-1 h-2 bg-on-tertiary-container/20 dark:bg-tertiary-fixed/20 rounded-full"></div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface dark:bg-gray-900 border-t border-outline-variant dark:border-gray-800 flex justify-around items-center h-16 z-50">
+<button class="flex flex-col items-center text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-secondary-fixed">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">HOME</span>
+</button>
+<button class="flex flex-col items-center text-primary dark:text-secondary-fixed">
+<span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>route</span>
+<span class="text-[10px] font-bold">PATH</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-secondary-fixed">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="text-[10px] font-bold">XP</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-secondary-fixed">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">ME</span>
+</button>
+</nav>
+<script>
+        // Smooth hover and entrance interactions
+        document.querySelectorAll('.squishy-button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'translateY(2px)';
+            });
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simple animation for active node pulse
+        const activeNode = document.querySelector('.path-node-active');
+        if (activeNode) {
+            setInterval(() => {
+                activeNode.classList.toggle('ring-4');
+            }, 1000);
+        }
+    </script>
+</body></html>

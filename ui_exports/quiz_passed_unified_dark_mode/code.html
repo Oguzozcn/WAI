@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quiz Success | WisdomAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#327a00",
+                        "on-tertiary-fixed": "#082100",
+                        "surface-dim": "#d6dbdd",
+                        "secondary": "#00658c",
+                        "surface-container-highest": "#dfe3e6",
+                        "primary-fixed-dim": "#95ccff",
+                        "surface-container-high": "#e5e9ec",
+                        "background": "#f6fafd",
+                        "on-background": "#171c1f",
+                        "outline-variant": "#c0c7d1",
+                        "on-secondary-fixed": "#001e2d",
+                        "secondary-container": "#2abcfd",
+                        "surface-bright": "#f6fafd",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#87fe45",
+                        "on-secondary-fixed-variant": "#004c6a",
+                        "on-error": "#ffffff",
+                        "tertiary": "#255f00",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#e0eeff",
+                        "tertiary-fixed-dim": "#6be026",
+                        "surface-variant": "#dfe3e6",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#0070ad",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#80d0ff",
+                        "on-primary-fixed-variant": "#004a75",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#c5e7ff",
+                        "on-secondary-container": "#004966",
+                        "on-surface": "#171c1f",
+                        "surface-tint": "#00639a",
+                        "inverse-primary": "#95ccff",
+                        "surface-container-low": "#f0f4f7",
+                        "outline": "#707881",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed": "#001d32",
+                        "inverse-on-surface": "#edf1f4",
+                        "primary": "#005787",
+                        "primary-fixed": "#cde5ff",
+                        "on-surface-variant": "#404750",
+                        "surface": "#f6fafd",
+                        "on-tertiary-container": "#bbff92",
+                        "surface-container": "#eaeef1",
+                        "on-tertiary-fixed-variant": "#1f5100",
+                        "inverse-surface": "#2c3134"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "card-gap": "20px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "stats-number": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .squishy-button {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-bottom: 3px solid rgba(0, 0, 0, 0.2);
+        }
+        .squishy-button:active {
+            transform: scale(0.96) translateY(2px);
+            border-bottom-width: 0px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .confetti-canvas {
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-on-surface text-inverse-on-surface font-body-md min-h-screen">
+<!-- Side Navigation Shell -->
+<nav class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline bg-inverse-surface z-40 min-h-screen" style="transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhvctwVTGynDkdYDTIPbZnBmxxrJauAxoJArSKL96yK-scizt9gcCDg6Lqc0v7kLxIlrlBhXZn-2IfHppn0OOi_0QFAzKgxbJsGKY5fp-iL32DwpQKJY7oBY8tsamIMlwigmUUEIRDddJq6JiNPhsS1jIGiepdtRSD2pPaLWuR84OBRjdVbU70Yq75ltH3Ts_bhlh2xUk53QBsB8SbH3L9tPhVMmL1RqU9lSr2YeQpZsuT8LcHFq7ovRaF4fI1hQ5QcQ"/><span class="font-headline-md text-headline-md font-extrabold text-inverse-primary">WisdomAI</span></div>
+<nav class="flex-1 space-y-1"><a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 text-outline-variant hover:bg-surface-variant/20 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">route</span><span class="font-label-md text-label-md">Learning Path</span></a><a class="flex items-center gap-3 px-4 py-3 text-outline-variant hover:bg-surface-variant/20 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">folder</span><span class="font-label-md text-label-md">Knowledge Vault</span></a><a class="flex items-center gap-3 px-4 py-3 text-outline-variant hover:bg-surface-variant/20 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Support</span></a></nav>
+<div class="mt-auto pt-6 border-t border-outline"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-outline-variant hover:bg-surface-variant/20 rounded-xl transition-all" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></a></div></div>
+</nav>
+<!-- Top AppBar Shell -->
+<header class="bg-inverse-surface border-b border-outline flex justify-between items-center w-full px-spacing-margin-desktop h-16 md:ml-64 md:max-w-[calc(100%-16rem)] fixed top-0 z-20 z-50"><div class="flex items-center gap-4"><button class="md:hidden p-2 text-inverse-on-surface"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">search</span><input class="bg-on-surface border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-inverse-primary text-sm h-10 text-inverse-on-surface placeholder-outline-variant" placeholder="Search..." type="text"/></div></div><div class="flex items-center gap-3"><div class="hidden lg:flex items-center gap-4 mr-4"><div class="flex flex-col items-center"><div class="flex items-center gap-1.5 px-3 py-1 bg-on-surface border border-outline rounded-full"><span class="material-symbols-outlined text-inverse-primary text-sm" style='font-variation-settings: "FILL" 1;'>military_tech</span><span class="font-stats-number text-sm text-inverse-on-surface">2.4k</span></div></div></div><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-inverse-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8XlmnoH4Y6H8NVQKZ1KJBFOtq13dIOpxJWmkcICvEy0wIU5o6imgGH8t1C6mob0I1WYDAbAqcR5u2PAZz7jz_ok-cG4Po4chUpLx0NR4eGSCZPeh4AU_9qVkliShiVm65rx1XEvjpiiO8xhRxoLrKb19q49zZfwdDs3eLGJvYPfqt89yW7UOau38_JGqQHWChH886R95h7-0VEYf8TFnUVV_nvK03rXpTLP7ABXqSrSLjA7oNVP_7"/></div></div></header>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-on-surface min-h-[calc(100vh-4rem)] pt-32 pt-8 pt-16">
+<!-- Background Animation Overlay -->
+<div class="max-w-[1200px] mx-auto">
+<!-- Celebratory Header Section -->
+<div class="mb-8 text-left mt-8">
+<h2 class="font-display-lg text-display-lg text-inverse-primary mb-2 font-extrabold">Congratulations, Alex! You Passed.</h2>
+<p class="text-outline-variant font-body-lg">You've successfully mastered the "Strategic Product Management" final quiz with flying colors.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Primary Success Card -->
+<div class="lg:col-span-8 flex flex-col gap-gutter">
+<div class="bg-inverse-surface rounded-xl border border-outline p-8 relative overflow-hidden shadow-sm">
+<div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+<!-- Score Radial (Simple SVG) -->
+<div class="relative w-48 h-48 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" style="transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);">
+<circle class="text-on-surface" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-inverse-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.9" stroke-dashoffset="44.2" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display-lg text-display-lg text-inverse-on-surface">92%</span>
+<span class="font-label-md text-outline-variant">FINAL SCORE</span>
+</div>
+</div>
+<div class="flex-1 space-y-6 text-center md:text-left">
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 bg-on-surface rounded-lg border border-outline">
+<div class="flex items-center justify-center md:justify-start gap-2 text-inverse-primary mb-1">
+<span class="material-symbols-outlined text-sm">stars</span>
+<span class="font-stats-number text-stats-number text-inverse-on-surface ml-1">+450 XP</span>
+</div>
+</div>
+<div class="p-4 bg-on-surface rounded-lg border border-outline">
+<div class="flex items-center justify-center md:justify-start gap-2 text-tertiary-fixed-dim mb-1">
+<span class="material-symbols-outlined text-sm">timer</span>
+<span class="font-label-md text-xs">TIME TAKEN</span>
+</div>
+<div class="font-stats-number text-stats-number text-inverse-on-surface">14:22</div>
+</div>
+</div>
+<div class="p-4 bg-secondary-container/20 border border-secondary-container/50 rounded-lg flex items-center gap-4">
+<div class="w-14 h-14 bg-secondary-container rounded-xl flex items-center justify-center text-on-secondary-container shadow-lg">
+<span class="material-symbols-outlined text-3xl" style='font-variation-settings: "FILL" 1;'>verified_user</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-inverse-primary">Badge Earned</h4>
+<p class="text-sm text-secondary-fixed">Strategic Management Professional Level 1</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Performance Breakdown Card -->
+<div class="bg-inverse-surface rounded-xl border border-outline p-8 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-6 flex items-center gap-2 text-inverse-on-surface">
+<span class="material-symbols-outlined text-inverse-primary">analytics</span>
+                            Performance Breakdown
+                        </h3>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between items-center text-sm font-medium">
+<span class="text-inverse-on-surface">Market Research &amp; Analysis</span>
+<span class="text-inverse-primary">100%</span>
+</div>
+<div class="h-2 w-full bg-on-surface rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim w-full rounded-full" style="transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-sm font-medium">
+<span class="text-inverse-on-surface">Product Roadmap Planning</span>
+<span class="text-inverse-primary">85%</span>
+</div>
+<div class="h-2 w-full bg-on-surface rounded-full overflow-hidden">
+<div class="h-full bg-inverse-primary w-[85%] rounded-full" style="transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-sm font-medium">
+<span class="text-inverse-on-surface">Stakeholder Management</span>
+<span class="text-inverse-primary">90%</span>
+</div>
+<div class="h-2 w-full bg-on-surface rounded-full overflow-hidden">
+<div class="h-full bg-inverse-primary w-[90%] rounded-full" style="transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Gamification & CTA Sidebar -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Actions Card -->
+<div class="bg-primary-fixed p-1 rounded-xl shadow-lg">
+<div class="bg-inverse-surface rounded-lg p-6 flex flex-col gap-4">
+<button class="w-full bg-primary-fixed text-on-primary-fixed py-4 rounded-xl font-bold flex items-center justify-center gap-3 squishy-button">
+<span class="material-symbols-outlined">workspace_premium</span>
+                                View Certificate
+                            </button>
+<button class="w-full bg-on-surface text-inverse-primary border border-outline py-4 rounded-xl font-bold flex items-center justify-center gap-3 squishy-button">
+<span class="material-symbols-outlined">map</span>
+                                Back to Learning Path
+                            </button>
+</div>
+</div>
+<!-- Share Progress -->
+<!-- Next Milestone Card -->
+<div class="bg-on-surface rounded-xl border-2 border-dashed border-outline p-6 flex flex-col items-center text-center opacity-70">
+<span class="material-symbols-outlined text-4xl mb-2 text-outline-variant">lock</span>
+<p class="font-label-md text-xs uppercase mb-1 text-outline-variant">Next Milestone</p>
+<h5 class="font-headline-md text-inverse-on-surface">Go-to-Market Strategy</h5>
+<p class="text-xs mt-2 text-outline-variant">Unlock by completing 'Pricing Models' module</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Confetti Effect (JS) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simple micro-interaction for performance items
+            const progressBars = document.querySelectorAll('.h-full');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.transition = 'width 1s cubic-bezier(0.65, 0, 0.35, 1)';
+                    bar.style.width = width;
+                }, 300);
+            });
+        });
+    </script>
+</body></html>

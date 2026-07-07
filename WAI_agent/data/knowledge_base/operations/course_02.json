@@ -1,0 +1,23 @@
+{
+  "title": "Vertex AI Studio",
+  "description": "Exploring generative AI models using Vertex AI Studio",
+  "topics": [
+    "vertex_ai_studio",
+    "generative_ai",
+    "prompt_design"
+  ],
+  "content": "Vertex AI Studio allows users to interact with, tune, and deploy foundation models. It provides a UI for prompt engineering (Language, Vision, and Speech). You can test different prompts, adjust parameters like temperature and max output tokens, and compare model responses before integrating them into applications.",
+  "estimated_hours": 1.5,
+  "key_facts": [
+    {
+      "concept": "Vertex AI Studio",
+      "definition": "UI for testing foundation models"
+    },
+    {
+      "concept": "Temperature",
+      "definition": "Controls the randomness of model output"
+    }
+  ],
+  "source_dtp": "dtp_vertex_ai_v1",
+  "version": "1.0"
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Vertex AI Model Registry",
+  "description": "Managing the ML model lifecycle",
+  "topics": [
+    "model_registry",
+    "mlops",
+    "versioning"
+  ],
+  "content": "The Model Registry acts as a central repository for ML models. It supports versioning, aliasing (e.g., 'default', 'production'), and metadata tracking. Models trained in Vertex AI, BigQuery ML, or external platforms can be registered here before deployment.",
+  "estimated_hours": 1.0,
+  "key_facts": [
+    {
+      "concept": "Model Registry",
+      "definition": "Central repository for managing model versions"
+    },
+    {
+      "concept": "Aliasing",
+      "definition": "Assigning tags like 'production' to specific model versions"
+    }
+  ],
+  "source_dtp": "dtp_vertex_ai_v1",
+  "version": "1.0"
+}

@@ -1,0 +1,341 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WisdomAI - Introduction to AI Agents</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#c5e7ff",
+                        "on-tertiary-fixed-variant": "#1f5100",
+                        "on-surface-variant": "#404750",
+                        "surface-variant": "#dfe3e6",
+                        "surface-bright": "#f6fafd",
+                        "on-secondary-container": "#004966",
+                        "surface-container-low": "#f0f4f7",
+                        "outline": "#707881",
+                        "error-container": "#ffdad6",
+                        "primary": "#005787",
+                        "primary-fixed-dim": "#95ccff",
+                        "on-primary-fixed": "#001d32",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#082100",
+                        "secondary-fixed-dim": "#80d0ff",
+                        "on-primary-container": "#e0eeff",
+                        "on-background": "#171c1f",
+                        "surface-container-high": "#e5e9ec",
+                        "primary-container": "#0070ad",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#171c1f",
+                        "tertiary-fixed": "#87fe45",
+                        "on-secondary-fixed": "#001e2d",
+                        "on-primary-fixed-variant": "#004a75",
+                        "inverse-primary": "#95ccff",
+                        "error": "#ba1a1a",
+                        "secondary": "#00658c",
+                        "inverse-on-surface": "#edf1f4",
+                        "on-tertiary-container": "#bbff92",
+                        "tertiary-container": "#327a00",
+                        "surface-tint": "#00639a",
+                        "tertiary": "#255f00",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#cde5ff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d6dbdd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2c3134",
+                        "tertiary-fixed-dim": "#6be026",
+                        "surface": "#f6fafd",
+                        "secondary-container": "#2abcfd",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c0c7d1",
+                        "on-secondary-fixed-variant": "#004c6a",
+                        "surface-container": "#eaeef1",
+                        "background": "#f6fafd",
+                        "surface-container-highest": "#dfe3e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-gap": "20px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-md": ["JetBrains Mono"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "stats-number": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .squishy-button {
+            transition: transform 0.1s ease-in-out;
+            box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.1);
+        }
+        .squishy-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.1);
+        }
+        .progress-node-active {
+            box-shadow: 0 0 0 4px white, 0 0 0 8px #2abcfd;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen py-6 px-4 fixed left-0 border-r border-outline-variant bg-surface-container-low w-64 top-0 z-50 min-h-screen"><div class="flex items-center gap-3 px-3 mb-6">
+<img alt="WisdomAI Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwMqFdpZCVuIBnoxnrq7qDeQCQVL2xi7-myWhD3x86DNycw9y6p4j5TADUudUh1RE4wnHjwv4SkDHY38Q0XoIX45cElBGy89MAI75U8V_kE-N-HDgllxxsv4TGKCutTi0S7i_Axzi3dXtXjGbgA2SHb31oDg5fLTYpovP7IqSf1NPH8tulWXwzp-eY4PolQru8qwy6ZPrUqDtbL3U-9fAyPZ9lBAGgkTEGOEMut5bOZ9bHawO4LyO7eHqtRcvMrwF53Q">
+<span class="font-headline-md text-headline-md font-bold text-primary">WisdomAI</span>
+</div>
+
+<div class="flex-1 space-y-1"><!-- Active State: Learning Path -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">route</span>
+<span class="font-label-md text-label-md">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-label-md text-label-md">Knowledge Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a></div>
+
+<div class="mt-auto pt-6 border-t border-outline-variant"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a></div></div></nav>
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full md:w-[calc(100%-16rem)] md:ml-64 px-margin-desktop h-16 sticky top-0 z-40 bg-surface border-b border-outline-variant"><div class="flex items-center gap-8">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-6"><div class="hidden lg:flex items-center gap-4 mr-4">
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="font-stats-number text-sm text-on-surface">2.4k</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkqfsn8zgmmZlLSYYnIrP6Mv2FcPJT3H5troA3U6-0ACK6daZ405Y_vsgx-RYYmm5J6SRXxPNAnh20CtOrQCX1exrljUQoNhLFaG30H9ZBUhuJ7xWcraztgpBJLXIK4jS5w1Acj-HUFIQl4XnXXBd_Q8HysY7nHEp8iWn9vGPL0fJIM8i1H1p8d6Exq22_bZxjsEFriSkNoeXw-E2G0CUx8NNK0NsQuYdEAU7vCdCkyFtFAU68kHZ">
+</div></div></header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-64 p-gutter md:p-margin-desktop max-w-[1200px] mx-auto w-full">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 text-on-surface-variant mb-6 overflow-x-auto whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="#">Catalog</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">AI &amp; Machine Learning</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface font-semibold">Introduction to AI Agents</span>
+</nav>
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Content Area -->
+<div class="col-span-12 lg:col-span-8">
+<!-- Lesson Hero Card -->
+<section class="bg-primary-container text-on-primary-container rounded-3xl p-8 mb-gutter relative overflow-hidden shadow-lg">
+<div class="relative z-10">
+<div class="inline-flex items-center gap-2 bg-[#ffffff20] backdrop-blur-md px-3 py-1 rounded-full mb-4">
+<span class="material-symbols-outlined text-[14px]">school</span>
+<span class="font-label-md text-label-md">Unit 2: Agent Architecture</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg mb-4">Introduction to AI Agents</h1>
+<div class="flex flex-wrap gap-4 mb-8 text-[14px]">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">schedule</span> 15 min</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">trending_up</span> Intermediate</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">update</span> Updated 2 hours ago</span>
+</div>
+<!-- Integrated Progress -->
+<div class="flex items-center gap-4 bg-[#00000020] p-4 rounded-2xl">
+<button class="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-xl font-bold squishy-button flex items-center gap-2" style="transform: scale(1) translateY(0px);">
+<span class="material-symbols-outlined">play_arrow</span>
+                                    Resume Lesson
+                                </button>
+<div class="flex-1 h-3 bg-[#ffffff30] rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container w-[65%] transition-all duration-1000"></div>
+</div>
+<span class="font-label-md text-label-md font-bold">65% Done</span>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="absolute top-[-20px] right-[-20px] w-64 h-64 opacity-20">
+</div>
+</section>
+<!-- Main Lesson Text & Graphics -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-3xl p-8 mb-gutter">
+<article class="prose prose-blue max-w-none">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">What is an AI Agent?</h2>
+<p class="text-body-lg text-on-surface-variant mb-6 leading-relaxed">
+                                Unlike standard LLMs that wait for a prompt to provide a static response, an <strong>AI Agent</strong> is a system designed to interact with its environment to achieve a specific goal. It possesses autonomy, reactivity, and social ability. 
+                            </p>
+<!-- Illustrative Graphic Placeholder -->
+<div class="my-8 rounded-2xl overflow-hidden border border-outline-variant">
+<img class="w-full aspect-video object-cover" data-alt="A sophisticated 3D diagram explaining AI Agent loops. It features central glowing cognitive core connected by ethereal blue lines to various nodes representing 'Sensors', 'Memory', and 'Actuators'. The style is ultra-modern, using deep blue and cyan gradients on a clean white background, consistent with a high-end corporate tech learning platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_pvmP4fSsIt1YDpP23yRj9vvBwJLwjzIMg2991WXAJw4rMfeN-CuEnMlWwqgq52ZSYW6JWSw6zcBBYHVyQ-L5HyX6KFMy71MlzlbG0n81aQrz2qQUhxqUVvrbHqcPZ49mPVUfjSXbz2uu44nF9OBey-Dxfe3QBkOF30vobKBMugPQhuPe96dgoYT7A7ROZS74bYhRl9Z18PCk7aPRPoVl-RRqdy_iUwSJiMbY_rYHUFTX9tX5D_P8">
+<div class="p-4 bg-surface-container-low text-center italic text-on-surface-variant text-body-md">
+                                    Figure 1.1: The Perception-Action Loop in Autonomous Agents
+                                </div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-3">Key Characteristics</h3>
+<ul class="space-y-4 mb-8">
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span class=""><strong>Autonomy:</strong> Operating without direct intervention from humans or others.</span>
+</li>
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span class=""><strong>Perception:</strong> Sensing the current state of the environment via data streams.</span>
+</li>
+<li class="flex gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span class=""><strong>Memory:</strong> Maintaining a history of interactions to improve future decision making.</span>
+</li>
+</ul>
+<!-- Knowledge Check Interaction -->
+<div class="bg-secondary-fixed text-on-secondary-fixed p-8 rounded-3xl border-2 border-secondary-container relative">
+<div class="flex items-start gap-4">
+<div class="bg-secondary-container p-3 rounded-2xl text-on-secondary-container">
+<span class="material-symbols-outlined text-[32px]">quiz</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md mb-2">Check your knowledge</h4>
+<p class="text-on-secondary-fixed-variant mb-6">Ready to test what you've learned about the perception loop? This quiz takes 3 minutes and earns you 50 XP.</p>
+<button class="bg-secondary-container text-on-secondary-container px-8 py-3 rounded-xl font-bold squishy-button hover:bg-secondary transition-colors">
+                                            Start Quiz
+                                        </button>
+</div>
+</div>
+</div>
+</article>
+</div>
+<!-- Navigation Footer -->
+<div class="flex justify-between items-center py-4">
+<button class="flex items-center gap-2 text-on-surface-variant font-bold hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+                            Previous: Unit Overview
+                        </button>
+<button class="flex items-center gap-2 bg-tertiary text-on-tertiary px-6 py-3 rounded-xl font-bold squishy-button">
+                            Complete &amp; Continue
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Sidebar Progress -->
+<aside class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Progress Sidebar Card -->
+<div class="bg-surface border border-outline-variant rounded-3xl p-6">
+<h3 class="font-headline-md text-headline-md mb-6">Content Progress</h3>
+<div class="relative pl-8 space-y-8">
+<!-- Vertical Line -->
+<div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-surface-variant"></div>
+<!-- Node Completed -->
+<div class="relative flex items-center gap-4">
+<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: &quot;wght&quot; 700;">check</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface-variant">Module 1</p>
+<p class="font-body-md text-on-surface-variant line-through opacity-60">History of Automation</p>
+</div>
+</div>
+<!-- Node Active -->
+<div class="relative flex items-center gap-4">
+<div class="absolute left-[-25px] w-[22px] h-[22px] rounded-full bg-secondary-container progress-node-active border-2 border-white"></div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-primary font-bold">Currently Reading</p>
+<p class="font-headline-md text-on-surface">Introduction to AI Agents</p>
+</div>
+</div>
+<!-- Node Locked -->
+<div class="relative flex items-center gap-4">
+<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-surface-variant border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant">lock</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface-variant">Module 3</p>
+<p class="font-body-md text-on-surface-variant">Agent Design Patterns</p>
+</div>
+</div>
+<!-- Node Locked -->
+<div class="relative flex items-center gap-4">
+<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-surface-variant border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant">lock</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface-variant">Module 4</p>
+<p class="font-body-md text-on-surface-variant">Deployment &amp; Scaling</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.squishy-button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'scale(0.98) translateY(2px)';
+            });
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'scale(1) translateY(0)';
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'scale(1) translateY(0)';
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body></html>

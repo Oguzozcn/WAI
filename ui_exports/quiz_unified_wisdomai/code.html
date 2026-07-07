@@ -1,0 +1,321 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WisdomAI - Final Assessment</title>
+<!-- Google Fonts: Hanken Grotesk, Inter, JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#bbff92",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-container-high": "#e5e9ec",
+                    "secondary-container": "#2abcfd",
+                    "on-background": "#171c1f",
+                    "on-primary-fixed": "#001d32",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#327a00",
+                    "inverse-on-surface": "#edf1f4",
+                    "on-secondary": "#ffffff",
+                    "primary": "#005787",
+                    "error-container": "#ffdad6",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#004a75",
+                    "inverse-surface": "#2c3134",
+                    "tertiary-fixed-dim": "#6be026",
+                    "primary-fixed-dim": "#95ccff",
+                    "primary-fixed": "#cde5ff",
+                    "surface-dim": "#d6dbdd",
+                    "secondary": "#00658c",
+                    "secondary-fixed-dim": "#80d0ff",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#dfe3e6",
+                    "surface-bright": "#f6fafd",
+                    "surface": "#f6fafd",
+                    "tertiary-fixed": "#87fe45",
+                    "on-primary-container": "#e0eeff",
+                    "on-surface-variant": "#404750",
+                    "tertiary": "#255f00",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed": "#001e2d",
+                    "on-secondary-fixed-variant": "#004c6a",
+                    "outline": "#707881",
+                    "on-tertiary-fixed": "#082100",
+                    "on-secondary-container": "#004966",
+                    "surface-container-low": "#f0f4f7",
+                    "surface-variant": "#dfe3e6",
+                    "on-surface": "#171c1f",
+                    "primary-container": "#0070ad",
+                    "on-tertiary-fixed-variant": "#1f5100",
+                    "inverse-primary": "#95ccff",
+                    "background": "#f6fafd",
+                    "surface-container": "#eaeef1",
+                    "surface-tint": "#00639a",
+                    "secondary-fixed": "#c5e7ff",
+                    "outline-variant": "#c0c7d1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px",
+                    "card-gap": "20px",
+                    "gutter": "24px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-lg": ["Inter"],
+                    "stats-number": ["Hanken Grotesk"],
+                    "label-md": ["JetBrains Mono"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .squishy-button {
+        box-shadow: 0 4px 0 0 #004a75;
+      }
+      .squishy-button:active {
+        box-shadow: 0 0px 0 0 #004a75;
+        transform: translateY(4px);
+      }
+      .squishy-success {
+        box-shadow: 0 4px 0 0 #1f5100;
+      }
+      .squishy-success:active {
+        box-shadow: 0 0px 0 0 #1f5100;
+        transform: translateY(4px);
+      }
+      .node-complete {
+        background-color: #005787;
+      }
+      .node-current {
+        background-color: #2abcfd;
+        outline: 4px solid #ffffff;
+        outline-offset: -4px;
+        box-shadow: 0 0 0 4px #2abcfd;
+      }
+      .progress-bg {
+        background-color: #dfe3e6;
+      }
+      .progress-fill {
+        background-color: #2abcfd;
+      }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen">
+<!-- Sidebar Navigation (SideNavBar) -->
+<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">route</span>
+<span class="font-label-md text-label-md">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-label-md text-label-md">Knowledge Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a></nav>
+<div class="mt-auto pt-6 border-t border-outline-variant">
+<div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a></div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- Top Navigation (TopNavBar) -->
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden lg:flex items-center gap-4 mr-4">
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
+<span class="font-stats-number text-sm text-on-surface">2.4k</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+</div>
+</div>
+</header>
+<!-- Quiz Container -->
+<div class="p-margin-desktop flex-1 overflow-auto">
+<div class="max-w-[1200px] mx-auto grid grid-cols-12 gap-gutter">
+<!-- Left Column: Quiz Content (8 cols) -->
+<div class="col-span-8 flex flex-col gap-6">
+<!-- Title Section -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[18px]">assignment</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Final Assessment</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Agent Development Kit</h1>
+<p class="text-on-surface-variant font-body-lg text-body-lg mt-2">Demonstrate your proficiency in configuring multi-agent orchestration within the Enterprise environment.</p>
+</div>
+<!-- Question Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col gap-8 transition-all hover:border-outline">
+<div class="flex items-start justify-between gap-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Question 4 of 12</h2>
+<span class="bg-surface-container px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant">Multiple Choice</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                            When deploying a sub-agent with specific latency constraints, which orchestration pattern ensures the highest level of task parallelism while maintaining state consistency across the primary control loop?
+                        </p>
+<!-- Options -->
+<div class="flex flex-col gap-4">
+<!-- Option 1 -->
+<label class="flex items-center gap-4 p-5 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
+<input class="w-5 h-5 text-primary focus:ring-primary border-outline-variant" name="quiz_option" type="radio">
+<span class="font-body-md text-body-md text-on-surface">Hierarchical Delegate with Event Sourcing</span>
+</label>
+<!-- Option 2 (Selected State Mockup) -->
+<label class="flex items-center gap-4 p-5 rounded-xl cursor-pointer transition-all border-outline-variant">
+<input checked="" class="w-5 h-5 text-primary focus:ring-primary border-primary" name="quiz_option" type="radio">
+<span class="font-body-md text-body-md text-on-surface">Asynchronous Broadcast with Shared Immutable State</span>
+</label>
+<!-- Option 3 -->
+<label class="flex items-center gap-4 p-5 border rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group border-primary bg-primary-container/10 border-2">
+<input class="w-5 h-5 text-primary focus:ring-primary border-outline-variant" name="quiz_option" type="radio">
+<span class="font-body-md text-body-md text-primary font-bold">Synchronous Cascade through Persistent Middleware</span>
+</label>
+<!-- Option 4 -->
+<label class="flex items-center gap-4 p-5 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
+<input class="w-5 h-5 text-primary focus:ring-primary border-outline-variant" name="quiz_option" type="radio">
+<span class="font-body-md text-body-md text-on-surface">Directed Acyclic Graph (DAG) with Locking Semantics</span>
+</label>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-between pt-6 border-t border-outline-variant">
+<button class="px-6 py-3 border-2 border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all">
+                                Skip for Now
+                            </button>
+<button class="px-10 py-3 bg-[#58cc02] text-on-tertiary rounded-xl font-bold squishy-success transition-all flex items-center gap-2">
+                                Next Question
+                                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Stats & Progress (4 cols) -->
+<div class="col-span-4 flex flex-col gap-gutter">
+<!-- Quiz Progress Card -->
+<div class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant space-y-6">
+<h3 class="font-headline-md text-headline-md">Quiz Progress</h3>
+<div class="flex gap-4 items-stretch">
+<div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<span class="font-label-md text-on-surface-variant block uppercase text-[10px] tracking-widest font-bold">Questions</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-primary">06</span>
+<span class="text-on-surface-variant text-body-md">/ 10</span>
+</div>
+</div>
+<div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<span class="font-label-md text-on-surface-variant block uppercase text-[10px] tracking-widest font-bold">Passing Score</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-primary">80</span>
+<span class="text-on-surface-variant text-body-md">%</span>
+</div>
+</div>
+</div>
+<div class="space-y-4 pt-4 border-t border-outline-variant">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">info</span>
+<span class="text-body-md">Attempts Left</span>
+</div>
+<span class="font-label-md font-bold text-primary">2 / 3</span>
+</div>
+</div>
+</div>
+<!-- Attempts Card -->
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Interactivity for Radio Buttons -->
+<script>
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Remove active classes from all parents
+                document.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('border-primary', 'bg-primary-container/10', 'border-2');
+                    label.classList.add('border-outline-variant');
+                    const text = label.querySelector('span');
+                    if (text) {
+                        text.classList.remove('text-primary', 'font-bold');
+                        text.classList.add('text-on-surface');
+                    }
+                });
+
+                // Add active classes to the checked parent
+                if (this.checked) {
+                    const parent = this.closest('label');
+                    parent.classList.remove('border-outline-variant');
+                    parent.classList.add('border-primary', 'bg-primary-container/10', 'border-2');
+                    const text = parent.querySelector('span:last-child');
+                    if (text) {
+                        text.classList.add('text-primary', 'font-bold');
+                        text.classList.remove('text-on-surface');
+                    }
+                }
+            });
+        });
+    </script>
+
+
+
+
+
+
+</body></html>

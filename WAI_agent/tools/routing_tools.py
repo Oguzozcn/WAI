@@ -1,0 +1,240 @@
+"""
+TEAP Routing Tools
+===================
+ADK function tools for adaptive path routing.
+Determines entry paths, handles assessment failures, and manages bypass eligibility.
+"""
+
+from ..shared.persistence import DepartmentScopedStore
+from ..shared.state_machine import (
+    determine_entry_path,
+    handle_assessment_result,
+    get_mandatory_courses,
+    get_state_description,
+)
+from ..shared.constants import DEFAULT_DEPARTMENT, ENTRY_PATH_VETERAN, ENTRY_PATH_INTERMEDIATE, ENTRY_PATH_STANDARD
+
+
+def determine_user_entry_path(
+    user_id: str,
+    department: str = DEFAULT_DEPARTMENT,
+) -> dict:
+    """Determine the learning entry path for a user based on their competency profile.
+
+    Routes the user to one of three paths:
+    - Veteran: Fast-track directly to validation assessment
+    - Intermediate: Choice of gap rerun or validation test
+    - Standard: Full 10-course learning path
+
+    Args:
+        user_id: The user to evaluate
+        department: The department scope
+
+    Returns:
+        Entry path recommendation with state and explanation.
+    """
+    store = DepartmentScopedStore(department)
+    progress = store.read_user_progress(user_id)
+
+    if progress is None:
+        return {
+            "status": "not_found",
+            "message": (
+                f"No profile found for user '{user_id}'. "
+                f"Please provide the user's experience level: "
+                f"'veteran', 'intermediate', or 'standard'."
+            ),
+        }
+
+    # Determine path from profile
+    experience_level = progress.get("entry_path", "")
+
+    if not experience_level:
+        return {
+            "status": "needs_assessment",
+            "user_id": user_id,
+            "message": (
+                "No experience level set for this user. "
+                "Please assess their background and set entry_path to "
+                "'veteran', 'intermediate', or 'standard'."
+            ),
+        }
+
+    initial_state = determine_entry_path(experience_level)
+    state_desc = get_state_description(initial_state)
+
+    return {
+        "user_id": user_id,
+        "experience_level": experience_level,
+        "entry_path": experience_level,
+        "initial_state": initial_state,
+        "description": state_desc,
+        "options": _get_path_options(experience_level),
+    }
+
+
+def handle_user_assessment_failure(
+    user_id: str,
+    score: float,
+    was_bypass_attempt: bool = False,
+    department: str = DEFAULT_DEPARTMENT,
+) -> dict:
+    """Handle the logic when a user fails a validation assessment.
+
+    Implements Case 1 (bypass lockout) and Case 2 (iterative retake):
+    - Case 1: User tried to skip learning path and failed (<80%) → bypass locked,
+              full learning path becomes mandatory (minus completed courses)
+    - Case 2: User went through courses and failed → gap review + retake allowed
+
+    Args:
+        user_id: The user who failed
+        score: The assessment score (0.0 to 1.0)
+        was_bypass_attempt: Whether the user tried to bypass the learning path
+        department: The department scope
+
+    Returns:
+        Next steps including state transition and required actions.
+    """
+    store = DepartmentScopedStore(department)
+    progress = store.read_user_progress(user_id)
+
+    if progress is None:
+        return {
+            "status": "not_found",
+            "message": f"No progress record found for user '{user_id}'.",
+        }
+
+    bypass_already_locked = progress.get("bypass_locked", False)
+
+    # Get state machine decision
+    result = handle_assessment_result(
+        score=score,
+        was_bypass_attempt=was_bypass_attempt,
+        bypass_already_locked=bypass_already_locked,
+    )
+
+    # If bypass is being locked (Case 1), calculate mandatory courses
+    if result["lock_bypass"]:
+        # All 10 courses minus completed ones
+        all_courses = [f"course_{i:02d}" for i in range(1, 11)]
+        completed = progress.get("completed_courses", [])
+        mandatory = get_mandatory_courses(all_courses, completed)
+
+        result["mandatory_courses"] = mandatory
+        result["completed_courses_kept"] = completed
+        result["total_mandatory"] = len(mandatory)
+
+        # Update progress
+        progress["bypass_locked"] = True
+        progress["bypass_attempts"] = progress.get("bypass_attempts", 0) + 1
+        progress["current_state"] = result["next_state"]
+        store.write_user_progress(user_id, progress)
+
+    return {
+        "user_id": user_id,
+        "score": score,
+        "score_percentage": f"{score:.0%}",
+        **result,
+    }
+
+
+def check_bypass_eligibility(
+    user_id: str,
+    department: str = DEFAULT_DEPARTMENT,
+) -> dict:
+    """Check if a user is eligible for fast-track bypass assessment.
+
+    A user can bypass the learning path IF:
+    - Their entry path is "veteran" or "intermediate"
+    - Their bypass has not been previously locked (from Case 1 failure)
+
+    Args:
+        user_id: The user to check
+        department: The department scope
+
+    Returns:
+        Eligibility status and explanation.
+    """
+    store = DepartmentScopedStore(department)
+    progress = store.read_user_progress(user_id)
+
+    if progress is None:
+        return {
+            "status": "not_found",
+            "message": f"No progress record found for user '{user_id}'.",
+        }
+
+    bypass_locked = progress.get("bypass_locked", False)
+    entry_path = progress.get("entry_path", "standard")
+    current_state = progress.get("current_state", "enrolled")
+
+    if bypass_locked:
+        return {
+            "user_id": user_id,
+            "eligible": False,
+            "reason": (
+                "Bypass is LOCKED. You previously attempted to skip the learning path "
+                "and did not meet the 80% threshold. You must complete the mandatory "
+                "courses before taking the assessment again."
+            ),
+            "bypass_attempts": progress.get("bypass_attempts", 0),
+        }
+
+    if entry_path == ENTRY_PATH_STANDARD:
+        return {
+            "user_id": user_id,
+            "eligible": False,
+            "reason": (
+                "Standard-path users must complete the full learning path "
+                "before taking the validation assessment."
+            ),
+        }
+
+    if current_state in ("passed", "completed"):
+        return {
+            "user_id": user_id,
+            "eligible": False,
+            "reason": "You have already passed the validation assessment.",
+        }
+
+    return {
+        "user_id": user_id,
+        "eligible": True,
+        "entry_path": entry_path,
+        "reason": (
+            f"As a {entry_path} learner, you can attempt the validation "
+            f"assessment directly. Warning: scoring below 80% will lock "
+            f"bypass and make the full learning path mandatory."
+        ),
+    }
+
+
+def _get_path_options(experience_level: str) -> list[dict]:
+    """Get the available options for a given entry path."""
+    if experience_level == ENTRY_PATH_VETERAN:
+        return [
+            {
+                "option": "Take Validation Assessment",
+                "description": "Skip directly to the final assessment. Score ≥80% to pass.",
+                "warning": "Scoring below 80% will lock this bypass option.",
+            },
+        ]
+    elif experience_level == ENTRY_PATH_INTERMEDIATE:
+        return [
+            {
+                "option": "Take Validation Assessment",
+                "description": "Attempt the assessment directly.",
+                "warning": "Scoring below 80% will lock bypass and require full courses.",
+            },
+            {
+                "option": "Review Gap Areas",
+                "description": "Review identified weak areas before attempting assessment.",
+            },
+        ]
+    else:  # standard
+        return [
+            {
+                "option": "Start Learning Path",
+                "description": "Begin the 10-course structured learning path.",
+            },
+        ]

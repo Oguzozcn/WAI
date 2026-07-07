@@ -1,0 +1,23 @@
+{
+  "title": "Vertex AI Pipelines",
+  "description": "Orchestrating ML workflows",
+  "topics": [
+    "pipelines",
+    "kubeflow",
+    "workflow_orchestration"
+  ],
+  "content": "Vertex AI Pipelines helps you automate and monitor ML systems. It allows you to orchestrate workflows defined using Kubeflow Pipelines (KFP) or TensorFlow Extended (TFX) SDKs. This is essential for building reproducible MLOps processes, from data extraction to model deployment.",
+  "estimated_hours": 2.5,
+  "key_facts": [
+    {
+      "concept": "Vertex AI Pipelines",
+      "definition": "Serverless orchestration of ML workflows"
+    },
+    {
+      "concept": "KFP",
+      "definition": "Kubeflow Pipelines SDK, commonly used to define pipelines"
+    }
+  ],
+  "source_dtp": "dtp_vertex_ai_v1",
+  "version": "1.0"
+}

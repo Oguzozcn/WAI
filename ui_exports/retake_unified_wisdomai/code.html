@@ -1,0 +1,296 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Assessment Recovery | WisdomAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#707881",
+                        "on-tertiary-fixed": "#082100",
+                        "on-secondary-container": "#004966",
+                        "on-secondary-fixed": "#001e2d",
+                        "on-secondary-fixed-variant": "#004c6a",
+                        "tertiary": "#255f00",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#87fe45",
+                        "on-primary-container": "#e0eeff",
+                        "on-surface-variant": "#404750",
+                        "surface": "#f6fafd",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#dfe3e6",
+                        "surface-bright": "#f6fafd",
+                        "outline-variant": "#c0c7d1",
+                        "surface-tint": "#00639a",
+                        "secondary-fixed": "#c5e7ff",
+                        "primary-container": "#0070ad",
+                        "on-tertiary-fixed-variant": "#1f5100",
+                        "inverse-primary": "#95ccff",
+                        "background": "#f6fafd",
+                        "surface-container": "#eaeef1",
+                        "on-surface": "#171c1f",
+                        "surface-variant": "#dfe3e6",
+                        "surface-container-low": "#f0f4f7",
+                        "primary": "#005787",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#327a00",
+                        "inverse-on-surface": "#edf1f4",
+                        "on-primary-fixed": "#001d32",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e5e9ec",
+                        "secondary-container": "#2abcfd",
+                        "on-background": "#171c1f",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#bbff92",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#80d0ff",
+                        "surface-dim": "#d6dbdd",
+                        "secondary": "#00658c",
+                        "primary-fixed-dim": "#95ccff",
+                        "primary-fixed": "#cde5ff",
+                        "tertiary-fixed-dim": "#6be026",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#004a75",
+                        "inverse-surface": "#2c3134",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "card-gap": "20px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "stats-number": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .squishy-button {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.15);
+        }
+        .squishy-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.15);
+        }
+        .primary-squish {
+            box-shadow: 0 4px 0 0 #004a75;
+        }
+        .success-squish {
+            box-shadow: 0 4px 0 0 #255f00;
+        }
+        .card-outline {
+            border: 1px solid #e0e6ed;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md">
+<!-- SideNavBar Shell -->
+<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
+<nav class="flex-1 space-y-2 px-4"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#"><span class="material-symbols-outlined">route</span><span class="font-label-md text-label-md">Learning Path</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">folder</span><span class="font-label-md text-label-md">Knowledge Vault</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Support</span></a></nav>
+<div class="mt-auto pt-6 border-t border-outline-variant"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></a></div></div>
+</aside>
+<!-- Main Viewport -->
+<div class="ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant"><div class="flex items-center gap-4"><button class="md:hidden p-2"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+</div></div><div class="flex items-center gap-3"><div class="hidden lg:flex items-center gap-4 mr-4"><div class="flex flex-col items-center"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full"><span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span><span class="font-stats-number text-sm text-on-surface">2.4k</span></div></div></div><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2xJ6R8mLxhp0DbI0A9UJtYvEYYJo2Ov4HNA6DyyNy7wlFbrugD1odxHNJriyl-PuyHwx9EvGsZR8OTAj6WPhdHVSWKXgk9IKeRW8TR57xbewQu5h3TKCSEX1AN71ER1JTDR3U13fGZ0mI0muVqQrADdIZssHvrqz5XsLyox0gKSDyCVtQ7SxBD5N7pRKpBG1Ldo_kRJP4JtNphQ7ejtydcb2KuKJpVFbRm7L8SnzUIUKKhJ1v4BEO"></div></div></header>
+<!-- Content Canvas -->
+<main class="flex-1 p-margin-desktop bg-background">
+<div class="max-w-[1200px] mx-auto">
+<div class="mb-10">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Ready to improve your score?</h2>
+<p class="text-body-lg text-on-surface-variant">Review the core concepts of <span class="font-bold text-primary">Advanced Cloud Architectures</span> and jump back in.</p>
+</div>
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column: Main Content -->
+<div class="col-span-12 lg:col-span-8 space-y-gutter">
+<!-- Previous Performance Card -->
+<section class="bg-surface-container-lowest rounded-xl card-outline p-8 flex flex-col md:flex-row items-center gap-8">
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="10"></circle>
+<circle class="text-error transition-all duration-1000" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="200.4" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-headline-lg font-extrabold text-error">45%</span>
+<span class="text-label-md font-label-md text-on-surface-variant">Score</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+<span class="material-symbols-outlined text-error text-[32px]" style="font-variation-settings: &quot;FILL&quot; 1;">cancel</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Last Attempt: Failed</h3>
+</div>
+<p class="text-body-md text-on-surface-variant mb-4">You were 35% away from the 80% passing goal. Most errors occurred in the "Data Sharding" section.</p>
+<div class="w-full bg-surface-container-highest h-3 rounded-full overflow-hidden">
+<div class="bg-primary h-full transition-all duration-1000" style="width: 45%;"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-label-md font-label-md">Current: 45%</span>
+<span class="text-label-md font-label-md text-primary font-bold">Goal: 80%</span>
+</div>
+</div>
+</section>
+<!-- Review Materials Section -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-headline-md font-headline-md text-on-surface">Review Recommended Lessons</h3>
+<a class="text-primary font-bold hover:underline" href="#">See all materials</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
+<div class="bg-surface-container-lowest rounded-xl card-outline overflow-hidden flex flex-col hover:border-primary transition-all group cursor-pointer">
+<div class="h-32 bg-primary-fixed overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="A stylized technical 3D visualization of data flowing between interconnected nodes and databases, blue and cyan color palette, clean vector-style lighting, representing Advanced Data Models lesson." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRnb_lJN727ln8r2DYi1VWryu8zqiRyTJQRz2tLyxyrbx44KfddEeAPnw9Z2ZLR-3qxI4Zha0a6ZMY6i90snhvS9WKlYQUjIEpQjA5rJtCeBHTxmSQFWMBMGUVO1WrDYOCCu0ZAhWaFUQjSd9jo_c-Dk8H-6O7i4gZidSRc0BERbzjDaM0Tw-mNyb262iDwYfaLRLxk3hNJrEkvOa-dX9T9l5Cn4haGk19IVkU_g4pZB6xYMRFkUUr">
+<div class="absolute inset-0 bg-primary/10 group-hover:bg-primary/0 transition-all"></div>
+</div>
+<div class="p-6 flex-1 border-b-4 border-secondary-container">
+<div class="text-label-md font-label-md text-primary mb-2 uppercase tracking-widest">Architecture</div>
+<h4 class="text-headline-md font-bold mb-4">Advanced Data Models</h4>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-label-md">15m</span>
+</div>
+<div class="bg-tertiary-fixed px-3 py-1 rounded-full text-on-tertiary-fixed font-bold text-label-md font-label-md">
+                                                +250 XP
+                                            </div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl card-outline overflow-hidden flex flex-col hover:border-primary transition-all group cursor-pointer">
+<div class="h-32 bg-secondary-fixed overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="An abstract illustration of expanding circles and upward arrows representing system scalability, modern clean corporate aesthetics, soft gradients of blue and teal, high-end SaaS UI style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmqv_ImN4Av7ihDJ_k8L2CjFGuPGV6t5E4AK_hkeitF10qFscIapD9LouuW4ViMGEGlk6ioxRAUGGxHT6UegZmRDXZPEvMVokkWxskyFIXswOBXvMgP4lw3PUy-vfMtbCXO9Wnzbg0qq6VVPCaJYAhySl_7VuQKGbATWtqaO-Zw6pOlxGIye8HgU2MqbPrzk8AUVC_f8hzS81PG-mMeBmQet0njlX7RvTZW-360hOuZI4VdNiDdXVP">
+<div class="absolute inset-0 bg-primary/10 group-hover:bg-primary/0 transition-all"></div>
+</div>
+<div class="p-6 flex-1 border-b-4 border-secondary-container">
+<div class="text-label-md font-label-md text-primary mb-2 uppercase tracking-widest">Engineering</div>
+<h4 class="text-headline-md font-bold mb-4">System Scalability</h4>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-label-md">20m</span>
+</div>
+<div class="bg-tertiary-fixed px-3 py-1 rounded-full text-on-tertiary-fixed font-bold text-label-md font-label-md">
+                                                +350 XP
+                                            </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Sidebar Stats/Rules -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter flex flex-col">
+<!-- Quiz Rules Card -->
+<section class="bg-surface-container-low rounded-xl p-6 border-l-4 border-primary">
+<h3 class="text-headline-md font-bold text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">assignment_turned_in</span>
+                                Assessment Rules
+                            </h3>
+<ul class="space-y-4">
+<li class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-lg border border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">flag</span>
+<span class="text-body-md">Passing Score</span>
+</div>
+<span class="font-bold text-primary">80%</span>
+</li>
+<li class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-lg border border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">replay</span>
+<span class="text-body-md">Attempts Left</span>
+</div>
+<span class="font-bold text-on-error-container">2</span>
+</li>
+</ul>
+</section>
+<!-- Rewards Card -->
+<!-- Primary Actions -->
+<div class="flex flex-col gap-4 mt-auto pt-8">
+<button class="w-full px-8 py-4 bg-tertiary-container text-white rounded-xl font-bold text-body-lg squishy-button success-squish flex items-center justify-center gap-2 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined">play_circle</span>
+                                Start Assessment
+                            </button>
+<button class="w-full px-8 py-4 bg-white text-primary border-2 border-primary-container rounded-xl font-bold text-body-lg squishy-button hover:bg-primary/5 transition-all">
+                                Review Lessons First
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.squishy-button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'scale(0.98)';
+            });
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'scale(1)';
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'scale(1)';
+            });
+        });
+
+        // Atmospheric shimmer effect for reward cards
+        const rewardsCard = document.querySelector('.bg-tertiary\\/5');
+        if (rewardsCard) {
+            setInterval(() => {
+                rewardsCard.style.transition = 'background-color 2s';
+                rewardsCard.style.backgroundColor = 'rgba(37, 95, 0, 0.1)';
+                setTimeout(() => {
+                    rewardsCard.style.backgroundColor = 'rgba(37, 95, 0, 0.05)';
+                }, 2000);
+            }, 4000);
+        }
+    </script>
+
+
+
+
+
+
+
+
+
+
+</body></html>

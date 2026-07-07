@@ -1,0 +1,22 @@
+{
+  "user_id": "emp_001",
+  "department": "operations",
+  "display_name": "Alex Chen",
+  "entry_path": "veteran",
+  "current_state": "in_progress",
+  "learning_path_id": "lp_vertex_ai_eng",
+  "completed_courses": [
+    "course_01",
+    "course_02"
+  ],
+  "current_course_id": "course_03",
+  "quiz_attempts": [],
+  "assessment_scores": [],
+  "best_assessment_score": 0.0,
+  "error_retention_matrix": {},
+  "bypass_locked": false,
+  "bypass_attempts": 0,
+  "readiness_score": 0.2,
+  "is_at_risk": false,
+  "enrolled_at": "2026-06-25T09:00:00Z"
+}

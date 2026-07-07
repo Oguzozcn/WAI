@@ -1,0 +1,23 @@
+{
+  "title": "Model Training & Tuning",
+  "description": "Training custom models and tuning foundation models",
+  "topics": [
+    "model_training",
+    "fine_tuning",
+    "custom_training"
+  ],
+  "content": "Vertex AI supports custom training using pre-built containers or custom Docker images. For foundation models, parameter-efficient fine-tuning (PEFT) and Reinforcement Learning from Human Feedback (RLHF) are supported. Training pipelines can be orchestrated using Vertex AI Pipelines.",
+  "estimated_hours": 2.5,
+  "key_facts": [
+    {
+      "concept": "Custom Training",
+      "definition": "Train models with own code and containers"
+    },
+    {
+      "concept": "PEFT",
+      "definition": "Parameter-Efficient Fine-Tuning for foundation models"
+    }
+  ],
+  "source_dtp": "dtp_vertex_ai_v1",
+  "version": "1.0"
+}

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WisdomAI Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c0c7d1",
+                      "secondary-container": "#2abcfd",
+                      "on-tertiary-fixed": "#082100",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#00639a",
+                      "on-primary-fixed-variant": "#004a75",
+                      "tertiary": "#255f00",
+                      "inverse-surface": "#2c3134",
+                      "error-container": "#ffdad6",
+                      "background": "#f6fafd",
+                      "surface": "#f6fafd",
+                      "primary": "#005787",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#1f5100",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#f6fafd",
+                      "surface-dim": "#d6dbdd",
+                      "surface-container-low": "#f0f4f7",
+                      "on-secondary-container": "#004966",
+                      "tertiary-fixed": "#87fe45",
+                      "inverse-primary": "#95ccff",
+                      "on-secondary-fixed-variant": "#004c6a",
+                      "inverse-on-surface": "#edf1f4",
+                      "surface-container-highest": "#dfe3e6",
+                      "secondary": "#00658c",
+                      "primary-fixed-dim": "#95ccff",
+                      "on-background": "#171c1f",
+                      "outline": "#707881",
+                      "on-tertiary-container": "#bbff92",
+                      "surface-variant": "#dfe3e6",
+                      "secondary-fixed-dim": "#80d0ff",
+                      "on-surface": "#171c1f",
+                      "on-primary-fixed": "#001d32",
+                      "surface-container-high": "#e5e9ec",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container": "#eaeef1",
+                      "secondary-fixed": "#c5e7ff",
+                      "on-surface-variant": "#404750",
+                      "on-secondary-fixed": "#001e2d",
+                      "primary-fixed": "#cde5ff",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "tertiary-container": "#327a00",
+                      "on-error-container": "#93000a",
+                      "primary-container": "#0070ad",
+                      "tertiary-fixed-dim": "#6be026",
+                      "on-primary-container": "#e0eeff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-gap": "20px",
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "stats-number": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-md": [
+                              "JetBrains Mono"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "stats-number": [
+                              "24px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background h-screen flex overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component) -->
+<nav class="h-full w-64 fixed left-0 top-0 border-r border-outline-variant bg-surface flex flex-col py-margin-desktop z-20 transition-transform duration-300 transform -translate-x-full md:translate-x-0" id="sidebar">
+<div class="px-gutter mb-8 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 flex-shrink-0"><img alt="WisdomAI Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLsAkB4ePHTFQXxwSxibiAU_vt1oswMNkG6zqwfpKmQrzljXJHlqke0k75mUtJK6IpQiPTz_6C_wg-3wCyvkRfLiE2t3cFg1gXdWgKszjvwjc5QD3Yh9L7Fwuv1wyI3IO7On6WnEQhOAmqHuy7vUqB9EEtyF_5GsDxm5fAgJURhvCdtjuUU3TLL7hvXq8FAlGScgtEvgwAg7ua_XD6b9i4zOMBIwNk4rcBnq4aPg7S9b1Pb8YAGU42jaePq5tJ-W3aNTuJRFNtNnPg"/></div>
+<div>
+<h1 class="text-headline-md font-headline-md font-extrabold text-primary">WisdomAI</h1>
+</div>
+</div>
+<button class="md:hidden text-on-surface-variant p-2" id="close-sidebar">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto px-4 flex flex-col gap-2">
+<button class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary-container text-on-primary-container rounded-lg font-body-md shadow-[0_2px_0_0_#004a75] hover:opacity-90 transition-opacity mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+                New Chat
+            </button>
+<!-- Navigation Links -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">auto_stories</span>
+<span class="font-body-md text-body-md">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">library_books</span>
+<span class="font-body-md text-body-md">Library</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">support_agent</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+<!-- Recent Chats Section (Contextual to Chat UI) -->
+<div class="mt-8 mb-2 px-4">
+<h3 class="font-label-md text-label-md text-outline tracking-wider uppercase">Recent Chats</h3>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-r-4 border-primary bg-surface-container-low transition-all duration-200" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-body-md text-body-md truncate">Leadership Models</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-outline">chat_bubble</span>
+<span class="font-body-md text-body-md truncate">Agile Methodologies Explained</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-outline">chat_bubble</span>
+<span class="font-body-md text-body-md truncate">Python Data Analysis</span>
+</a>
+</div>
+<div class="p-4 mt-auto">
+<button class="w-full py-3 rounded-lg border border-outline-variant text-on-surface-variant font-body-md hover:bg-surface-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; color: #ffc800;">local_fire_department</span>
+                View Streak
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 relative w-full h-full">
+<!-- TopAppBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-16 border-b border-outline-variant bg-surface shrink-0 z-10 sticky top-0">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container rounded-full" id="open-sidebar">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="hidden md:flex items-center bg-surface-container rounded-full px-4 py-2 border border-transparent focus-within:border-primary focus-within:bg-surface transition-colors w-64 lg:w-96">
+<span class="material-symbols-outlined text-outline mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-md font-body-md text-on-surface placeholder:text-outline p-0" placeholder="Search chat history..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; color: #ffc800;">local_fire_department</span>
+<span class="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, circular professional headshot photograph of a person, well-lit against a neutral background, used as an avatar in a clean, modern corporate gamification user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHOvR80nqLymMD9oE5McPMTMNJbeAhpPNIRBgQ0C_v0Udam3opV0PInVthd8IQvGEfI90qVNimxDkeQBBxYzLwZh9X7Aj-l4SB4fAoTznCWhSDz2uurPKG5jP2bsFFfqKiG8P3NqwZBWwnrhoLtq2CQgGQooHWDQfQCYV08aKrK-UvK0qcnk-6yrNjmLpJYMVV33sqdPZq6s2Z2owmbPcfwmj_jjQvWYOB49KzaLZ2wb0chanBI3i8"/>
+</div>
+</header>
+<!-- Chat History Scrollable Area -->
+<main class="flex-1 overflow-y-auto p-4 md:p-gutter pb-32 flex flex-col gap-6" id="chat-container">
+<!-- AI Welcome Message -->
+<div class="flex gap-4 max-w-3xl mx-auto w-full">
+<div class="w-10 h-10 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">WisdomAI</span>
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl rounded-tl-sm shadow-sm text-body-md font-body-md text-on-surface">
+<p>Welcome back! Let's continue exploring <strong>Leadership Models</strong>. Last time, we discussed Transformational Leadership. Would you like to dive into Situational Leadership next, or review some real-world case studies?</p>
+<div class="mt-4 flex flex-wrap gap-2">
+<button class="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full text-sm font-body-md border border-outline-variant transition-colors">Explore Situational Leadership</button>
+<button class="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full text-sm font-body-md border border-outline-variant transition-colors">Show Case Studies</button>
+</div>
+</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex gap-4 max-w-3xl mx-auto w-full flex-row-reverse">
+<img alt="User profile photo" class="w-10 h-10 rounded-full border border-outline-variant object-cover flex-shrink-0" data-alt="A small, circular professional headshot photograph of a person, well-lit against a neutral background, used as an avatar in a clean, modern corporate gamification user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaTpo3S-OJISsHtE4kCySk80yaGck9jSJaYivxvcSZfujXtdSWefeaXScAyll84kiL87_m4Vc1bmvH0EHa-YiaJ9AoOVHyD2Yz76tQmuKCc7YK7hHLBNngYsf3he-6W2M0bqo0Ty8vb6psJLPH_0fI810XZ8DdIkx6Klw5C_dCdYJTuwz6MmGer1K00vth60sxssM40QTVV9StnztHadXTAExV0tZ_d7Yop1OyOBsIULz0ABb5nM9m"/>
+<div class="flex flex-col gap-1 items-end">
+<span class="font-label-md text-label-md text-on-surface-variant">You</span>
+<div class="bg-primary-container text-on-primary-container p-4 rounded-xl rounded-tr-sm shadow-[0_2px_0_0_#004a75] text-body-md font-body-md">
+<p>Let's look at some real-world case studies for Transformational Leadership first to solidify my understanding before moving on.</p>
+</div>
+</div>
+</div>
+<!-- AI Response -->
+<div class="flex gap-4 max-w-3xl mx-auto w-full">
+<div class="w-10 h-10 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="flex flex-col gap-1 w-full">
+<span class="font-label-md text-label-md text-on-surface-variant">WisdomAI</span>
+<div class="bg-surface-container-lowest border border-outline-variant p-5 rounded-xl rounded-tl-sm shadow-sm text-body-md font-body-md text-on-surface flex flex-col gap-4">
+<p>Excellent choice. Examining real-world applications is a great way to solidify the concepts.</p>
+<p>Here is a classic case study often cited in organizational psychology:</p>
+<!-- Bento Grid style content card inside chat -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant border-b-2 border-b-secondary-container">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary-container">business</span>
+<h4 class="font-headline-md text-base font-bold text-on-surface">The Turnaround</h4>
+</div>
+<p class="text-sm text-on-surface-variant">How a failing tech division was revitalized not by changing the product, but by reshaping the engineering culture to value innovation over strict adherence to legacy processes.</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant border-b-2 border-b-tertiary-fixed">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary">psychology</span>
+<h4 class="font-headline-md text-base font-bold text-on-surface">Key Element</h4>
+</div>
+<p class="text-sm text-on-surface-variant">The leader exhibited <strong>Intellectual Stimulation</strong> (one of the 4 I's) by challenging the team's assumptions about 'how things are done here.'</p>
+</div>
+</div>
+<div class="mt-2 p-3 bg-tertiary-fixed bg-opacity-10 border border-tertiary-fixed rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-tertiary mt-0.5" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<div>
+<p class="text-sm font-bold text-on-surface">Concept Unlocked!</p>
+<p class="text-xs text-on-surface-variant">You've engaged deeply with Transformational Leadership.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Loading indicator (typing state) -->
+<div class="flex gap-4 max-w-3xl mx-auto w-full opacity-50 hidden" id="typing-indicator">
+<div class="w-10 h-10 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="flex flex-col gap-1 justify-center">
+<div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl rounded-tl-sm flex gap-1 items-center h-12">
+<div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+<div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+<div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Input Area -->
+<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-surface via-surface to-transparent pt-10 pb-6 px-4 md:px-gutter">
+<div class="max-w-3xl mx-auto relative">
+<!-- Floating action prompt suggesting next steps -->
+<div class="absolute -top-12 left-0 right-0 flex justify-center pointer-events-none">
+<span class="bg-surface-container-high text-on-surface text-xs font-label-md px-3 py-1 rounded-full border border-outline-variant shadow-sm pointer-events-auto cursor-pointer hover:bg-surface-variant transition-colors">
+                         Press Enter to send
+                     </span>
+</div>
+<div class="bg-surface-container-lowest border-2 border-outline-variant focus-within:border-primary rounded-xl shadow-sm flex items-end p-2 transition-colors relative group">
+<button class="p-3 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors shrink-0">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<textarea class="w-full bg-transparent border-none focus:ring-0 resize-none py-3 px-2 font-body-md text-on-surface placeholder:text-outline max-h-32" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 128) + 'px'" placeholder="Ask WisdomAI a question..." rows="1" style="min-height: 48px;"></textarea>
+<button class="p-3 bg-primary text-on-primary hover:bg-primary-container rounded-lg transition-colors shrink-0 shadow-[0_2px_0_0_#004a75] active:translate-y-[2px] active:shadow-none ml-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<div class="text-center mt-2">
+<p class="text-xs text-outline font-body-md">WisdomAI can make mistakes. Consider verifying important information.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Scripts for interaction -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('open-sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+
+            openBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+            });
+
+            closeBtn.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+            });
+
+            // Simulate typing indicator demo
+            const textarea = document.querySelector('textarea');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const sendBtn = document.querySelector('button .material-symbols-outlined:contains("send")').parentElement;
+
+            sendBtn.addEventListener('click', () => {
+                if(textarea.value.trim() !== '') {
+                    textarea.value = '';
+                    typingIndicator.classList.remove('hidden');
+                    
+                    // Scroll to bottom
+                    const chatContainer = document.getElementById('chat-container');
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                    // Hide after a delay
+                    setTimeout(() => {
+                        typingIndicator.classList.add('hidden');
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+</body></html>

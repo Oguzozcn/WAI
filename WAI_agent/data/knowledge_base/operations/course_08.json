@@ -1,0 +1,23 @@
+{
+  "title": "Vertex AI Feature Store",
+  "description": "Managing and serving ML features",
+  "topics": [
+    "feature_store",
+    "feature_engineering",
+    "mlops"
+  ],
+  "content": "Vertex AI Feature Store provides a centralized repository for organizing, storing, and serving ML features. It helps prevent training-serving skew by ensuring the same feature values are used during model training and online prediction. It supports both batch and online serving.",
+  "estimated_hours": 2.0,
+  "key_facts": [
+    {
+      "concept": "Feature Store",
+      "definition": "Centralized repository for ML features"
+    },
+    {
+      "concept": "Training-Serving Skew",
+      "definition": "Inconsistency prevented by using a feature store"
+    }
+  ],
+  "source_dtp": "dtp_vertex_ai_v1",
+  "version": "1.0"
+}

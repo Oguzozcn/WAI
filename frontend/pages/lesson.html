@@ -1,0 +1,401 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>WisdomAI - Introduction to AI Agents</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#c5e7ff",
+                        "on-tertiary-fixed-variant": "#1f5100",
+                        "on-surface-variant": "#404750",
+                        "surface-variant": "#dfe3e6",
+                        "surface-bright": "#f6fafd",
+                        "on-secondary-container": "#004966",
+                        "surface-container-low": "#f0f4f7",
+                        "outline": "#707881",
+                        "error-container": "#ffdad6",
+                        "primary": "#005787",
+                        "primary-fixed-dim": "#95ccff",
+                        "on-primary-fixed": "#001d32",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#082100",
+                        "secondary-fixed-dim": "#80d0ff",
+                        "on-primary-container": "#e0eeff",
+                        "on-background": "#171c1f",
+                        "surface-container-high": "#e5e9ec",
+                        "primary-container": "#0070ad",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#171c1f",
+                        "tertiary-fixed": "#87fe45",
+                        "on-secondary-fixed": "#001e2d",
+                        "on-primary-fixed-variant": "#004a75",
+                        "inverse-primary": "#95ccff",
+                        "error": "#ba1a1a",
+                        "secondary": "#00658c",
+                        "inverse-on-surface": "#edf1f4",
+                        "on-tertiary-container": "#bbff92",
+                        "tertiary-container": "#327a00",
+                        "surface-tint": "#00639a",
+                        "tertiary": "#255f00",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#cde5ff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d6dbdd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2c3134",
+                        "tertiary-fixed-dim": "#6be026",
+                        "surface": "#f6fafd",
+                        "secondary-container": "#2abcfd",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c0c7d1",
+                        "on-secondary-fixed-variant": "#004c6a",
+                        "surface-container": "#eaeef1",
+                        "background": "#f6fafd",
+                        "surface-container-highest": "#dfe3e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-gap": "20px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-md": ["JetBrains Mono"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "stats-number": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .squishy-button {
+            transition: transform 0.1s ease-in-out;
+            box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.1);
+        }
+        .squishy-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.1);
+        }
+        .progress-node-active {
+            box-shadow: 0 0 0 4px white, 0 0 0 8px #2abcfd;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen py-6 px-4 fixed left-0 border-r border-outline-variant bg-surface-container-low w-64 top-0 z-50 min-h-screen"><div class="flex items-center gap-3 px-3 mb-6">
+<img alt="WisdomAI Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwMqFdpZCVuIBnoxnrq7qDeQCQVL2xi7-myWhD3x86DNycw9y6p4j5TADUudUh1RE4wnHjwv4SkDHY38Q0XoIX45cElBGy89MAI75U8V_kE-N-HDgllxxsv4TGKCutTi0S7i_Axzi3dXtXjGbgA2SHb31oDg5fLTYpovP7IqSf1NPH8tulWXwzp-eY4PolQru8qwy6ZPrUqDtbL3U-9fAyPZ9lBAGgkTEGOEMut5bOZ9bHawO4LyO7eHqtRcvMrwF53Q">
+<span class="font-headline-md text-headline-md font-bold text-primary">WisdomAI</span>
+</div>
+
+<div class="flex-1 space-y-1"><!-- Active State: Learning Path -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/learning-path">
+<span class="material-symbols-outlined">route</span>
+<span class="font-label-md text-label-md">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-label-md text-label-md">Knowledge Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a></div>
+
+<div class="mt-auto pt-6 border-t border-outline-variant"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a></div></div></nav>
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full md:w-[calc(100%-16rem)] md:ml-64 px-margin-desktop h-16 sticky top-0 z-40 bg-surface border-b border-outline-variant"><div class="flex items-center gap-8">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-6"><div class="hidden lg:flex items-center gap-4 mr-4">
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="font-stats-number text-sm text-on-surface">2.4k</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkqfsn8zgmmZlLSYYnIrP6Mv2FcPJT3H5troA3U6-0ACK6daZ405Y_vsgx-RYYmm5J6SRXxPNAnh20CtOrQCX1exrljUQoNhLFaG30H9ZBUhuJ7xWcraztgpBJLXIK4jS5w1Acj-HUFIQl4XnXXBd_Q8HysY7nHEp8iWn9vGPL0fJIM8i1H1p8d6Exq22_bZxjsEFriSkNoeXw-E2G0CUx8NNK0NsQuYdEAU7vCdCkyFtFAU68kHZ">
+</div></div></header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-64 p-gutter md:p-margin-desktop max-w-[1200px] mx-auto w-full">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 text-on-surface-variant mb-6 overflow-x-auto whitespace-nowrap">
+<a class="hover:text-primary transition-colors" href="#">Catalog</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">AI &amp; Machine Learning</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span id="lesson-breadcrumb" class="text-on-surface font-semibold">Loading...</span>
+</nav>
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Content Area -->
+<div class="col-span-12 lg:col-span-8">
+<!-- Lesson Hero Card -->
+<section class="bg-primary-container text-on-primary-container rounded-3xl p-8 mb-gutter relative overflow-hidden shadow-lg">
+<div class="relative z-10">
+<div class="inline-flex items-center gap-2 bg-[#ffffff20] backdrop-blur-md px-3 py-1 rounded-full mb-4">
+<span class="material-symbols-outlined text-[14px]">school</span>
+<span id="lesson-unit-label" class="font-label-md text-label-md">Loading...</span>
+</div>
+<h1 id="lesson-title" class="font-headline-lg text-headline-lg mb-4">Loading Lesson...</h1>
+<div class="flex flex-wrap gap-4 mb-8 text-[14px]">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">schedule</span> <span id="lesson-est-time">--</span></span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">trending_up</span> Intermediate</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">update</span> Updated 2 hours ago</span>
+</div>
+<!-- Integrated Progress -->
+<div class="flex items-center gap-4 bg-[#00000020] p-4 rounded-2xl">
+<button class="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-xl font-bold squishy-button flex items-center gap-2" style="transform: scale(1) translateY(0px);">
+<span class="material-symbols-outlined">play_arrow</span>
+                                    Resume Lesson
+                                </button>
+<div class="flex-1 h-3 bg-[#ffffff30] rounded-full overflow-hidden">
+<div id="lesson-progress-bar" class="h-full bg-secondary-container w-[0%] transition-all duration-1000"></div>
+</div>
+<span id="lesson-progress-text" class="font-label-md text-label-md font-bold">0% Done</span>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="absolute top-[-20px] right-[-20px] w-64 h-64 opacity-20">
+</div>
+</section>
+<!-- Main Lesson Text & Graphics -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-3xl p-8 mb-gutter">
+<article id="lesson-content" class="prose prose-blue max-w-none"></article>
+</div>
+<!-- Navigation Footer -->
+<div class="flex justify-between items-center py-4">
+<button class="flex items-center gap-2 text-on-surface-variant font-bold hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+                            Previous: Unit Overview
+                        </button>
+<button id="start-quiz-btn" class="flex items-center gap-2 bg-tertiary text-on-tertiary px-6 py-3 rounded-xl font-bold squishy-button cursor-pointer">
+<span>Start Quiz</span>
+<span class="material-symbols-outlined">quiz</span>
+</button>
+</div>
+</div>
+<!-- Sidebar Progress -->
+<aside class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Progress Sidebar Card -->
+<div class="bg-surface border border-outline-variant rounded-3xl p-6">
+<h3 class="font-headline-md text-headline-md mb-6">Content Progress</h3>
+<div id="lesson-sidebar-progress" class="relative pl-8 space-y-8">
+<div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-surface-variant"></div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('.squishy-button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'scale(0.98) translateY(2px)';
+            });
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'scale(1) translateY(0)';
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'scale(1) translateY(0)';
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+<script src="/js/api-client.js"></script>
+<script src="/js/theme-toggle.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('course') || 'course_03'; 
+        
+        const [path, progress, kbRes] = await Promise.all([
+            WisdomAPI.getLearningPath('emp_001'),
+            WisdomAPI.getUserProgress('emp_001'),
+            fetch('/api/kb/documents').then(r => r.json())
+        ]);
+
+        const completedSet = new Set(progress.completed_courses || []);
+        const totalCourses = path.courses.length;
+        const completedCount = completedSet.size;
+        const pct = Math.round((completedCount / totalCourses) * 100);
+        const courseMeta = path.courses.find(c => c.course_id === courseId);
+        const courseIdx = path.courses.findIndex(c => c.course_id === courseId);
+
+        if (courseMeta) {
+            // Title
+            const titleEl = document.getElementById('lesson-title');
+            if (titleEl) titleEl.textContent = courseMeta.title;
+
+            // Breadcrumb
+            const breadcrumb = document.getElementById('lesson-breadcrumb');
+            if (breadcrumb) breadcrumb.textContent = courseMeta.title;
+
+            // Unit label
+            const unitLabel = document.getElementById('lesson-unit-label');
+            if (unitLabel) unitLabel.textContent = 'Module ' + (courseIdx + 1) + ' of ' + totalCourses;
+
+            // Estimated time
+            const estTime = document.getElementById('lesson-est-time');
+            if (estTime) estTime.textContent = courseMeta.estimated_hours + 'h est.';
+
+            // Progress bar & text
+            const progressBar = document.getElementById('lesson-progress-bar');
+            if (progressBar) progressBar.style.width = pct + '%';
+            const progressText = document.getElementById('lesson-progress-text');
+            if (progressText) progressText.textContent = pct + '% Done';
+
+            // Main content from KB
+            const courseDoc = kbRes.documents.find(d => d.title === courseMeta.title);
+            const lessonContent = courseDoc ? courseDoc.content : courseMeta.description;
+            const contentEl = document.getElementById('lesson-content');
+            if (contentEl) {
+                // Convert markdown-like content to HTML
+                let formatted = lessonContent
+                    .replace(/## (.*)/g, '<h2 class="font-headline-md text-headline-md text-on-surface mb-4 mt-8">$1</h2>')
+                    .replace(/### (.*)/g, '<h3 class="font-headline-md text-on-surface mb-3 mt-6">$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/```python([\s\S]*?)```/g, '<pre class="bg-surface-container-low p-4 rounded-xl overflow-x-auto my-4 text-sm font-label-md"><code>$1</code></pre>')
+                    .replace(/- \*\*(.*?)\*\*: (.*)/g, '<li class="flex gap-3 mb-3"><span class="material-symbols-outlined text-primary mt-1">check_circle</span><span><strong>$1</strong>: $2</span></li>')
+                    .replace(/- \*\*(.*?)\*\*/g, '<li class="flex gap-3 mb-3"><span class="material-symbols-outlined text-primary mt-1">check_circle</span><span><strong>$1</strong></span></li>');
+
+                // Wrap plain paragraphs
+                formatted = formatted.split('\n\n').map(p => {
+                    p = p.trim();
+                    if (!p) return '';
+                    if (p.startsWith('<h') || p.startsWith('<pre') || p.startsWith('<li') || p.startsWith('<ul')) return p;
+                    if (p.startsWith('1.') || p.startsWith('- ')) return p;
+                    return '<p class="text-body-lg text-on-surface-variant mb-4 leading-relaxed">' + p + '</p>';
+                }).join('\n');
+
+                contentEl.innerHTML = formatted;
+            }
+        }
+
+        // Sidebar progress
+        const sidebar = document.getElementById('lesson-sidebar-progress');
+        if (sidebar) {
+            let sidebarHtml = '<div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-surface-variant"></div>';
+            
+            const startIdx = Math.max(0, courseIdx - 1);
+            const endIdx = Math.min(totalCourses, courseIdx + 3);
+            
+            for (let i = startIdx; i < endIdx; i++) {
+                const c = path.courses[i];
+                const isCompleted = completedSet.has(c.course_id);
+                const isCurrent = c.course_id === courseId;
+                
+                if (isCompleted) {
+                    sidebarHtml += '<div class="relative flex items-center gap-4">' +
+                        '<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-primary flex items-center justify-center">' +
+                        '<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: \'wght\' 700;">check</span></div>' +
+                        '<div class="flex-1"><p class="font-label-md text-label-md text-on-surface-variant">Module ' + (i+1) + '</p>' +
+                        '<p class="font-body-md text-on-surface-variant line-through opacity-60">' + c.title + '</p></div></div>';
+                } else if (isCurrent) {
+                    sidebarHtml += '<div class="relative flex items-center gap-4">' +
+                        '<div class="absolute left-[-25px] w-[22px] h-[22px] rounded-full bg-secondary-container progress-node-active border-2 border-white"></div>' +
+                        '<div class="flex-1"><p class="font-label-md text-label-md text-primary font-bold">Currently Reading</p>' +
+                        '<p class="font-headline-md text-on-surface">' + c.title + '</p></div></div>';
+                } else {
+                    sidebarHtml += '<div class="relative flex items-center gap-4">' +
+                        '<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-surface-variant border-2 border-white flex items-center justify-center">' +
+                        '<span class="material-symbols-outlined text-[12px] text-on-surface-variant">lock</span></div>' +
+                        '<div class="flex-1"><p class="font-label-md text-label-md text-on-surface-variant">Module ' + (i+1) + '</p>' +
+                        '<p class="font-body-md text-on-surface-variant">' + c.title + '</p></div></div>';
+                }
+            }
+            sidebar.innerHTML = sidebarHtml;
+        }
+
+        // Wire up the Start Quiz button
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        if (startQuizBtn && courseMeta) {
+            startQuizBtn.addEventListener('click', async () => {
+                startQuizBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Generating AI Quiz...';
+                startQuizBtn.disabled = true;
+                startQuizBtn.classList.add('opacity-70');
+                try {
+                    const res = await fetch('/api/quiz/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            topic: courseMeta.title,
+                            difficulty: 'medium',
+                            question_count: 3
+                        })
+                    });
+                    if (!res.ok) throw new Error('Failed');
+                    const quizData = await res.json();
+                    window.location.href = '/quiz?quiz_id=' + quizData.quiz_id + '&course_id=' + courseId;
+                } catch (err) {
+                    startQuizBtn.innerHTML = 'Error. Try Again.';
+                    startQuizBtn.disabled = false;
+                    startQuizBtn.classList.remove('opacity-70');
+                }
+            });
+        }
+
+    } catch (err) {
+        console.error('Failed to load lesson', err);
+    }
+});
+</script>
+
+</body></html>
