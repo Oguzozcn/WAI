@@ -1,0 +1,110 @@
+{
+  "user_id": "manager",
+  "department": "operations",
+  "error_retention_matrix": {
+    "generative_ai_beginner's_guide": 1,
+    "concept_2": 1
+  },
+  "quiz_attempts": [
+    {
+      "quiz_id": "quiz_64c31d60",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-07T14:21:50.331080"
+    },
+    {
+      "quiz_id": "quiz_05a349d6",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-07T20:38:07.675511"
+    },
+    {
+      "quiz_id": "quiz_e7a4fc5c",
+      "score": 0.6666666666666666,
+      "total_questions": 3,
+      "correct_answers": 2,
+      "attempted_at": "2026-07-08T13:40:11.112933"
+    },
+    {
+      "quiz_id": "quiz_abfd746e",
+      "score": 1.0,
+      "total_questions": 5,
+      "correct_answers": 5,
+      "attempted_at": "2026-07-08T13:41:14.694899"
+    },
+    {
+      "quiz_id": "quiz_8dcd1fc3",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-08T13:42:16.280770"
+    },
+    {
+      "quiz_id": "quiz_8dcd1fc3",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-08T13:42:17.193087"
+    },
+    {
+      "quiz_id": "quiz_549f0f2c",
+      "score": 1.0,
+      "total_questions": 5,
+      "correct_answers": 5,
+      "attempted_at": "2026-07-08T13:42:49.052512"
+    },
+    {
+      "quiz_id": "quiz_549f0f2c",
+      "score": 1.0,
+      "total_questions": 5,
+      "correct_answers": 5,
+      "attempted_at": "2026-07-08T13:42:50.055640"
+    }
+  ],
+  "assessment_scores": [
+    {
+      "quiz_id": "quiz_64c31d60",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_05a349d6",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_e7a4fc5c",
+      "score": 0.6666666666666666,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_abfd746e",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_8dcd1fc3",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_8dcd1fc3",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_549f0f2c",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_549f0f2c",
+      "score": 1.0,
+      "type": "quiz"
+    }
+  ],
+  "best_assessment_score": 1.0,
+  "last_updated": "2026-07-08T13:42:50.055655"
+}

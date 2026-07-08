@@ -264,50 +264,81 @@
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const urlParams = new URLSearchParams(window.location.search);
-        const courseId = urlParams.get('course') || 'course_03'; 
-        
-        const [path, progress, kbRes] = await Promise.all([
-            WisdomAPI.getLearningPath('emp_001'),
-            WisdomAPI.getUserProgress('emp_001'),
-            fetch('/api/kb/documents').then(r => r.json())
-        ]);
+        const courseId = urlParams.get('course') || 'course_03';
+        const lessonId = urlParams.get('lesson');
 
-        const completedSet = new Set(progress.completed_courses || []);
-        const totalCourses = path.courses.length;
-        const completedCount = completedSet.size;
-        const pct = Math.round((completedCount / totalCourses) * 100);
-        const courseMeta = path.courses.find(c => c.course_id === courseId);
-        const courseIdx = path.courses.findIndex(c => c.course_id === courseId);
+        let courseMeta = null;
+        let lessonData = null;
+        let lessonContent = '';
+        let totalCourses = 1;
+        let courseIdx = 0;
+
+        // Try to fetch dynamic lesson content first
+        if (lessonId) {
+            try {
+                const res = await fetch(`/api/lesson/${courseId}/${lessonId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    courseMeta = data.course;
+                    lessonData = data.lesson;
+                    lessonContent = lessonData ? lessonData.content : (courseMeta.content || '');
+                    totalCourses = courseMeta.lessons ? courseMeta.lessons.length : 1;
+                    courseIdx = lessonData ? (lessonData.order - 1) : 0;
+                }
+            } catch(e) { console.log('Dynamic lesson fetch failed, falling back.'); }
+        }
+
+        // Fallback to original API
+        if (!courseMeta) {
+            const [path, progress, kbRes] = await Promise.all([
+                WisdomAPI.getLearningPath('emp_001'),
+                WisdomAPI.getUserProgress('emp_001'),
+                fetch('/api/kb/documents').then(r => r.json())
+            ]);
+
+            totalCourses = path.courses.length;
+            courseMeta = path.courses.find(c => c.course_id === courseId);
+            courseIdx = path.courses.findIndex(c => c.course_id === courseId);
+
+            if (courseMeta) {
+                const courseDoc = kbRes.documents.find(d => d.title === courseMeta.title);
+                lessonContent = courseDoc ? courseDoc.content : courseMeta.description;
+            }
+        }
 
         if (courseMeta) {
+            const titleText = lessonData ? lessonData.title : courseMeta.title;
+
             // Title
             const titleEl = document.getElementById('lesson-title');
-            if (titleEl) titleEl.textContent = courseMeta.title;
+            if (titleEl) titleEl.textContent = titleText;
 
             // Breadcrumb
             const breadcrumb = document.getElementById('lesson-breadcrumb');
-            if (breadcrumb) breadcrumb.textContent = courseMeta.title;
+            if (breadcrumb) breadcrumb.textContent = titleText;
 
             // Unit label
             const unitLabel = document.getElementById('lesson-unit-label');
-            if (unitLabel) unitLabel.textContent = 'Module ' + (courseIdx + 1) + ' of ' + totalCourses;
+            if (unitLabel) unitLabel.textContent = lessonData
+                ? `Lesson ${lessonData.order} of ${totalCourses}`
+                : `Module ${courseIdx + 1} of ${totalCourses}`;
 
             // Estimated time
             const estTime = document.getElementById('lesson-est-time');
-            if (estTime) estTime.textContent = courseMeta.estimated_hours + 'h est.';
+            if (estTime) estTime.textContent = lessonData
+                ? `${lessonData.estimated_minutes} min`
+                : `${courseMeta.estimated_hours}h est.`;
 
-            // Progress bar & text
+            // Progress bar & text (simple linear progress)
+            const progressPct = lessonData ? Math.round((lessonData.order / totalCourses) * 100) : 0;
             const progressBar = document.getElementById('lesson-progress-bar');
-            if (progressBar) progressBar.style.width = pct + '%';
+            if (progressBar) progressBar.style.width = progressPct + '%';
             const progressText = document.getElementById('lesson-progress-text');
-            if (progressText) progressText.textContent = pct + '% Done';
+            if (progressText) progressText.textContent = progressPct + '% Done';
 
-            // Main content from KB
-            const courseDoc = kbRes.documents.find(d => d.title === courseMeta.title);
-            const lessonContent = courseDoc ? courseDoc.content : courseMeta.description;
+            // Main content
             const contentEl = document.getElementById('lesson-content');
-            if (contentEl) {
-                // Convert markdown-like content to HTML
+            if (contentEl && lessonContent) {
                 let formatted = lessonContent
                     .replace(/## (.*)/g, '<h2 class="font-headline-md text-headline-md text-on-surface mb-4 mt-8">$1</h2>')
                     .replace(/### (.*)/g, '<h3 class="font-headline-md text-on-surface mb-3 mt-6">$1</h3>')
@@ -316,7 +347,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .replace(/- \*\*(.*?)\*\*: (.*)/g, '<li class="flex gap-3 mb-3"><span class="material-symbols-outlined text-primary mt-1">check_circle</span><span><strong>$1</strong>: $2</span></li>')
                     .replace(/- \*\*(.*?)\*\*/g, '<li class="flex gap-3 mb-3"><span class="material-symbols-outlined text-primary mt-1">check_circle</span><span><strong>$1</strong></span></li>');
 
-                // Wrap plain paragraphs
                 formatted = formatted.split('\n\n').map(p => {
                     p = p.trim();
                     if (!p) return '';
@@ -327,67 +357,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 contentEl.innerHTML = formatted;
             }
-        }
 
-        // Sidebar progress
-        const sidebar = document.getElementById('lesson-sidebar-progress');
-        if (sidebar) {
-            let sidebarHtml = '<div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-surface-variant"></div>';
-            
-            const startIdx = Math.max(0, courseIdx - 1);
-            const endIdx = Math.min(totalCourses, courseIdx + 3);
-            
-            for (let i = startIdx; i < endIdx; i++) {
-                const c = path.courses[i];
-                const isCompleted = completedSet.has(c.course_id);
-                const isCurrent = c.course_id === courseId;
-                
-                if (isCompleted) {
-                    sidebarHtml += '<div class="relative flex items-center gap-4">' +
-                        '<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-primary flex items-center justify-center">' +
-                        '<span class="material-symbols-outlined text-[12px] text-white" style="font-variation-settings: \'wght\' 700;">check</span></div>' +
-                        '<div class="flex-1"><p class="font-label-md text-label-md text-on-surface-variant">Module ' + (i+1) + '</p>' +
-                        '<p class="font-body-md text-on-surface-variant line-through opacity-60">' + c.title + '</p></div></div>';
-                } else if (isCurrent) {
-                    sidebarHtml += '<div class="relative flex items-center gap-4">' +
-                        '<div class="absolute left-[-25px] w-[22px] h-[22px] rounded-full bg-secondary-container progress-node-active border-2 border-white"></div>' +
-                        '<div class="flex-1"><p class="font-label-md text-label-md text-primary font-bold">Currently Reading</p>' +
-                        '<p class="font-headline-md text-on-surface">' + c.title + '</p></div></div>';
-                } else {
-                    sidebarHtml += '<div class="relative flex items-center gap-4">' +
-                        '<div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-surface-variant border-2 border-white flex items-center justify-center">' +
-                        '<span class="material-symbols-outlined text-[12px] text-on-surface-variant">lock</span></div>' +
-                        '<div class="flex-1"><p class="font-label-md text-label-md text-on-surface-variant">Module ' + (i+1) + '</p>' +
-                        '<p class="font-body-md text-on-surface-variant">' + c.title + '</p></div></div>';
+            // Key concepts sidebar (for dynamic lessons)
+            if (lessonData && lessonData.key_concepts && lessonData.key_concepts.length > 0) {
+                const sidebar = document.getElementById('lesson-sidebar-progress');
+                if (sidebar) {
+                    let sidebarHtml = '<div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-surface-variant"></div>';
+                    lessonData.key_concepts.forEach((concept, i) => {
+                        sidebarHtml += `
+                        <div class="relative flex items-center gap-4">
+                            <div class="absolute left-[-23px] w-[18px] h-[18px] rounded-full bg-primary-fixed flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[12px] text-primary">lightbulb</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-label-md text-label-md text-primary">Key Concept ${i + 1}</p>
+                                <p class="font-body-md text-on-surface">${concept}</p>
+                            </div>
+                        </div>`;
+                    });
+                    sidebar.innerHTML = sidebarHtml;
                 }
             }
-            sidebar.innerHTML = sidebarHtml;
         }
 
         // Wire up the Start Quiz button
         const startQuizBtn = document.getElementById('start-quiz-btn');
         if (startQuizBtn && courseMeta) {
-            startQuizBtn.addEventListener('click', async () => {
-                startQuizBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Generating AI Quiz...';
-                startQuizBtn.disabled = true;
-                startQuizBtn.classList.add('opacity-70');
-                try {
-                    const res = await fetch('/api/quiz/generate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            topic: courseMeta.title,
-                            difficulty: 'medium',
-                            question_count: 3
-                        })
-                    });
-                    if (!res.ok) throw new Error('Failed');
-                    const quizData = await res.json();
-                    window.location.href = '/quiz?quiz_id=' + quizData.quiz_id + '&course_id=' + courseId;
-                } catch (err) {
-                    startQuizBtn.innerHTML = 'Error. Try Again.';
-                    startQuizBtn.disabled = false;
-                    startQuizBtn.classList.remove('opacity-70');
+            startQuizBtn.addEventListener('click', () => {
+                if (lessonId) {
+                    window.location.href = `/quiz?course=${courseId}&lesson=${lessonId}&type=short_quiz`;
+                } else {
+                    window.location.href = `/quiz?course=${courseId}&type=short_quiz`;
                 }
             });
         }

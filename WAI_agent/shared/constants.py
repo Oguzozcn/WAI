@@ -12,6 +12,7 @@ LUCK_FAILURE_THRESHOLD = 2  # ≥2 failures on same concept tag → mandatory pa
 MAX_COURSES = 10  # Standard learning path length
 MAX_QUIZ_QUESTIONS = 10  # Max questions per short quiz
 MAX_ASSESSMENT_QUESTIONS = 20  # Max questions per validation assessment
+MAX_QUIZ_ATTEMPTS = 3  # Maximum quiz attempts before state-locking
 DEFAULT_TIMEFRAME_WEEKS = 4  # Default transition timeframe
 
 # ── Departments (MVP: single department) ──

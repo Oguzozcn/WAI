@@ -48,8 +48,36 @@ def generate_quiz(
 
     quiz_id = f"quiz_{uuid.uuid4().hex[:8]}"
 
-    # Build quiz structure — the LLM will fill in actual questions
-    # based on the knowledge base content and topic
+    # Generate heuristic/mock questions for the demo
+    questions = []
+    for i in range(question_count):
+        correct_idx = i % 4
+        
+        # Build 4 options: 1 correct, 3 obviously incorrect
+        options = []
+        for j in range(4):
+            if j == correct_idx:
+                options.append(f"Correct Concept: This is the accurate definition for part {i+1} of {topic}.")
+            else:
+                options.append(f"Incorrect Option: This is a completely unrelated or wrong statement regarding part {i+1}.")
+
+        # Generate mock rationale for each option
+        rationale = {}
+        for j in range(4):
+            if j == correct_idx:
+                rationale[str(j)] = f"Correct! This option accurately defines the core concept of {topic} part {i+1}."
+            else:
+                rationale[str(j)] = f"This is incorrect. It focuses on the wrong aspect of {topic} and misses the main point."
+
+        questions.append({
+            "question_id": f"q_{uuid.uuid4().hex[:6]}",
+            "text": f"Regarding '{topic}', which of the following represents the core concept for part {i+1}?",
+            "options": options,
+            "correct_answer_index": correct_idx,
+            "rationale": rationale,
+            "concept_tags": [topic.lower().replace(" ", "_"), f"concept_{i+1}"]
+        })
+
     quiz = {
         "quiz_id": quiz_id,
         "topic": topic,
@@ -58,27 +86,8 @@ def generate_quiz(
         "question_count": question_count,
         "knowledge_base_available": len(knowledge_base) > 0,
         "created_at": datetime.utcnow().isoformat(),
-        "instructions": (
-            f"Generate {question_count} {difficulty} questions about '{topic}'. "
-            f"Quiz type: {quiz_type}. "
-            f"Include multiple-choice options (A, B, C, D) for each question. "
-            f"Tag each question with relevant concept tags for gap tracking."
-        ),
+        "questions": questions,
     }
-
-    # If knowledge base content is available, include relevant material
-    if knowledge_base:
-        relevant_content = []
-        for doc in knowledge_base:
-            doc_topics = [t.lower() for t in doc.get("topics", [])]
-            if topic.lower() in doc.get("title", "").lower() or \
-               any(topic.lower() in t for t in doc_topics):
-                relevant_content.append({
-                    "title": doc.get("title", ""),
-                    "content": doc.get("content", ""),
-                    "topics": doc.get("topics", []),
-                })
-        quiz["source_material"] = relevant_content
 
     return quiz
 

@@ -1,0 +1,361 @@
+{
+  "path_id": "lp_3fd24d09",
+  "department": "operations",
+  "role": "auto_generated",
+  "timeframe_weeks": 2,
+  "total_courses": 3,
+  "total_estimated_hours": 6.8,
+  "hours_per_week": 3.4,
+  "days_per_course": 2,
+  "source_document": "gemini test.txt, Generative AI beginner's guide.txt",
+  "courses": [
+    {
+      "course_id": "course_41ce5a67",
+      "title": "Gemini Test",
+      "description": "Auto-generated curriculum from 'gemini test.txt'",
+      "topics": [
+        "parts",
+        "Python\nGo\nNode",
+        "text",
+        "The Gemini",
+        "For example"
+      ],
+      "estimated_hours": 1.2,
+      "order": 1,
+      "lessons": [
+        {
+          "lesson_id": "lesson_01",
+          "title": "with appropriate values for your project.",
+          "content": "export GOOGLE_CLOUD_PROJECT=GOOGLE_CLOUD_PROJECT_ID\nexport GOOGLE_CLOUD_LOCATION=global\nexport GOOGLE_GENAI_USE_ENTERPRISE=True\n    \nMake your first request\nUse the\u00a0generateContent\u00a0method to send a request to the Gemini API.\nThe following examples show how to make a request using one of the SDKs or REST. To run an SDK example, copy the code to a file (for example,\u00a0request.py) and run the file from your terminal (for example,\u00a0python request.py).\nPython\nGo\nNode.js\nJava\nC#\nREST\n\n\n\n\n\nfrom google import genai\nfrom google.genai.types import HttpOptions\n\nclient = genai.Client(http_options=HttpOptions(api_version=\"v1\"))\nresponse = client.models.generate_content(\n    model=\"gemini-3.5-flash\",\n    contents=\"How does AI work?\",\n)\nprint(response.text)",
+          "key_concepts": [
+            "Python\nGo\nNode"
+          ],
+          "estimated_minutes": 10,
+          "order": 1,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_02",
+          "title": "...",
+          "content": "When you use a regional API endpoint (for example,\u00a0us-central1), the region from the endpoint URL determines where the request is processed. Any conflicting location in the resource path is ignored.\nGenerate images\nGemini can generate and process images conversationally. You can prompt Gemini with text, images, or a combination of both to achieve various image-related tasks, such as image generation and editing. The following code demonstrates how to generate an image based on a descriptive prompt:\nYou must include\u00a0responseModalities: [\"TEXT\", \"IMAGE\"]\u00a0in your configuration. Image-only output is not supported with these models.\nPython\nGo\nNode.js\nJava\n\n\n\n\n\nimport os\nfrom io import BytesIO\n\nfrom google import genai\nfrom google.genai.types import GenerateContentConfig, Modality\nfrom PIL import Image\n\nclient = genai.Client()\n\nresponse = client.models.generate_content(\n    model=\"gemini-3.1-flash-image\",\n    contents=(\"Generate an image of the Eiffel tower with fireworks in the background.\"),\n    config=GenerateContentConfig(\n        response_modalities=[Modality.TEXT, Modality.IMAGE],\n    ),\n)\nfor part in response.candidates[0].content.parts:\n    if part.text:\n        print(part.text)\n    elif part.inline_data:\n        image = Image.open(BytesIO((part.inline_data.data)))\n        # Ensure the output directory exists\n        output_dir = \"output_folder\"\n        os.makedirs(output_dir, exist_ok=True)\n        image.save(os.path.join(output_dir, \"example-image-eiffel-tower.png\"))\n\nUnderstand images\nGemini can understand images as well. The following code uses the image generated in the previous section and uses a different model to infer information about the image:\nPython\nGo\nNode.js\nJava\n\n\n\n\n\nfrom google import genai\nfrom google.genai.types import HttpOptions, Part\n\nclient = genai.Client(http_options=HttpOptions(api_version=\"v1\"))\nresponse = client.models.generate_content(\n    model=\"gemini-3.5-flash\",\n    contents=[\n        \"What is shown in this image?\",\n        Part.from_uri(\n            file_uri=\"gs://cloud-samples-data/generative-ai/image/scones.jpg\",\n            mime_type=\"image/jpeg\",\n        ),\n    ],\n)\nprint(response.text)",
+          "key_concepts": [
+            "parts",
+            "Python\nGo\nNode",
+            "text",
+            "e based on a descriptive prompt",
+            "must include\u00a0responseModalities",
+            "inline_data",
+            "fer information about the image"
+          ],
+          "estimated_minutes": 10,
+          "order": 2,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_03",
+          "title": "The image shows a flat lay of blueberry scones arranged on parchment paper. There are ...",
+          "content": "Use code execution\nThe Gemini API code execution feature enables the model to generate and run Python code and learn iteratively from the results until it arrives at a final output. Gemini Enterprise Agent Platform provides code execution as a tool, similar to function calling. You can use this code execution capability to build applications that benefit from code-based reasoning and that produce text output. For example:\nPython\nGo\nNode.js\nJava\n\n\n\n\n\nfrom google import genai\nfrom google.genai.types import (\n    GenerateContentConfig,\n    HttpOptions,\n    Tool,\n    ToolCodeExecution,\n)\n\nclient = genai.Client(http_options=HttpOptions(api_version=\"v1\"))\nmodel_id = \"gemini-3.5-flash\"\n\ncode_execution_tool = Tool(code_execution=ToolCodeExecution())\nresponse = client.models.generate_content(\n    model=model_id,\n    contents=\"Calculate 20th fibonacci number. Then find the nearest palindrome to it.\",\n    config=GenerateContentConfig(\n        tools=[code_execution_tool],\n        temperature=0,\n    ),\n)\nprint(\"# Code:\")\nprint(response.executable_code)\nprint(\"# Outcome:\")\nprint(response.code_execution_result)",
+          "key_concepts": [
+            "The Gemini",
+            "Python\nGo\nNode",
+            "For example",
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 3,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_04",
+          "title": "fib_20=6765",
+          "content": "For more examples of code execution, check out the\u00a0code execution documentation.",
+          "key_concepts": [],
+          "estimated_minutes": 10,
+          "order": 4,
+          "has_quiz": true
+        }
+      ],
+      "has_final_assessment": true
+    },
+    {
+      "course_id": "course_d0a46657",
+      "title": "Generative Ai Beginner'S Guide",
+      "description": "Auto-generated curriculum from 'Generative AI beginner's guide.txt'",
+      "topics": [
+        "Function calling",
+        "Agent Platform",
+        "Block harmful content",
+        "On Gemini Enterprise Agent Platform",
+        "including the following",
+        "Learn how to perform new tasks",
+        "Grounding",
+        "Access external information",
+        "Model Garden",
+        "Agent Studio"
+      ],
+      "estimated_hours": 2.8,
+      "order": 1,
+      "lessons": [
+        {
+          "lesson_id": "lesson_01",
+          "title": "Generative AI beginner's guide",
+          "content": "Generative AI beginner's guide\n\nThis beginner's guide introduces you to the core technologies of generative AI and explains how they fit together to power chatbots and applications. Generative AI (also known as genAI or gen AI) is a field of machine learning (ML) that develops and uses ML models for generating new content.\n\nGenerative AI models are often called large language models (LLMs) because of their large size and ability to understand and generate natural language. However, depending on the data that the models are trained on, these models can understand and generate content from multiple modalities, including text, images, videos, and audio. Models that work with multiple modalities of data are called multimodal models.\n\nGoogle provides the Gemini family of generative AI models designed for multimodal use cases; capable of processing information from multiple modalities, including images, videos, and text.",
+          "key_concepts": [],
+          "estimated_minutes": 10,
+          "order": 1,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_02",
+          "title": "Content generation",
+          "content": "Content generation\n\nIn order for generative AI models to generate content that's useful in real-world applications, they need to have the following capabilities:\n\nLearn how to perform new tasks:\n\nGenerative AI models are designed to perform general tasks. If you want a model to perform tasks that are unique to your use case, then you need to be able to customize the model. On Gemini Enterprise Agent Platform, you can customize your model through model tuning.",
+          "key_concepts": [
+            "Learn how to perform new tasks",
+            "have the following capabilities",
+            "On Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 2,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_03",
+          "title": "Access external information:",
+          "content": "Access external information:\n\nGenerative AI models are trained on vast amounts of data. However, in order for these models to be useful, they need to be able to access information outside of their training data. For example, if you want to create a customer service chatbot that's powered by a generative AI model, the model needs to have access to information about the products and services that you offer. In Gemini Enterprise Agent Platform, you use the grounding and function calling features to help the model access external information.\n\nBlock harmful content:\n\nGenerative AI models might generate output that you don't expect, including text that's offensive or insensitive. To maintain safety and prevent misuse, the models need safety filters to block prompts and responses that are determined to be potentially harmful. Gemini Enterprise Agent Platform has built-in safety features that promote the responsible use of our generative AI services.",
+          "key_concepts": [
+            "Block harmful content",
+            "Access external information",
+            "Gemini Enterprise Agent Platform",
+            "In Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 3,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_04",
+          "title": "Prompt",
+          "content": "Prompt\n\nPrompt\n\nThe generative AI workflow typically starts with prompting. A prompt is a natural language request sent to a generative AI model to elicit a response back. Depending on the model, a prompt can contain text, images, videos, audio, documents, and other modalities or even multiple modalities (multimodal).\n\nCreating a prompt to get the desired response from the model is a practice called prompt design. While prompt design is a process of trial and error, there are prompt design principles and strategies that you can use to nudge the model to behave in the desired way. Agent Studio offers a prompt management tool to help you manage your prompts.",
+          "key_concepts": [
+            "Agent Studio"
+          ],
+          "estimated_minutes": 10,
+          "order": 4,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_05",
+          "title": "Foundation models",
+          "content": "Foundation models\n\nFoundation models\n\nPrompts are sent to a generative AI model for response generation. Gemini Enterprise Agent Platform has a variety of generative AI foundation models that are accessible through a managed API, including the following:\n\nGemini API: Advanced reasoning, multiturn chat, code generation, and multimodal prompts.",
+          "key_concepts": [
+            "Gemini Enterprise Agent Platform",
+            "Gemini API",
+            "including the following"
+          ],
+          "estimated_minutes": 10,
+          "order": 5,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_06",
+          "title": "The models differ in size, modality, and cost. You can explo...",
+          "content": "The models differ in size, modality, and cost. You can explore Google models, as well as open models and models from Google partners, in Model Garden.\n\nModel customization\n\nModel customization\n\nYou can customize the default behavior of Google's foundation models so that they consistently generate the desired results without using complex prompts. This customization process is called model tuning. Model tuning helps you reduce the cost and latency of your requests by allowing you to simplify your prompts.",
+          "key_concepts": [
+            "Model Garden"
+          ],
+          "estimated_minutes": 10,
+          "order": 6,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_07",
+          "title": "Gemini Enterprise Agent Platform also offers model evaluatio...",
+          "content": "Gemini Enterprise Agent Platform also offers model evaluation tools to help you evaluate the performance of your tuned model. After your tuned model is production-ready, you can deploy it to an endpoint and monitor performance like in standard MLOps workflows.\n\nAccess external information\n\nAugmentation\n\nGemini Enterprise Agent Platform offers multiple ways to give the model access to external APIs and real-time information.",
+          "key_concepts": [
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 7,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_08",
+          "title": "Grounding: Connects model responses to a source of truth, su...",
+          "content": "Grounding: Connects model responses to a source of truth, such as your own data or web search, helping to reduce hallucinations.\n\nRAG: Connects models to external knowledge sources, such as documents and databases, to generate more accurate and informative responses.\n\nFunction calling: Lets the model interact with external APIs to get real-time information and perform real-world tasks.\n\nCitation check",
+          "key_concepts": [
+            "Function calling",
+            "Grounding"
+          ],
+          "estimated_minutes": 10,
+          "order": 8,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_09",
+          "title": "Citation check",
+          "content": "Citation check\n\nAfter the response is generated, Gemini Enterprise Agent Platform checks whether citations need to be included with the response. If a significant amount of the text in the response comes from a particular source, that source is added to the citation metadata in the response.\n\nResponsible AI and safety\n\nResponsible AI and safety",
+          "key_concepts": [
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 9,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_10",
+          "title": "The last layer of checks that the prompt and response go thr...",
+          "content": "The last layer of checks that the prompt and response go through before being returned is the safety filters. Gemini Enterprise Agent Platform checks both the prompt and response for how much the prompt or response belongs to a safety category. If the threshold is exceeded for one or more categories, the response is blocked and Gemini Enterprise Agent Platform returns a fallback response.\n\nResponse\n\nResponse\n\nIf the prompt and response passes the safety filter checks, the response is returned. Typically, the response is returned all at once. However, with Agent Platform you can also receive responses progressively as it generates by enabling streaming.",
+          "key_concepts": [
+            "Agent Platform",
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 10,
+          "has_quiz": true
+        }
+      ],
+      "has_final_assessment": true
+    },
+    {
+      "course_id": "course_efe2e4cc",
+      "title": "Generative Ai Beginner'S Guide",
+      "description": "Auto-generated curriculum from 'Generative AI beginner's guide.txt'",
+      "topics": [
+        "have the following capabilities",
+        "Agent Studio",
+        "Grounding",
+        "Agent Platform",
+        "Learn how to perform new tasks",
+        "Model Garden",
+        "Gemini API",
+        "Gemini Enterprise Agent Platform",
+        "Function calling",
+        "In Gemini Enterprise Agent Platform"
+      ],
+      "estimated_hours": 2.8,
+      "order": 1,
+      "lessons": [
+        {
+          "lesson_id": "lesson_01",
+          "title": "Generative AI beginner's guide",
+          "content": "Generative AI beginner's guide\n\nThis beginner's guide introduces you to the core technologies of generative AI and explains how they fit together to power chatbots and applications. Generative AI (also known as genAI or gen AI) is a field of machine learning (ML) that develops and uses ML models for generating new content.\n\nGenerative AI models are often called large language models (LLMs) because of their large size and ability to understand and generate natural language. However, depending on the data that the models are trained on, these models can understand and generate content from multiple modalities, including text, images, videos, and audio. Models that work with multiple modalities of data are called multimodal models.\n\nGoogle provides the Gemini family of generative AI models designed for multimodal use cases; capable of processing information from multiple modalities, including images, videos, and text.",
+          "key_concepts": [],
+          "estimated_minutes": 10,
+          "order": 1,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_02",
+          "title": "Content generation",
+          "content": "Content generation\n\nIn order for generative AI models to generate content that's useful in real-world applications, they need to have the following capabilities:\n\nLearn how to perform new tasks:\n\nGenerative AI models are designed to perform general tasks. If you want a model to perform tasks that are unique to your use case, then you need to be able to customize the model. On Gemini Enterprise Agent Platform, you can customize your model through model tuning.",
+          "key_concepts": [
+            "have the following capabilities",
+            "Learn how to perform new tasks",
+            "On Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 2,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_03",
+          "title": "Access external information:",
+          "content": "Access external information:\n\nGenerative AI models are trained on vast amounts of data. However, in order for these models to be useful, they need to be able to access information outside of their training data. For example, if you want to create a customer service chatbot that's powered by a generative AI model, the model needs to have access to information about the products and services that you offer. In Gemini Enterprise Agent Platform, you use the grounding and function calling features to help the model access external information.\n\nBlock harmful content:\n\nGenerative AI models might generate output that you don't expect, including text that's offensive or insensitive. To maintain safety and prevent misuse, the models need safety filters to block prompts and responses that are determined to be potentially harmful. Gemini Enterprise Agent Platform has built-in safety features that promote the responsible use of our generative AI services.",
+          "key_concepts": [
+            "Access external information",
+            "Block harmful content",
+            "In Gemini Enterprise Agent Platform",
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 3,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_04",
+          "title": "Prompt",
+          "content": "Prompt\n\nPrompt\n\nThe generative AI workflow typically starts with prompting. A prompt is a natural language request sent to a generative AI model to elicit a response back. Depending on the model, a prompt can contain text, images, videos, audio, documents, and other modalities or even multiple modalities (multimodal).\n\nCreating a prompt to get the desired response from the model is a practice called prompt design. While prompt design is a process of trial and error, there are prompt design principles and strategies that you can use to nudge the model to behave in the desired way. Agent Studio offers a prompt management tool to help you manage your prompts.",
+          "key_concepts": [
+            "Agent Studio"
+          ],
+          "estimated_minutes": 10,
+          "order": 4,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_05",
+          "title": "Foundation models",
+          "content": "Foundation models\n\nFoundation models\n\nPrompts are sent to a generative AI model for response generation. Gemini Enterprise Agent Platform has a variety of generative AI foundation models that are accessible through a managed API, including the following:\n\nGemini API: Advanced reasoning, multiturn chat, code generation, and multimodal prompts.",
+          "key_concepts": [
+            "Gemini API",
+            "including the following",
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 5,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_06",
+          "title": "The models differ in size, modality, and cost. You can explo...",
+          "content": "The models differ in size, modality, and cost. You can explore Google models, as well as open models and models from Google partners, in Model Garden.\n\nModel customization\n\nModel customization\n\nYou can customize the default behavior of Google's foundation models so that they consistently generate the desired results without using complex prompts. This customization process is called model tuning. Model tuning helps you reduce the cost and latency of your requests by allowing you to simplify your prompts.",
+          "key_concepts": [
+            "Model Garden"
+          ],
+          "estimated_minutes": 10,
+          "order": 6,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_07",
+          "title": "Gemini Enterprise Agent Platform also offers model evaluatio...",
+          "content": "Gemini Enterprise Agent Platform also offers model evaluation tools to help you evaluate the performance of your tuned model. After your tuned model is production-ready, you can deploy it to an endpoint and monitor performance like in standard MLOps workflows.\n\nAccess external information\n\nAugmentation\n\nGemini Enterprise Agent Platform offers multiple ways to give the model access to external APIs and real-time information.",
+          "key_concepts": [
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 7,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_08",
+          "title": "Grounding: Connects model responses to a source of truth, su...",
+          "content": "Grounding: Connects model responses to a source of truth, such as your own data or web search, helping to reduce hallucinations.\n\nRAG: Connects models to external knowledge sources, such as documents and databases, to generate more accurate and informative responses.\n\nFunction calling: Lets the model interact with external APIs to get real-time information and perform real-world tasks.\n\nCitation check",
+          "key_concepts": [
+            "Function calling",
+            "Grounding"
+          ],
+          "estimated_minutes": 10,
+          "order": 8,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_09",
+          "title": "Citation check",
+          "content": "Citation check\n\nAfter the response is generated, Gemini Enterprise Agent Platform checks whether citations need to be included with the response. If a significant amount of the text in the response comes from a particular source, that source is added to the citation metadata in the response.\n\nResponsible AI and safety\n\nResponsible AI and safety",
+          "key_concepts": [
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 9,
+          "has_quiz": true
+        },
+        {
+          "lesson_id": "lesson_10",
+          "title": "The last layer of checks that the prompt and response go thr...",
+          "content": "The last layer of checks that the prompt and response go through before being returned is the safety filters. Gemini Enterprise Agent Platform checks both the prompt and response for how much the prompt or response belongs to a safety category. If the threshold is exceeded for one or more categories, the response is blocked and Gemini Enterprise Agent Platform returns a fallback response.\n\nResponse\n\nResponse\n\nIf the prompt and response passes the safety filter checks, the response is returned. Typically, the response is returned all at once. However, with Agent Platform you can also receive responses progressively as it generates by enabling streaming.",
+          "key_concepts": [
+            "Agent Platform",
+            "Gemini Enterprise Agent Platform"
+          ],
+          "estimated_minutes": 10,
+          "order": 10,
+          "has_quiz": true
+        }
+      ],
+      "has_final_assessment": true
+    }
+  ],
+  "created_at": "2026-07-07T13:46:10.711090",
+  "last_updated": "2026-07-08T13:38:45.981074"
+}

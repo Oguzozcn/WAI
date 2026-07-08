@@ -132,6 +132,39 @@
       .progress-fill {
         background-color: #2abcfd;
       }
+
+      /* ── Feedback Panel (Accordion/Inline Reveal) ── */
+      .feedback-panel {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.35s ease,
+                    margin-top 0.35s ease;
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 0.75rem;
+        padding: 0 1.5rem;
+      }
+      .feedback-panel:not(.invisible) {
+        padding: 1.25rem 1.5rem;
+      }
+
+      /* ── Lock Overlay ── */
+      .lock-overlay {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        background: rgba(23, 28, 31, 0.75);
+      }
+
+      /* ── Toast animation ── */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translate(-50%, 12px); }
+        to   { opacity: 1; transform: translate(-50%, 0); }
+      }
+      .animate-fade-in {
+        animation: fadeInUp 0.3s ease-out;
+      }
     </style>
 </head>
 <body class="bg-background font-body-md text-on-background min-h-screen">
@@ -198,49 +231,50 @@
 <div class="flex flex-col gap-1">
 <div class="flex items-center gap-2 text-primary">
 <span class="material-symbols-outlined text-[18px]">assignment</span>
-<span class="font-label-md text-label-md uppercase tracking-wider">Final Assessment</span>
+<span class="font-label-md text-label-md uppercase tracking-wider" data-quiz="subtitle">Final Assessment</span>
 </div>
-<h1 class="font-headline-lg text-headline-lg text-on-surface">Agent Development Kit</h1>
+<h1 class="font-headline-lg text-headline-lg text-on-surface" data-quiz="title">Loading Quiz...</h1>
 <p class="text-on-surface-variant font-body-lg text-body-lg mt-2">Demonstrate your proficiency in configuring multi-agent orchestration within the Enterprise environment.</p>
 </div>
 <!-- Question Card -->
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col gap-8 transition-all hover:border-outline">
 <div class="flex items-start justify-between gap-4">
-<h2 class="font-headline-md text-headline-md text-on-surface">Question 4 of 12</h2>
+<h2 class="font-headline-md text-headline-md text-on-surface" data-quiz="question-counter">Question 1 of …</h2>
 <span class="bg-surface-container px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant">Multiple Choice</span>
 </div>
-<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
-                            When deploying a sub-agent with specific latency constraints, which orchestration pattern ensures the highest level of task parallelism while maintaining state consistency across the primary control loop?
-                        </p>
-<!-- Options -->
-<div class="flex flex-col gap-4">
-<!-- Option 1 -->
-<label class="flex items-center gap-4 p-5 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
-<input class="w-5 h-5 text-primary focus:ring-primary border-outline-variant" name="quiz_option" type="radio">
-<span class="font-body-md text-body-md text-on-surface">Hierarchical Delegate with Event Sourcing</span>
-</label>
-<!-- Option 2 (Selected State Mockup) -->
-<label class="flex items-center gap-4 p-5 rounded-xl cursor-pointer transition-all border-outline-variant">
-<input checked="" class="w-5 h-5 text-primary focus:ring-primary border-primary" name="quiz_option" type="radio">
-<span class="font-body-md text-body-md text-on-surface">Asynchronous Broadcast with Shared Immutable State</span>
-</label>
-<!-- Option 3 -->
-<label class="flex items-center gap-4 p-5 border rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group border-primary bg-primary-container/10 border-2">
-<input class="w-5 h-5 text-primary focus:ring-primary border-outline-variant" name="quiz_option" type="radio">
-<span class="font-body-md text-body-md text-primary font-bold">Synchronous Cascade through Persistent Middleware</span>
-</label>
-<!-- Option 4 -->
-<label class="flex items-center gap-4 p-5 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
-<input class="w-5 h-5 text-primary focus:ring-primary border-outline-variant" name="quiz_option" type="radio">
-<span class="font-body-md text-body-md text-on-surface">Directed Acyclic Graph (DAG) with Locking Semantics</span>
-</label>
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed" data-quiz="question-text">
+  Loading question...
+</p>
+<!-- Options Container (dynamically populated by controller) -->
+<div class="flex flex-col gap-4" data-quiz="options">
+  <!-- Options rendered here by QuizSessionController -->
 </div>
+
+<!-- ═══ Feedback Panel (Accordion / Inline Reveal) ═══ -->
+<div class="feedback-panel invisible border-green-500 bg-green-50" data-quiz="feedback-panel">
+  <div class="flex items-center gap-3 mb-3">
+    <span class="material-symbols-outlined text-2xl" data-feedback="icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+    <span class="font-headline-md text-headline-md" data-feedback="title">Correct!</span>
+  </div>
+  <p class="font-body-md text-body-md text-on-surface mb-2" data-feedback="why"></p>
+  <p class="font-body-md text-body-md text-on-surface-variant italic mb-2" data-feedback="correct-answer" style="display:none;"></p>
+  <div class="mt-3 pt-3 border-t border-outline-variant/50">
+    <div class="flex items-start gap-2">
+      <span class="material-symbols-outlined text-primary text-[18px] mt-0.5">psychology</span>
+      <div>
+        <span class="font-label-md text-label-md text-primary uppercase tracking-wider block mb-1">How to Think About This</span>
+        <p class="font-body-md text-body-md text-on-surface-variant" data-feedback="how-to-think"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Actions -->
 <div class="flex items-center justify-between pt-6 border-t border-outline-variant">
-<button class="px-6 py-3 border-2 border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all">
+<button class="px-6 py-3 border-2 border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all" data-quiz="skip-btn">
                                 Skip for Now
                             </button>
-<button class="px-10 py-3 bg-[#58cc02] text-on-tertiary rounded-xl font-bold squishy-success transition-all flex items-center gap-2">
+<button class="px-10 py-3 bg-[#58cc02] text-on-tertiary rounded-xl font-bold squishy-success transition-all flex items-center gap-2" data-quiz="next-btn">
                                 Next Question
                                 <span class="material-symbols-outlined">arrow_forward</span>
 </button>
@@ -256,14 +290,14 @@
 <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
 <span class="font-label-md text-on-surface-variant block uppercase text-[10px] tracking-widest font-bold">Questions</span>
 <div class="flex items-baseline gap-1">
-<span class="font-headline-md text-headline-md text-primary">06</span>
-<span class="text-on-surface-variant text-body-md">/ 10</span>
+<span class="font-headline-md text-headline-md text-primary" data-quiz="progress-current">01</span>
+<span class="text-on-surface-variant text-body-md" data-quiz="progress-total">/ …</span>
 </div>
 </div>
 <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
 <span class="font-label-md text-on-surface-variant block uppercase text-[10px] tracking-widest font-bold">Passing Score</span>
 <div class="flex items-baseline gap-1">
-<span class="font-headline-md text-headline-md text-primary">80</span>
+<span class="font-headline-md text-headline-md text-primary" data-quiz="passing-score">80</span>
 <span class="text-on-surface-variant text-body-md">%</span>
 </div>
 </div>
@@ -274,7 +308,7 @@
 <span class="material-symbols-outlined text-secondary">info</span>
 <span class="text-body-md">Attempts Left</span>
 </div>
-<span class="font-label-md font-bold text-primary">2 / 3</span>
+<span class="font-label-md font-bold text-primary" data-quiz="attempts-left">3 / 3</span>
 </div>
 </div>
 </div>
@@ -282,42 +316,30 @@
 </div>
 </div>
 </div>
+
+<!-- ═══ State-Locking Overlay Modal ═══ -->
+<div class="lock-overlay hidden fixed inset-0 z-[100] flex items-center justify-center" data-quiz="lock-overlay">
+  <div class="bg-surface-container-lowest rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl border border-outline-variant text-center">
+    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-error/10 flex items-center justify-center">
+      <span class="material-symbols-outlined text-error text-4xl" style="font-variation-settings: 'FILL' 1;">lock</span>
+    </div>
+    <h2 class="font-headline-lg text-headline-lg text-on-surface mb-3">Assessment Locked</h2>
+    <p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+      You have used all available attempts for this assessment.
+      To continue your learning journey, please complete the mandatory remedial learning path.
+    </p>
+    <a href="/learning-path" class="inline-flex items-center gap-2 px-10 py-4 bg-primary text-on-primary rounded-xl font-bold text-lg shadow-lg hover:bg-primary/90 transition-all squishy-button">
+      <span class="material-symbols-outlined">route</span>
+      Start Remedial Path
+    </a>
+    <p class="mt-4 text-sm text-on-surface-variant">Your progress has been saved. Complete the learning path to unlock a new attempt.</p>
+  </div>
+</div>
+
 </main>
-<!-- Simple Interactivity for Radio Buttons -->
-<script>
-        document.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                // Remove active classes from all parents
-                document.querySelectorAll('label').forEach(label => {
-                    label.classList.remove('border-primary', 'bg-primary-container/10', 'border-2');
-                    label.classList.add('border-outline-variant');
-                    const text = label.querySelector('span');
-                    if (text) {
-                        text.classList.remove('text-primary', 'font-bold');
-                        text.classList.add('text-on-surface');
-                    }
-                });
 
-                // Add active classes to the checked parent
-                if (this.checked) {
-                    const parent = this.closest('label');
-                    parent.classList.remove('border-outline-variant');
-                    parent.classList.add('border-primary', 'bg-primary-container/10', 'border-2');
-                    const text = parent.querySelector('span:last-child');
-                    if (text) {
-                        text.classList.add('text-primary', 'font-bold');
-                        text.classList.remove('text-on-surface');
-                    }
-                }
-            });
-        });
-    </script>
-
-
-
-
-
-
+<!-- Scripts -->
 <script src="/js/api-client.js"></script>
+<script src="/js/quiz-controller.js"></script>
 <script src="/js/theme-toggle.js"></script>
 </body></html>

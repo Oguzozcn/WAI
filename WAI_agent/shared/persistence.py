@@ -12,11 +12,15 @@ Future migration path:
 
 import json
 import os
+import threading
 from pathlib import Path
 from datetime import date, datetime
 from typing import Optional
 
 from .constants import SCHEMA_VERSION
+
+# Global lock for thread safety during read-modify-write operations
+_store_lock = threading.Lock()
 
 
 class IsolationViolationError(Exception):
@@ -140,14 +144,18 @@ class DepartmentScopedStore:
         # Scoped paths — these are the ONLY directories this store can access
         self.user_progress_path = self.base_path / "user_progress" / department_id
         self.knowledge_base_path = self.base_path / "knowledge_base" / department_id
+        self.raw_documents_path = self.base_path / "knowledge_base" / department_id / "raw"
         self.conflicts_path = self.base_path / "conflicts" / department_id
         self.kpi_store_path = self.base_path / "kpi_store"
+        self.learning_paths_path = self.base_path / "learning_paths" / department_id
 
         # Ensure directories exist
         self.user_progress_path.mkdir(parents=True, exist_ok=True)
         self.knowledge_base_path.mkdir(parents=True, exist_ok=True)
+        self.raw_documents_path.mkdir(parents=True, exist_ok=True)
         self.conflicts_path.mkdir(parents=True, exist_ok=True)
         self.kpi_store_path.mkdir(parents=True, exist_ok=True)
+        self.learning_paths_path.mkdir(parents=True, exist_ok=True)
 
     # ── User Progress ──
 
@@ -195,6 +203,61 @@ class DepartmentScopedStore:
         """Write a knowledge base document to the department-scoped directory."""
         file_path = self.knowledge_base_path / f"{doc_id}.json"
         file_path.write_text(json.dumps(data, indent=2))
+
+    # ── Raw Document Storage ──
+
+    def write_raw_document(self, filename: str, content: str) -> str:
+        """Save an uploaded raw document (.txt or .md) to the raw/ subdirectory.
+
+        Args:
+            filename: Original filename of the uploaded document.
+            content: The text content of the document.
+
+        Returns:
+            The absolute path of the saved file.
+        """
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        file_path = self.raw_documents_path / safe_name
+        file_path.write_text(content, encoding="utf-8")
+        return str(file_path)
+
+    def read_raw_document(self, filename: str) -> Optional[str]:
+        """Read a raw document from the raw/ subdirectory."""
+        file_path = self.raw_documents_path / filename
+        if not file_path.exists():
+            return None
+        return file_path.read_text(encoding="utf-8")
+
+    def list_raw_documents(self) -> list[str]:
+        """List all raw document filenames in this department's raw/ directory."""
+        return [
+            f.name for f in self.raw_documents_path.iterdir()
+            if f.is_file() and f.name not in (".gitkeep",)
+        ]
+
+    # ── Learning Path Persistence ──
+
+    def write_learning_path(self, path_id: str, data: dict) -> None:
+        """Persist a generated learning path to the department-scoped directory."""
+        data["last_updated"] = datetime.utcnow().isoformat()
+        file_path = self.learning_paths_path / f"{path_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_learning_path(self, path_id: str) -> Optional[dict]:
+        """Read a persisted learning path."""
+        file_path = self.learning_paths_path / f"{path_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def read_latest_learning_path(self) -> Optional[dict]:
+        """Read the most recently updated learning path for this department."""
+        paths = list(self.learning_paths_path.glob("*.json"))
+        if not paths:
+            return None
+        # Sort by modification time, newest first
+        paths.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        return json.loads(paths[0].read_text())
 
     # ── Conflicts ──
 

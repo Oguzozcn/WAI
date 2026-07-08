@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -20,6 +20,9 @@ from pydantic import BaseModel
 # ── Ensure WAI_agent is importable ──
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Server-side cache for quiz evaluation (to prevent sending answers to frontend)
+_active_quizzes = {}
 
 from WAI_agent.tools.quiz_tools import (
     generate_quiz,
@@ -31,6 +34,7 @@ from WAI_agent.tools.curriculum_tools import (
     generate_learning_path,
     generate_daily_agenda,
     identify_content_gaps,
+    trigger_curriculum_generation,
 )
 from WAI_agent.tools.progress_tools import (
     get_user_progress,
@@ -39,7 +43,7 @@ from WAI_agent.tools.progress_tools import (
     flag_at_risk_users,
 )
 from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT
+from WAI_agent.shared.constants import DEFAULT_DEPARTMENT, MAX_QUIZ_ATTEMPTS, PASS_THRESHOLD
 
 
 # ── App ──
@@ -179,8 +183,82 @@ async def api_generate_quiz(body: QuizGenerateRequest, department: str = DEFAULT
         quiz_type=body.quiz_type,
         department=department,
     )
-    return result
+    
+    _active_quizzes[result["quiz_id"]] = result
+    import copy
+    sanitized = copy.deepcopy(result)
+    for q in sanitized.get("questions", []):
+        q.pop("correct_answer_index", None)
+        
+    return sanitized
 
+
+# ── Quiz Session Start ──
+
+class QuizStartRequest(BaseModel):
+    topic: str
+    difficulty: str = "medium"
+    question_count: int = 5
+    quiz_type: str = "short_quiz"
+    user_id: str = "manager"
+
+
+@app.post("/api/quiz/start")
+async def api_quiz_start(body: QuizStartRequest, department: str = DEFAULT_DEPARTMENT):
+    """Initialize a new quiz session with attempt tracking.
+
+    Returns the full quiz payload including 4-option questions and per-option
+    rationale/feedback strings. The correct_answer_index is stripped from the
+    response but retained server-side for secure evaluation.
+    """
+    # Check remaining attempts for this user
+    store = DepartmentScopedStore(department)
+    progress = store.read_user_progress(body.user_id)
+    previous_attempts = 0
+    if progress:
+        quiz_attempts = progress.get("quiz_attempts", [])
+        # Count attempts for the same topic
+        previous_attempts = sum(
+            1 for a in quiz_attempts
+            if a.get("topic", "") == body.topic or a.get("quiz_type", "") == body.quiz_type
+        )
+
+    attempts_remaining = max(0, MAX_QUIZ_ATTEMPTS - previous_attempts)
+
+    if attempts_remaining <= 0:
+        return {
+            "status": "locked",
+            "attempts_remaining": 0,
+            "max_attempts": MAX_QUIZ_ATTEMPTS,
+            "message": "You have used all your attempts. Please complete the remedial learning path.",
+        }
+
+    # Generate the quiz
+    result = generate_quiz(
+        topic=body.topic,
+        difficulty=body.difficulty,
+        question_count=body.question_count,
+        quiz_type=body.quiz_type,
+        department=department,
+    )
+
+    # Cache the full quiz (with answers) for server-side evaluation
+    _active_quizzes[result["quiz_id"]] = result
+
+    # Sanitize: strip correct_answer_index but keep rationale for each option
+    import copy
+    sanitized = copy.deepcopy(result)
+    for q in sanitized.get("questions", []):
+        q.pop("correct_answer_index", None)
+
+    sanitized["attempts_remaining"] = attempts_remaining
+    sanitized["max_attempts"] = MAX_QUIZ_ATTEMPTS
+    sanitized["pass_threshold"] = PASS_THRESHOLD
+
+    return sanitized
+
+
+# ── Quiz Evaluate (Enhanced with Per-Question Feedback) ──
 
 class QuizEvaluateRequest(BaseModel):
     quiz_id: str
@@ -188,15 +266,111 @@ class QuizEvaluateRequest(BaseModel):
     answers: list[dict]
 
 
+class QuizAnswerSingleRequest(BaseModel):
+    """Evaluate a single answer for instant feedback."""
+    quiz_id: str
+    question_id: str
+    selected_index: int
+
+
+@app.post("/api/quiz/evaluate/single")
+async def api_evaluate_single_answer(body: QuizAnswerSingleRequest):
+    """Evaluate a single answer and return instant feedback.
+
+    Returns whether the answer is correct and the rationale (why right/wrong,
+    how to think) for the selected option.
+    """
+    cached_quiz = _active_quizzes.get(body.quiz_id)
+    if not cached_quiz:
+        raise HTTPException(status_code=404, detail="Quiz session expired or not found.")
+
+    q_lookup = {q["question_id"]: q for q in cached_quiz.get("questions", [])}
+    q = q_lookup.get(body.question_id)
+    if not q:
+        raise HTTPException(status_code=404, detail="Question not found in this quiz.")
+
+    is_correct = (body.selected_index == q["correct_answer_index"])
+    correct_idx = q["correct_answer_index"]
+    correct_text = q["options"][correct_idx]
+    selected_text = q["options"][body.selected_index] if 0 <= body.selected_index < len(q["options"]) else ""
+
+    # Build per-option rationale feedback
+    rationale = q.get("rationale", {})
+    feedback_why = rationale.get(str(body.selected_index), "")
+    feedback_correct_why = rationale.get(str(correct_idx), "")
+
+    # If no pre-generated rationale, provide a heuristic one
+    if not feedback_why:
+        if is_correct:
+            feedback_why = f"Correct! '{selected_text}' is the right answer because it directly addresses the core concept."
+        else:
+            feedback_why = f"'{selected_text}' is not the best answer here. While it may seem relevant, it does not fully capture the requirement."
+    if not feedback_correct_why:
+        feedback_correct_why = f"'{correct_text}' is correct because it most accurately and completely addresses the question."
+
+    how_to_think = (
+        "When approaching questions like this, identify the key action or definition the question asks for. "
+        "Eliminate options that are partially correct but miss the core requirement, "
+        "then select the option that provides the most complete and specific answer."
+    )
+
+    return {
+        "question_id": body.question_id,
+        "selected_index": body.selected_index,
+        "is_correct": is_correct,
+        "correct_index": correct_idx,
+        "correct_answer": correct_text,
+        "selected_answer": selected_text,
+        "feedback_why": feedback_why,
+        "feedback_how_to_think": how_to_think,
+        "concept_tags": q.get("concept_tags", []),
+    }
+
+
 @app.post("/api/quiz/evaluate")
 async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT_DEPARTMENT):
-    """Evaluate user answers for a quiz."""
+    """Evaluate user answers for a complete quiz and return full results."""
+    cached_quiz = _active_quizzes.get(body.quiz_id)
+    if not cached_quiz:
+        raise HTTPException(status_code=404, detail="Quiz session expired or not found.")
+
+    enriched_answers = []
+    # Build a lookup for questions
+    q_lookup = {q["question_id"]: q for q in cached_quiz.get("questions", [])}
+
+    for user_ans in body.answers:
+        q_id = user_ans.get("question_id")
+        q = q_lookup.get(q_id)
+        if q:
+            selected_idx = user_ans.get("selected_index")
+            is_correct = (selected_idx == q["correct_answer_index"])
+            correct_ans_text = q["options"][q["correct_answer_index"]]
+            
+            enriched_answers.append({
+                "question_id": q_id,
+                "user_answer": q["options"][selected_idx] if selected_idx is not None and 0 <= selected_idx < len(q["options"]) else str(selected_idx),
+                "correct_answer": correct_ans_text,
+                "is_correct": is_correct,
+                "concept_tags": q.get("concept_tags", [])
+            })
+
     result = evaluate_answers(
         quiz_id=body.quiz_id,
         user_id=body.user_id,
-        answers=body.answers,
+        answers=enriched_answers,
         department=department,
     )
+
+    # Add attempt tracking info
+    store = DepartmentScopedStore(department)
+    progress = store.read_user_progress(body.user_id)
+    previous_attempts = 0
+    if progress:
+        previous_attempts = len(progress.get("quiz_attempts", []))
+    result["attempts_used"] = previous_attempts
+    result["attempts_remaining"] = max(0, MAX_QUIZ_ATTEMPTS - previous_attempts)
+    result["max_attempts"] = MAX_QUIZ_ATTEMPTS
+
     return result
 
 
@@ -268,6 +442,153 @@ async def api_kb_validate(body: ValidateDocumentRequest, department: str = DEFAU
         department=department,
     )
     return result
+
+
+# ── File Upload & Curriculum Generation ──
+
+ALLOWED_EXTENSIONS = {".txt", ".md"}
+
+@app.post("/api/kb/upload")
+async def api_kb_upload(
+    file: UploadFile = File(...),
+    department: str = Form(DEFAULT_DEPARTMENT),
+    append_to_latest: bool = Form(False)
+):
+    """Upload a document file, save it to raw/, and generate a curriculum.
+
+    This is the core pipeline endpoint:
+    1. Validates file type (.txt, .md only for MVP).
+    2. Reads the file content.
+    3. Saves the raw file to data/knowledge_base/{dept}/raw/.
+    4. Triggers the curriculum generation pipeline (Course Splitter).
+    5. Returns the generated learning path.
+    """
+    # Validate file extension
+    ext = Path(file.filename).suffix.lower() if file.filename else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type '{ext}'. Only .txt and .md files are supported in the MVP."
+        )
+
+    # Read file content
+    content_bytes = await file.read()
+    try:
+        content = content_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="File could not be read as UTF-8 text.")
+
+    if not content.strip():
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    # Save raw document
+    store = DepartmentScopedStore(department)
+    store.write_raw_document(file.filename, content)
+
+    # Trigger curriculum generation pipeline
+    result = trigger_curriculum_generation(
+        filename=file.filename,
+        department=department,
+        append_to_latest=append_to_latest,
+    )
+
+    if result.get("status") != "success":
+        raise HTTPException(status_code=500, detail=result.get("message", "Curriculum generation failed."))
+
+    return result
+
+
+# ── Dynamic Learning Path ──
+
+@app.get("/api/learning-path/latest")
+async def api_latest_learning_path(department: str = DEFAULT_DEPARTMENT):
+    """Get the most recently generated learning path for a department."""
+    store = DepartmentScopedStore(department)
+    path = store.read_latest_learning_path()
+    if not path:
+        # Fallback to generating from existing KB
+        return generate_learning_path(role="new_joiner", department=department)
+    return path
+
+
+# ── Lesson Content ──
+
+@app.get("/api/lesson/{course_id}/{lesson_id}")
+async def api_get_lesson(course_id: str, lesson_id: str, department: str = DEFAULT_DEPARTMENT):
+    """Get the content for a specific lesson within a course."""
+    store = DepartmentScopedStore(department)
+
+    # Search through all learning paths for this course and lesson
+    for path_file in store.learning_paths_path.glob("*.json"):
+        import json as _json
+        path_data = _json.loads(path_file.read_text())
+        for course in path_data.get("courses", []):
+            if course["course_id"] == course_id:
+                for lesson in course.get("lessons", []):
+                    if lesson["lesson_id"] == lesson_id:
+                        return {
+                            "course": course,
+                            "lesson": lesson,
+                            "path_id": path_data.get("path_id", ""),
+                        }
+
+    # Fallback: try KB documents
+    docs = store.read_knowledge_base()
+    for doc in docs:
+        if doc.get("title", "").lower().replace(" ", "_") == course_id.replace("course_", ""):
+            return {"course": doc, "lesson": None, "path_id": ""}
+
+    raise HTTPException(status_code=404, detail=f"Lesson '{lesson_id}' in course '{course_id}' not found.")
+
+
+# ── Quiz by Lesson ──
+
+@app.get("/api/quiz/by-lesson/{course_id}/{lesson_id}")
+async def api_quiz_by_lesson(course_id: str, lesson_id: str, department: str = DEFAULT_DEPARTMENT):
+    """Generate a short quiz for a specific lesson using its content as context."""
+    store = DepartmentScopedStore(department)
+
+    # Find the lesson content
+    lesson_content = None
+    lesson_title = None
+    for path_file in store.learning_paths_path.glob("*.json"):
+        import json as _json
+        path_data = _json.loads(path_file.read_text())
+        for course in path_data.get("courses", []):
+            if course["course_id"] == course_id:
+                for lesson in course.get("lessons", []):
+                    if lesson["lesson_id"] == lesson_id:
+                        lesson_content = lesson.get("content", "")
+                        lesson_title = lesson.get("title", "")
+                        break
+
+    if not lesson_content:
+        raise HTTPException(status_code=404, detail="Lesson not found for quiz generation.")
+
+    # Generate quiz scoped to this lesson's content
+    quiz = generate_quiz(
+        topic=lesson_title,
+        difficulty="medium",
+        question_count=3,
+        quiz_type="short_quiz",
+        department=department,
+    )
+
+    # Inject the lesson content as source material
+    quiz["lesson_context"] = lesson_content
+    quiz["lesson_id"] = lesson_id
+    quiz["course_id"] = course_id
+
+    # Cache for secure evaluation
+    _active_quizzes[quiz["quiz_id"]] = quiz
+
+    # Sanitize payload for frontend
+    import copy
+    sanitized_quiz = copy.deepcopy(quiz)
+    for q in sanitized_quiz.get("questions", []):
+        q.pop("correct_answer_index", None)
+
+    return sanitized_quiz
 
 
 # ═══════════════════════════════════════════

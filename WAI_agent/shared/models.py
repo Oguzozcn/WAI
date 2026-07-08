@@ -15,14 +15,31 @@ from datetime import datetime, date
 # ── Learning Path Models ──
 
 @dataclass
+class Lesson:
+    """A single lesson within a course module."""
+    lesson_id: str
+    title: str
+    content: str = ""
+    key_concepts: list[str] = field(default_factory=list)
+    estimated_minutes: int = 15
+    order: int = 0
+    has_quiz: bool = True  # 1 Short Quiz per lesson (standardized)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
 class Course:
-    """A single course within a learning path."""
+    """A single course/module within a learning path."""
     course_id: str
     title: str
     description: str
     topics: list[str] = field(default_factory=list)
     estimated_hours: float = 1.0
     order: int = 0
+    lessons: list[dict] = field(default_factory=list)  # List of Lesson dicts
+    has_final_assessment: bool = True  # 1 Final Assessment per module (standardized)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -37,6 +54,7 @@ class LearningPath:
     courses: list[Course] = field(default_factory=list)
     timeframe_weeks: int = 4
     created_at: str = ""
+    source_document: str = ""  # Reference to the raw uploaded file that generated this path
 
     def __post_init__(self):
         if not self.created_at:

@@ -9,9 +9,6 @@ import json
 import uuid
 from datetime import datetime
 
-from google.adk.agents import Agent
-from google.adk.agents.callback_context import CallbackContext
-
 from ..shared.persistence import DepartmentScopedStore
 from ..shared.constants import MAX_COURSES, DEFAULT_DEPARTMENT, DEFAULT_TIMEFRAME_WEEKS
 
@@ -239,3 +236,261 @@ def identify_content_gaps(
         })
 
     return analysis
+
+
+# ── Document-to-Curriculum Pipeline ──
+
+def _split_text_into_sections(text: str) -> list[dict]:
+    """Split document text into logical sections based on headings or paragraphs.
+
+    Detects markdown-style headers (## or ###) as section delimiters.
+    Falls back to paragraph-based chunking if no headers found.
+    """
+    import re
+    sections = []
+
+    # Try markdown heading-based splitting first
+    heading_pattern = re.compile(r'^(#{1,3})\s+(.+)$', re.MULTILINE)
+    headings = list(heading_pattern.finditer(text))
+
+    if headings:
+        for i, match in enumerate(headings):
+            title = match.group(2).strip()
+            start = match.end()
+            end = headings[i + 1].start() if i + 1 < len(headings) else len(text)
+            content = text[start:end].strip()
+            if content:
+                sections.append({"title": title, "content": content})
+    else:
+        # Paragraph-based chunking: split on double newlines
+        paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+
+        # Group paragraphs into chunks of roughly equal size (max 10 chunks)
+        max_sections = min(MAX_COURSES, max(1, len(paragraphs)))
+        chunk_size = max(1, len(paragraphs) // max_sections)
+
+        for i in range(0, len(paragraphs), chunk_size):
+            chunk = paragraphs[i:i + chunk_size]
+            combined = "\n\n".join(chunk)
+            # Generate title from first ~50 chars of first paragraph
+            first_line = chunk[0][:60].strip()
+            if len(chunk[0]) > 60:
+                first_line += "..."
+            sections.append({"title": first_line, "content": combined})
+
+    return sections[:MAX_COURSES]
+
+
+def _extract_key_concepts(text: str) -> list[str]:
+    """Extract key concepts/terms from a text block.
+
+    Looks for bold terms (**term**), capitalized phrases, and terms after colons.
+    """
+    import re
+    concepts = set()
+
+    # Extract bold terms
+    for match in re.finditer(r'\*\*(.*?)\*\*', text):
+        term = match.group(1).strip()
+        if 2 < len(term) < 60:
+            concepts.add(term)
+
+    # Extract terms after colons (definition-style)
+    for match in re.finditer(r'(\w[\w\s]{2,30}):\s', text):
+        term = match.group(1).strip()
+        if len(term) > 3:
+            concepts.add(term)
+
+    # Extract capitalized multi-word terms (likely proper nouns / concepts)
+    for match in re.finditer(r'\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)\b', text):
+        concepts.add(match.group(1))
+
+    return list(concepts)[:10]
+
+
+def process_document_to_curriculum(
+    document_text: str,
+    document_title: str = "Uploaded Document",
+    department: str = DEFAULT_DEPARTMENT,
+) -> dict:
+    """Split a document into a structured curriculum: Module → Lessons.
+
+    The Course Splitter logic. Analyzes document_text and generates a
+    structured curriculum with up to 10 lessons per module, each with
+    a short quiz, plus a final assessment for the module.
+
+    Args:
+        document_text: The raw text content of the uploaded document.
+        document_title: The title/filename of the document.
+        department: The department scope.
+
+    Returns:
+        A structured curriculum dict with courses and lessons.
+    """
+    sections = _split_text_into_sections(document_text)
+
+    if not sections:
+        return {
+            "status": "error",
+            "message": "Could not extract any content from the document.",
+        }
+
+    # Build lessons from sections
+    lessons = []
+    for i, section in enumerate(sections):
+        key_concepts = _extract_key_concepts(section["content"])
+        lessons.append({
+            "lesson_id": f"lesson_{i + 1:02d}",
+            "title": section["title"],
+            "content": section["content"],
+            "key_concepts": key_concepts,
+            "estimated_minutes": max(10, min(30, len(section["content"]) // 200)),
+            "order": i + 1,
+            "has_quiz": True,
+        })
+
+    # Calculate total estimated hours
+    total_minutes = sum(l["estimated_minutes"] for l in lessons)
+    # Add 5 min per short quiz + 15 min for final assessment
+    total_minutes += len(lessons) * 5 + 15
+    estimated_hours = round(total_minutes / 60, 1)
+
+    # Build the module/course
+    # Extract a clean title from the document name
+    clean_title = document_title.replace(".txt", "").replace(".md", "").replace("_", " ").title()
+
+    course = {
+        "course_id": f"course_{uuid.uuid4().hex[:8]}",
+        "title": clean_title,
+        "description": f"Auto-generated curriculum from '{document_title}'",
+        "topics": list(set(
+            concept
+            for lesson in lessons
+            for concept in lesson["key_concepts"][:3]
+        ))[:10],
+        "estimated_hours": estimated_hours,
+        "order": 1,
+        "lessons": lessons,
+        "has_final_assessment": True,
+    }
+
+    return {
+        "status": "success",
+        "course": course,
+        "total_lessons": len(lessons),
+        "total_estimated_hours": estimated_hours,
+    }
+
+
+def trigger_curriculum_generation(
+    filename: str,
+    department: str = DEFAULT_DEPARTMENT,
+    user_id: str = "manager",
+    append_to_latest: bool = False,
+) -> dict:
+    """Orchestrate the full upload-to-curriculum pipeline.
+
+    1. Reads the saved raw document from the knowledge base.
+    2. Splits it into a structured curriculum (Course → Lessons).
+    3. Saves the course JSON to the knowledge base.
+    4. Generates and persists the learning path (either new or appended).
+
+    Args:
+        filename: The filename of the raw document.
+        department: The department scope.
+        user_id: The user who triggered the generation.
+        append_to_latest: If True, merges this course into the latest existing path.
+
+    Returns:
+        The generated learning path details.
+    """
+    store = DepartmentScopedStore(department)
+
+    # Step 1: Read the raw document
+    document_text = store.read_raw_document(filename)
+    if not document_text:
+        return {
+            "status": "error",
+            "message": f"Raw document '{filename}' not found.",
+        }
+
+    # Step 2: Split into curriculum
+    result = process_document_to_curriculum(
+        document_text=document_text,
+        document_title=filename,
+        department=department,
+    )
+
+    if result.get("status") != "success":
+        return result
+
+    course = result["course"]
+
+    # Step 3: Save the course to the knowledge base
+    course_doc = {
+        "title": course["title"],
+        "description": course["description"],
+        "topics": course["topics"],
+        "content": document_text[:2000],
+        "estimated_hours": course["estimated_hours"],
+        "key_facts": [
+            {"concept": c, "definition": ""}
+            for c in course["topics"][:5]
+        ],
+        "source_dtp": f"raw/{filename}",
+        "version": "1.0",
+        "lessons": course["lessons"],
+        "has_final_assessment": course["has_final_assessment"],
+    }
+    store.write_knowledge_document(course["course_id"], course_doc)
+
+    # Step 4: Build or Append to learning path
+    from ..shared.persistence import _store_lock
+    
+    with _store_lock:
+        existing_path = None
+        if append_to_latest:
+            existing_path = store.read_latest_learning_path()
+
+        if existing_path:
+            # Append to existing
+            path_id = existing_path["path_id"]
+            existing_path["courses"].append(course)
+            existing_path["total_courses"] = len(existing_path["courses"])
+            existing_path["total_estimated_hours"] = round(sum(c.get("estimated_hours", 0) for c in existing_path["courses"]), 1)
+            existing_path["timeframe_weeks"] = max(1, int(existing_path["total_estimated_hours"] / 4) + 1)
+            existing_path["hours_per_week"] = round(existing_path["total_estimated_hours"] / existing_path["timeframe_weeks"], 1)
+            # Retain the earliest source_document or append
+            if filename not in existing_path.get("source_document", ""):
+                existing_path["source_document"] = existing_path.get("source_document", "") + f", {filename}"
+            
+            learning_path = existing_path
+        else:
+            # Create new
+            path_id = f"lp_{uuid.uuid4().hex[:8]}"
+            learning_path = {
+                "path_id": path_id,
+                "department": department,
+                "role": "auto_generated",
+                "timeframe_weeks": max(1, int(course["estimated_hours"] / 4) + 1),
+                "total_courses": 1,
+                "total_estimated_hours": course["estimated_hours"],
+                "hours_per_week": round(course["estimated_hours"], 1),
+                "days_per_course": 2,
+                "source_document": filename,
+                "courses": [course],
+                "created_at": datetime.utcnow().isoformat(),
+            }
+
+        store.write_learning_path(path_id, learning_path)
+
+    return {
+        "status": "success",
+        "path_id": path_id,
+        "course_id": course["course_id"],
+        "total_lessons": result["total_lessons"],
+        "total_estimated_hours": result["total_estimated_hours"],
+        "learning_path": learning_path,
+        "appended": bool(existing_path)
+    }
+

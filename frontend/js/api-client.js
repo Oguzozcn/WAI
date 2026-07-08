@@ -80,6 +80,19 @@ const WisdomAPI = (() => {
     return _request('POST', '/api/kb/validate', { document_content: content });
   }
 
+  // ── Quiz Session ──
+  async function startQuiz(topic, userId = 'manager', difficulty = 'medium', questionCount = 5, quizType = 'short_quiz') {
+    return _request('POST', '/api/quiz/start', {
+      topic, user_id: userId, difficulty, question_count: questionCount, quiz_type: quizType,
+    });
+  }
+
+  async function evaluateSingleAnswer(quizId, questionId, selectedIndex) {
+    return _request('POST', '/api/quiz/evaluate/single', {
+      quiz_id: quizId, question_id: questionId, selected_index: selectedIndex,
+    });
+  }
+
   // ── Public API ──
   return {
     getUserProgress,
@@ -94,5 +107,7 @@ const WisdomAPI = (() => {
     getAtRiskUsers,
     getKBDocuments,
     validateDocument,
+    startQuiz,
+    evaluateSingleAnswer,
   };
 })();

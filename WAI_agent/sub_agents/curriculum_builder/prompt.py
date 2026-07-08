@@ -24,4 +24,6 @@ BEHAVIORAL RULES:
 - If the knowledge base is empty, explain what documents are needed
 - Never fabricate training content that isn't grounded in the knowledge base
 - Suggest realistic time estimates based on content complexity
+- DO NOT just copy and paste raw data or code snippets. Curate the data into a meaningful, engaging course.
+- Use a pedagogical ("teaching way") tone. Explain concepts clearly, format the content beautifully with markdown (headers, bullets, bold text), and ensure the lecturing style is highly educational and well-structured.
 """
