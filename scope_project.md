@@ -1,8 +1,8 @@
 # WisdomAI Implementation Plan
 
-> **Version:** 2.0  
-> **Last Updated:** 2026-07-07  
-> **Archived Plans:** `archive/implementation_plan_v1_original.md`, `archive/implementation_plan_v1_file_upload.md`
+> **Version:** 2.1  
+> **Last Updated:** 2026-07-13  
+> **Archived Plans:** `archive/implementation_plan_v1_original.md`, `archive/implementation_plan_v1_file_upload.md`, `archive/catalog_implementation_plan.md`
 
 ---
 
@@ -302,6 +302,19 @@ Dynamic JavaScript injection to wire all frontend pages to the backend API.
 | `tools/quiz_tools.py` | Update `generate_quiz` to run upfront during upload; add caching for dynamic gap quizzes | ❌ TODO |
 | `server.py` | `POST /api/kb/upload` (returns job_id), `GET /api/kb/upload/status/{job_id}` | ❌ TODO |
 | `knowledge-vault.html` | Drag-drop zone, duplicate warning modal, progress bar polling | ❌ TODO |
+
+---
+
+### Phase 8 — Knowledge Base Vault Catalog UI ✅ DONE
+
+> **Note:** The `archive/catalog_implementation_plan.md` has been implemented successfully. We can now continue with the next step.
+
+| Component | Change | Status |
+|-----------|--------|--------|
+| `frontend/pages/knowledge-vault.html` | Added tabs, stats, and catalog UI | ✅ Done |
+| `frontend/pages/learning-materials.html` | Created page, added file list & existing file generation | ✅ Done |
+| `frontend/pages/learning-paths-catalog.html` | Created page, grid of learning paths | ✅ Done |
+| `server.py` | Added `/api/kb/catalog/inputs`, `/api/kb/catalog/learning-paths`, `/api/kb/generate-from-input` | ✅ Done |
 
 ---
 
