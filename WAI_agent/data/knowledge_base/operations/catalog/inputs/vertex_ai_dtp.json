@@ -1,0 +1,227 @@
+{
+  "dtp_id": "dtp_vertex_ai_v1",
+  "version": "1.0",
+  "department": "operations",
+  "courses": [
+    {
+      "course_id": "course_01",
+      "title": "Vertex AI Fundamentals",
+      "description": "Introduction to Google Cloud's Vertex AI platform",
+      "topics": [
+        "vertex_ai",
+        "cloud_ml",
+        "ml_platform"
+      ],
+      "content": "Vertex AI is a fully-managed machine learning platform on Google Cloud. It unified AutoML and AI Platform into a single environment. It allows data scientists and ML engineers to train, host, and manage ML models efficiently. Key components include Vertex AI Studio, Model Registry, and Endpoints.",
+      "estimated_hours": 1.0,
+      "key_facts": [
+        {
+          "concept": "Vertex AI",
+          "definition": "Fully-managed ML platform"
+        },
+        {
+          "concept": "Unified Platform",
+          "definition": "Combines AutoML and AI Platform"
+        }
+      ]
+    },
+    {
+      "course_id": "course_02",
+      "title": "Vertex AI Studio",
+      "description": "Exploring generative AI models using Vertex AI Studio",
+      "topics": [
+        "vertex_ai_studio",
+        "generative_ai",
+        "prompt_design"
+      ],
+      "content": "Vertex AI Studio allows users to interact with, tune, and deploy foundation models. It provides a UI for prompt engineering (Language, Vision, and Speech). You can test different prompts, adjust parameters like temperature and max output tokens, and compare model responses before integrating them into applications.",
+      "estimated_hours": 1.5,
+      "key_facts": [
+        {
+          "concept": "Vertex AI Studio",
+          "definition": "UI for testing foundation models"
+        },
+        {
+          "concept": "Temperature",
+          "definition": "Controls the randomness of model output"
+        }
+      ]
+    },
+    {
+      "course_id": "course_03",
+      "title": "Model Training & Tuning",
+      "description": "Training custom models and tuning foundation models",
+      "topics": [
+        "model_training",
+        "fine_tuning",
+        "custom_training"
+      ],
+      "content": "Vertex AI supports custom training using pre-built containers or custom Docker images. For foundation models, parameter-efficient fine-tuning (PEFT) and Reinforcement Learning from Human Feedback (RLHF) are supported. Training pipelines can be orchestrated using Vertex AI Pipelines.",
+      "estimated_hours": 2.5,
+      "key_facts": [
+        {
+          "concept": "Custom Training",
+          "definition": "Train models with own code and containers"
+        },
+        {
+          "concept": "PEFT",
+          "definition": "Parameter-Efficient Fine-Tuning for foundation models"
+        }
+      ]
+    },
+    {
+      "course_id": "course_04",
+      "title": "Gemini API in Vertex AI",
+      "description": "Integrating Gemini multimodal models",
+      "topics": [
+        "gemini_api",
+        "multimodal",
+        "llm"
+      ],
+      "content": "The Gemini API in Vertex AI provides access to Google's most capable multimodal models. It supports text, image, video, and audio inputs. Key models include Gemini 1.5 Pro (for complex reasoning and large contexts) and Gemini 1.5 Flash (optimized for speed and efficiency).",
+      "estimated_hours": 2.0,
+      "key_facts": [
+        {
+          "concept": "Gemini 1.5 Pro",
+          "definition": "Model for complex reasoning tasks"
+        },
+        {
+          "concept": "Multimodal",
+          "definition": "Supports text, image, video, and audio inputs"
+        }
+      ]
+    },
+    {
+      "course_id": "course_05",
+      "title": "Vertex AI Vector Search",
+      "description": "Building semantic search applications",
+      "topics": [
+        "vector_search",
+        "embeddings",
+        "nearest_neighbor"
+      ],
+      "content": "Vertex AI Vector Search (formerly Matching Engine) is a high-scale, low-latency vector database. It enables similarity search using vector embeddings. It's crucial for building Retrieval-Augmented Generation (RAG) applications, recommendation systems, and image search engines.",
+      "estimated_hours": 2.0,
+      "key_facts": [
+        {
+          "concept": "Vector Search",
+          "definition": "High-scale vector database for similarity search"
+        },
+        {
+          "concept": "Embeddings",
+          "definition": "Numerical representations of data used for semantic matching"
+        }
+      ]
+    },
+    {
+      "course_id": "course_06",
+      "title": "Vertex AI Model Registry",
+      "description": "Managing the ML model lifecycle",
+      "topics": [
+        "model_registry",
+        "mlops",
+        "versioning"
+      ],
+      "content": "The Model Registry acts as a central repository for ML models. It supports versioning, aliasing (e.g., 'default', 'production'), and metadata tracking. Models trained in Vertex AI, BigQuery ML, or external platforms can be registered here before deployment.",
+      "estimated_hours": 1.0,
+      "key_facts": [
+        {
+          "concept": "Model Registry",
+          "definition": "Central repository for managing model versions"
+        },
+        {
+          "concept": "Aliasing",
+          "definition": "Assigning tags like 'production' to specific model versions"
+        }
+      ]
+    },
+    {
+      "course_id": "course_07",
+      "title": "Model Deployment & Endpoints",
+      "description": "Deploying models for online predictions",
+      "topics": [
+        "model_deployment",
+        "endpoints",
+        "online_prediction"
+      ],
+      "content": "To get real-time predictions, models are deployed to Vertex AI Endpoints. Endpoints manage compute resources, auto-scaling, and traffic splitting (useful for A/B testing or canary deployments). Each endpoint exposes a REST API for client applications to call.",
+      "estimated_hours": 1.5,
+      "key_facts": [
+        {
+          "concept": "Endpoints",
+          "definition": "Infrastructure for serving online predictions"
+        },
+        {
+          "concept": "Traffic Splitting",
+          "definition": "Routing traffic between different model versions on the same endpoint"
+        }
+      ]
+    },
+    {
+      "course_id": "course_08",
+      "title": "Vertex AI Feature Store",
+      "description": "Managing and serving ML features",
+      "topics": [
+        "feature_store",
+        "feature_engineering",
+        "mlops"
+      ],
+      "content": "Vertex AI Feature Store provides a centralized repository for organizing, storing, and serving ML features. It helps prevent training-serving skew by ensuring the same feature values are used during model training and online prediction. It supports both batch and online serving.",
+      "estimated_hours": 2.0,
+      "key_facts": [
+        {
+          "concept": "Feature Store",
+          "definition": "Centralized repository for ML features"
+        },
+        {
+          "concept": "Training-Serving Skew",
+          "definition": "Inconsistency prevented by using a feature store"
+        }
+      ]
+    },
+    {
+      "course_id": "course_09",
+      "title": "Vertex AI Pipelines",
+      "description": "Orchestrating ML workflows",
+      "topics": [
+        "pipelines",
+        "kubeflow",
+        "workflow_orchestration"
+      ],
+      "content": "Vertex AI Pipelines helps you automate and monitor ML systems. It allows you to orchestrate workflows defined using Kubeflow Pipelines (KFP) or TensorFlow Extended (TFX) SDKs. This is essential for building reproducible MLOps processes, from data extraction to model deployment.",
+      "estimated_hours": 2.5,
+      "key_facts": [
+        {
+          "concept": "Vertex AI Pipelines",
+          "definition": "Serverless orchestration of ML workflows"
+        },
+        {
+          "concept": "KFP",
+          "definition": "Kubeflow Pipelines SDK, commonly used to define pipelines"
+        }
+      ]
+    },
+    {
+      "course_id": "course_10",
+      "title": "Retrieval-Augmented Generation (RAG)",
+      "description": "Grounding LLMs with enterprise data",
+      "topics": [
+        "rag",
+        "grounding",
+        "generative_ai"
+      ],
+      "content": "RAG is a technique to improve LLM accuracy by retrieving relevant information from an external knowledge base (like Vector Search) and providing it to the model in the prompt. Vertex AI supports Grounding, allowing models to cite sources and reducing hallucinations. Grounding can connect to Google Search or custom data stores.",
+      "estimated_hours": 2.0,
+      "key_facts": [
+        {
+          "concept": "RAG",
+          "definition": "Retrieval-Augmented Generation for improving LLM accuracy"
+        },
+        {
+          "concept": "Grounding",
+          "definition": "Connecting LLMs to verifiable information sources"
+        }
+      ]
+    }
+  ]
+}

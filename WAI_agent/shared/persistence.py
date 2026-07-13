@@ -149,6 +149,13 @@ class DepartmentScopedStore:
         self.kpi_store_path = self.base_path / "kpi_store"
         self.learning_paths_path = self.base_path / "learning_paths" / department_id
 
+        # ── Catalog Paths (Knowledge Vault catalog structure) ──
+        self.catalog_path = self.base_path / "knowledge_base" / department_id / "catalog"
+        self.catalog_inputs_path = self.catalog_path / "inputs"
+        self.catalog_standard_paths_path = self.catalog_path / "standard_paths"
+        self.catalog_unofficial_paths_path = self.catalog_path / "unofficial_paths"
+        self.catalog_gap_paths_path = self.catalog_path / "gap_paths"
+
         # Ensure directories exist
         self.user_progress_path.mkdir(parents=True, exist_ok=True)
         self.knowledge_base_path.mkdir(parents=True, exist_ok=True)
@@ -156,6 +163,10 @@ class DepartmentScopedStore:
         self.conflicts_path.mkdir(parents=True, exist_ok=True)
         self.kpi_store_path.mkdir(parents=True, exist_ok=True)
         self.learning_paths_path.mkdir(parents=True, exist_ok=True)
+        self.catalog_inputs_path.mkdir(parents=True, exist_ok=True)
+        self.catalog_standard_paths_path.mkdir(parents=True, exist_ok=True)
+        self.catalog_unofficial_paths_path.mkdir(parents=True, exist_ok=True)
+        self.catalog_gap_paths_path.mkdir(parents=True, exist_ok=True)
 
     # ── User Progress ──
 
@@ -258,6 +269,179 @@ class DepartmentScopedStore:
         # Sort by modification time, newest first
         paths.sort(key=lambda p: p.stat().st_mtime, reverse=True)
         return json.loads(paths[0].read_text())
+
+    # ── Catalog: Input Files ──
+
+    def write_catalog_input(self, filename: str, content: str) -> str:
+        """Save an uploaded raw document to catalog/inputs/.
+
+        Args:
+            filename: Original filename of the uploaded document.
+            content: The text content of the document.
+
+        Returns:
+            The absolute path of the saved file.
+        """
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        file_path = self.catalog_inputs_path / safe_name
+        file_path.write_text(content, encoding="utf-8")
+        return str(file_path)
+
+    def list_catalog_inputs(self) -> list[dict]:
+        """List all input files in catalog/inputs/ with metadata."""
+        results = []
+        for f in sorted(self.catalog_inputs_path.iterdir()):
+            if f.is_file() and f.name not in (".gitkeep",):
+                stat = f.stat()
+                results.append({
+                    "filename": f.name,
+                    "size_bytes": stat.st_size,
+                    "date_added": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                })
+        return results
+
+    # ── Catalog: Standard Learning Paths ──
+
+    def write_standard_path(self, path_id: str, data: dict) -> None:
+        """Persist a generated standard learning path to catalog/standard_paths/."""
+        data["last_updated"] = datetime.utcnow().isoformat()
+        data["path_type"] = "official"
+        file_path = self.catalog_standard_paths_path / f"{path_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_standard_path(self, path_id: str) -> Optional[dict]:
+        """Read a standard learning path from the catalog."""
+        file_path = self.catalog_standard_paths_path / f"{path_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def list_standard_paths(self) -> list[dict]:
+        """List all standard learning paths with summary metadata."""
+        results = []
+        for f in sorted(self.catalog_standard_paths_path.glob("*.json")):
+            if f.name == ".gitkeep":
+                continue
+            try:
+                data = json.loads(f.read_text())
+                results.append({
+                    "path_id": data.get("path_id", f.stem),
+                    "title": self._extract_path_title(data),
+                    "total_courses": data.get("total_courses", len(data.get("courses", []))),
+                    "total_estimated_hours": data.get("total_estimated_hours", 0),
+                    "source_document": data.get("source_document", ""),
+                    "source_input_files": data.get("source_input_files", []),
+                    "created_at": data.get("created_at", ""),
+                    "path_type": "official",
+                })
+            except (json.JSONDecodeError, KeyError):
+                continue
+        return results
+
+    # ── Catalog: Unofficial Learning Paths (User-Scoped) ──
+
+    def write_unofficial_path(self, user_id: str, path_id: str, data: dict) -> None:
+        """Persist an unofficial user-created learning path."""
+        user_dir = self.catalog_unofficial_paths_path / user_id
+        user_dir.mkdir(parents=True, exist_ok=True)
+        data["last_updated"] = datetime.utcnow().isoformat()
+        data["path_type"] = "unofficial"
+        data["created_by"] = user_id
+        file_path = user_dir / f"{path_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def list_unofficial_paths(self, user_id: str | None = None) -> list[dict]:
+        """List unofficial learning paths.
+
+        Args:
+            user_id: If provided, list only paths for this user.
+                     If None, list all unofficial paths across all users.
+        """
+        results = []
+        if user_id:
+            user_dir = self.catalog_unofficial_paths_path / user_id
+            dirs = [user_dir] if user_dir.exists() else []
+        else:
+            dirs = [d for d in self.catalog_unofficial_paths_path.iterdir() if d.is_dir()]
+
+        for user_dir in dirs:
+            uid = user_dir.name
+            for f in sorted(user_dir.glob("*.json")):
+                try:
+                    data = json.loads(f.read_text())
+                    results.append({
+                        "path_id": data.get("path_id", f.stem),
+                        "title": self._extract_path_title(data),
+                        "total_courses": data.get("total_courses", len(data.get("courses", []))),
+                        "total_estimated_hours": data.get("total_estimated_hours", 0),
+                        "created_by": uid,
+                        "created_at": data.get("created_at", ""),
+                        "path_type": "unofficial",
+                    })
+                except (json.JSONDecodeError, KeyError):
+                    continue
+        return results
+
+    # ── Catalog: Gap Learning Paths (User-Scoped) ──
+
+    def write_gap_path(self, user_id: str, path_id: str, data: dict) -> None:
+        """Persist a knowledge gap learning path for a specific user."""
+        user_dir = self.catalog_gap_paths_path / user_id
+        user_dir.mkdir(parents=True, exist_ok=True)
+        data["last_updated"] = datetime.utcnow().isoformat()
+        data["path_type"] = "gap"
+        data["assigned_to"] = user_id
+        file_path = user_dir / f"{path_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def list_gap_paths(self, user_id: str | None = None) -> list[dict]:
+        """List gap learning paths.
+
+        Args:
+            user_id: If provided, list only gap paths for this user.
+                     If None, list all gap paths across all users.
+        """
+        results = []
+        if user_id:
+            user_dir = self.catalog_gap_paths_path / user_id
+            dirs = [user_dir] if user_dir.exists() else []
+        else:
+            dirs = [d for d in self.catalog_gap_paths_path.iterdir() if d.is_dir()]
+
+        for user_dir in dirs:
+            uid = user_dir.name
+            for f in sorted(user_dir.glob("*.json")):
+                try:
+                    data = json.loads(f.read_text())
+                    results.append({
+                        "path_id": data.get("path_id", f.stem),
+                        "title": self._extract_path_title(data),
+                        "total_courses": data.get("total_courses", len(data.get("courses", []))),
+                        "assigned_to": uid,
+                        "created_at": data.get("created_at", ""),
+                        "path_type": "gap",
+                    })
+                except (json.JSONDecodeError, KeyError):
+                    continue
+        return results
+
+    # ── Catalog Helpers ──
+
+    @staticmethod
+    def _extract_path_title(data: dict) -> str:
+        """Extract a human-readable title from a learning path JSON."""
+        # Try explicit title first
+        if data.get("title"):
+            return data["title"]
+        # Fall back to first course title
+        courses = data.get("courses", [])
+        if courses and courses[0].get("title"):
+            return courses[0]["title"]
+        # Fall back to source document name
+        if data.get("source_document"):
+            name = data["source_document"]
+            return name.replace("_", " ").replace(".md", "").replace(".txt", "").title()
+        return data.get("path_id", "Untitled Path")
 
     # ── Conflicts ──
 
