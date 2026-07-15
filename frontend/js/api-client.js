@@ -46,8 +46,8 @@ const WisdomAPI = (() => {
     return _request('POST', '/api/quiz/generate', { topic, difficulty, question_count: questionCount, quiz_type: quizType });
   }
 
-  async function evaluateQuiz(quizId, userId, answers) {
-    return _request('POST', '/api/quiz/evaluate', { quiz_id: quizId, user_id: userId, answers });
+  async function evaluateQuiz(quizId, userId, answers, quizType = 'short_quiz', courseId = '') {
+    return _request('POST', '/api/quiz/evaluate', { quiz_id: quizId, user_id: userId, answers, quiz_type: quizType, course_id: courseId });
   }
 
   async function getReflectionPrompt(questionId, questionText, userAnswer, correctAnswer, conceptTags) {
@@ -81,7 +81,7 @@ const WisdomAPI = (() => {
   }
 
   // ── Quiz Session ──
-  async function startQuiz(topic, userId = 'manager', difficulty = 'medium', questionCount = 5, quizType = 'short_quiz') {
+  async function startQuiz(topic, userId = 'emp_001', difficulty = 'medium', questionCount = 5, quizType = 'short_quiz') {
     return _request('POST', '/api/quiz/start', {
       topic, user_id: userId, difficulty, question_count: questionCount, quiz_type: quizType,
     });

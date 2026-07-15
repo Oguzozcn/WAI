@@ -35,6 +35,7 @@ from WAI_agent.tools.curriculum_tools import (
     generate_daily_agenda,
     identify_content_gaps,
     trigger_curriculum_generation,
+    generate_remedial_course,
 )
 from WAI_agent.tools.progress_tools import (
     get_user_progress,
@@ -200,7 +201,7 @@ class QuizStartRequest(BaseModel):
     difficulty: str = "medium"
     question_count: int = 5
     quiz_type: str = "short_quiz"
-    user_id: str = "manager"
+    user_id: str = "emp_001"
 
 
 @app.post("/api/quiz/start")
@@ -264,6 +265,8 @@ class QuizEvaluateRequest(BaseModel):
     quiz_id: str
     user_id: str
     answers: list[dict]
+    quiz_type: str = "short_quiz"
+    course_id: str = ""
 
 
 class QuizAnswerSingleRequest(BaseModel):
@@ -361,15 +364,111 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
         department=department,
     )
 
-    # Add attempt tracking info
+    # ── Phase 7: Update MasteryVectors per tested_concept_token ──
     store = DepartmentScopedStore(department)
     progress = store.read_user_progress(body.user_id)
-    previous_attempts = 0
-    if progress:
-        previous_attempts = len(progress.get("quiz_attempts", []))
+    if progress is None:
+        progress = {}
+
+    mastery_vectors = progress.get("mastery_vectors", {})
+    luck_failures = progress.get("luck_failures", {})
+    now_iso = __import__("datetime").datetime.utcnow().isoformat()
+
+    for user_ans in body.answers:
+        q_id = user_ans.get("question_id")
+        q = q_lookup.get(q_id)
+        if not q:
+            continue
+        token_id = q.get("tested_concept_token") or (q.get("concept_tags") or [""])[0]
+        if not token_id:
+            continue
+
+        is_correct = (user_ans.get("selected_index") == q["correct_answer_index"])
+        vec = mastery_vectors.get(token_id, {
+            "concept_id": token_id,
+            "ability_score": 0.5,
+            "last_seen": now_iso,
+            "half_life_days": 7.0,
+            "historical_attempts": 0,
+            "correct_count": 0,
+        })
+
+        vec["historical_attempts"] = vec.get("historical_attempts", 0) + 1
+        vec["last_seen"] = now_iso
+
+        if is_correct:
+            vec["correct_count"] = vec.get("correct_count", 0) + 1
+            vec["ability_score"] = min(1.0, vec.get("ability_score", 0.5) + 0.15)
+        else:
+            vec["ability_score"] = max(0.0, vec.get("ability_score", 0.5) - 0.20)
+            luck_failures[token_id] = luck_failures.get(token_id, 0) + 1
+
+        mastery_vectors[token_id] = vec
+
+    progress["mastery_vectors"] = mastery_vectors
+    progress["luck_failures"] = luck_failures
+    store.write_user_progress(body.user_id, progress)
+
+    # Add attempt tracking info
+    previous_attempts = len(progress.get("quiz_attempts", []))
     result["attempts_used"] = previous_attempts
     result["attempts_remaining"] = max(0, MAX_QUIZ_ATTEMPTS - previous_attempts)
     result["max_attempts"] = MAX_QUIZ_ATTEMPTS
+
+    # If this was a final assessment
+    if body.quiz_type == "final_assessment":
+        if not result.get("passed", True):
+            incorrect = [a for a in enriched_answers if not a.get("is_correct", False)]
+            if incorrect:
+                # Enrich incorrect answers with question text from the cached quiz
+                cached_quiz = _active_quizzes.get(body.quiz_id, {})
+                q_lookup = {q["question_id"]: q for q in cached_quiz.get("questions", [])}
+                for ans in incorrect:
+                    q = q_lookup.get(ans.get("question_id", ""))
+                    if q:
+                        ans["question_text"] = q.get("text", "")
+
+                try:
+                    remedial = generate_remedial_course(
+                        incorrect_answers=incorrect,
+                        user_id=body.user_id,
+                        source_course_id=body.course_id,
+                        department=department,
+                    )
+                    result["remedial_course_generated"] = True
+                    result["remedial_course_id"] = remedial.get("course_id")
+                    result["remedial_message"] = (
+                        f"A personalized remedial course \"{ remedial.get('title') }\" has been "
+                        "added to your learning path based on your gap analysis."
+                    )
+                except Exception as e:
+                    print(f"[/api/quiz/evaluate] Remedial course generation failed: {e}")
+                    result["remedial_course_generated"] = False
+        elif body.course_id.startswith("remedial_"):
+            # Mark the remedial course as complete
+            completed = progress.get("completed_courses", [])
+            if body.course_id not in completed:
+                completed.append(body.course_id)
+                progress["completed_courses"] = completed
+                
+            # Check if this resolves the source course
+            # Find the remedial course to get its source
+            for rc in progress.get("remedial_courses", []):
+                if rc.get("course_id") == body.course_id:
+                    src_id = rc.get("source_course_id")
+                    if src_id and src_id not in completed:
+                        completed.append(src_id)
+                        progress["completed_courses"] = completed
+                    break
+                    
+            # Check if ALL learning path courses are now complete
+            path = store.read_latest_learning_path()
+            if path:
+                path_course_ids = set(c["course_id"] for c in path.get("courses", []))
+                if path_course_ids.issubset(set(completed)):
+                    progress["current_state"] = "completed"
+                    
+            store.write_user_progress(body.user_id, progress)
 
     return result
 
@@ -501,24 +600,59 @@ async def api_kb_upload(
 # ── Dynamic Learning Path ──
 
 @app.get("/api/learning-path/latest")
-async def api_latest_learning_path(department: str = DEFAULT_DEPARTMENT):
-    """Get the most recently generated learning path for a department."""
+async def api_latest_learning_path(user_id: str = None, department: str = DEFAULT_DEPARTMENT):
+    """Get the most recently generated learning path, injecting any remedial courses for the user."""
     store = DepartmentScopedStore(department)
     path = store.read_latest_learning_path()
     if not path:
         # Fallback to generating from existing KB
-        return generate_learning_path(role="new_joiner", department=department)
+        path = generate_learning_path(role="new_joiner", department=department)
+
+    # Inject remedial courses AFTER the specific course they were generated for
+    if user_id:
+        progress = store.read_user_progress(user_id)
+        if progress:
+            remedial_courses = progress.get("remedial_courses", [])
+            if remedial_courses:
+                completed = set(progress.get("completed_courses", []))
+                pending_remedial = [
+                    c for c in remedial_courses
+                    if c.get("course_id") not in completed
+                ]
+                if pending_remedial:
+                    # Build a map: source_course_id → list of remedial courses
+                    remedial_map = {}
+                    unanchored = []
+                    for rc in pending_remedial:
+                        src = rc.get("source_course_id", "")
+                        if src:
+                            remedial_map.setdefault(src, []).append(rc)
+                        else:
+                            unanchored.append(rc)
+
+                    # Rebuild the course list, inserting remedial after their source
+                    new_courses = []
+                    for c in path.get("courses", []):
+                        new_courses.append(c)
+                        for rc in remedial_map.get(c["course_id"], []):
+                            new_courses.append(rc)
+                    # Append any unanchored remedial courses at the end
+                    new_courses.extend(unanchored)
+
+                    path = dict(path)
+                    path["courses"] = new_courses
+
     return path
 
 
 # ── Lesson Content ──
 
 @app.get("/api/lesson/{course_id}/{lesson_id}")
-async def api_get_lesson(course_id: str, lesson_id: str, department: str = DEFAULT_DEPARTMENT):
+async def api_get_lesson(course_id: str, lesson_id: str, user_id: str = "emp_001", department: str = DEFAULT_DEPARTMENT):
     """Get the content for a specific lesson within a course."""
     store = DepartmentScopedStore(department)
 
-    # Search through all learning paths for this course and lesson
+    # 1. Search through all learning paths for this course and lesson
     for path_file in store.learning_paths_path.glob("*.json"):
         import json as _json
         path_data = _json.loads(path_file.read_text())
@@ -532,7 +666,21 @@ async def api_get_lesson(course_id: str, lesson_id: str, department: str = DEFAU
                             "path_id": path_data.get("path_id", ""),
                         }
 
-    # Fallback: try KB documents
+    # 2. Search through the user's remedial courses in progress
+    progress = store.read_user_progress(user_id)
+    if progress:
+        for rc in progress.get("remedial_courses", []):
+            if rc.get("course_id") == course_id:
+                for lesson in rc.get("lessons", []):
+                    if lesson.get("lesson_id") == lesson_id:
+                        return {
+                            "course": rc,
+                            "lesson": lesson,
+                            "path_id": "",
+                            "is_remedial": True,
+                        }
+
+    # 3. Fallback: try KB documents
     docs = store.read_knowledge_base()
     for doc in docs:
         if doc.get("title", "").lower().replace(" ", "_") == course_id.replace("course_", ""):
@@ -544,15 +692,37 @@ async def api_get_lesson(course_id: str, lesson_id: str, department: str = DEFAU
 # ── Quiz by Lesson ──
 
 @app.get("/api/quiz/by-lesson/{course_id}/{lesson_id}")
-async def api_quiz_by_lesson(course_id: str, lesson_id: str, department: str = DEFAULT_DEPARTMENT):
-    """Generate a short quiz for a specific lesson using its content as context."""
+async def api_quiz_by_lesson(course_id: str, lesson_id: str, user_id: str = "emp_001", department: str = DEFAULT_DEPARTMENT):
+    """Generate or retrieve a short quiz for a specific lesson."""
     store = DepartmentScopedStore(department)
+    import copy as _copy, json as _json
 
-    # Find the lesson content
+    # 1. Check user's remedial courses first (they have pre-generated quizzes)
+    if user_id:
+        progress = store.read_user_progress(user_id)
+        if progress:
+            for rc in progress.get("remedial_courses", []):
+                if rc.get("course_id") == course_id:
+                    for lesson in rc.get("lessons", []):
+                        if lesson.get("lesson_id") == lesson_id:
+                            sq = lesson.get("short_quiz")
+                            # Only use pre-generated quiz if it actually has questions
+                            if sq and sq.get("questions"):
+                                # Cache for secure server-side evaluation
+                                _active_quizzes[sq["quiz_id"]] = sq
+                                sanitized = _copy.deepcopy(sq)
+                                for q in sanitized.get("questions", []):
+                                    q.pop("correct_answer_index", None)
+                                sanitized["attempts_remaining"] = 3
+                                sanitized["max_attempts"] = 3
+                                sanitized["pass_threshold"] = PASS_THRESHOLD
+                                return sanitized
+                            # If quiz is empty/stub, fall through to generate from lesson content
+
+    # 2. Search through learning path files
     lesson_content = None
     lesson_title = None
     for path_file in store.learning_paths_path.glob("*.json"):
-        import json as _json
         path_data = _json.loads(path_file.read_text())
         for course in path_data.get("courses", []):
             if course["course_id"] == course_id:
@@ -561,6 +731,28 @@ async def api_quiz_by_lesson(course_id: str, lesson_id: str, department: str = D
                         lesson_content = lesson.get("content", "")
                         lesson_title = lesson.get("title", "")
                         break
+
+    # 3. If still not found, search remedial courses in user progress
+    if not lesson_content and user_id:
+        progress = store.read_user_progress(user_id)
+        if progress:
+            for rc in progress.get("remedial_courses", []):
+                if rc.get("course_id") == course_id:
+                    for lesson in rc.get("lessons", []):
+                        if lesson.get("lesson_id") == lesson_id:
+                            # Remedial lessons use content_summary + key_points
+                            parts = []
+                            if lesson.get("content_summary"):
+                                parts.append(lesson["content_summary"])
+                            if lesson.get("key_points"):
+                                parts.append("\n".join(f"- {p}" for p in lesson["key_points"]))
+                            if lesson.get("content"):
+                                parts.append(lesson["content"])
+                            if lesson.get("body"):
+                                parts.append(lesson["body"])
+                            lesson_content = "\n\n".join(parts) if parts else lesson.get("title", "Remedial Review")
+                            lesson_title = lesson.get("title", "Remedial Review")
+                            break
 
     if not lesson_content:
         raise HTTPException(status_code=404, detail="Lesson not found for quiz generation.")
@@ -574,7 +766,6 @@ async def api_quiz_by_lesson(course_id: str, lesson_id: str, department: str = D
         department=department,
     )
 
-    # Inject the lesson content as source material
     quiz["lesson_context"] = lesson_content
     quiz["lesson_id"] = lesson_id
     quiz["course_id"] = course_id
@@ -582,12 +773,61 @@ async def api_quiz_by_lesson(course_id: str, lesson_id: str, department: str = D
     # Cache for secure evaluation
     _active_quizzes[quiz["quiz_id"]] = quiz
 
-    # Sanitize payload for frontend
-    import copy
-    sanitized_quiz = copy.deepcopy(quiz)
+    sanitized_quiz = _copy.deepcopy(quiz)
     for q in sanitized_quiz.get("questions", []):
         q.pop("correct_answer_index", None)
 
+    return sanitized_quiz
+
+
+# ── Quiz by Course ──
+
+@app.get("/api/quiz/by-course/{course_id}")
+async def api_quiz_by_course(course_id: str, type: str = "final_assessment", user_id: str = "emp_001", department: str = DEFAULT_DEPARTMENT):
+    """Retrieve or generate a final assessment for a course."""
+    store = DepartmentScopedStore(department)
+    import copy as _copy, json as _json
+
+    # 1. Check user's remedial courses for pre-generated final assessment
+    if user_id and type == "final_assessment":
+        progress = store.read_user_progress(user_id)
+        if progress:
+            for rc in progress.get("remedial_courses", []):
+                if rc.get("course_id") == course_id:
+                    fa = rc.get("final_assessment")
+                    if fa and fa.get("questions"):
+                        _active_quizzes[fa["quiz_id"]] = fa
+                        sanitized = _copy.deepcopy(fa)
+                        for q in sanitized.get("questions", []):
+                            q.pop("correct_answer_index", None)
+                        sanitized["attempts_remaining"] = 3
+                        sanitized["max_attempts"] = 3
+                        sanitized["pass_threshold"] = PASS_THRESHOLD
+                        return sanitized
+
+    # 2. Get course title for generation fallback
+    course_title = course_id.replace("course_", "").replace("_", " ").title()
+    for path_file in store.learning_paths_path.glob("*.json"):
+        path_data = _json.loads(path_file.read_text())
+        for course in path_data.get("courses", []):
+            if course["course_id"] == course_id:
+                course_title = course.get("title", course_title)
+                break
+                
+    # 3. Generate new assessment
+    quiz = generate_quiz(
+        topic=course_title,
+        difficulty="medium",
+        question_count=10 if type == "final_assessment" else 5,
+        quiz_type=type,
+        department=department,
+    )
+    quiz["course_id"] = course_id
+    
+    _active_quizzes[quiz["quiz_id"]] = quiz
+    sanitized_quiz = _copy.deepcopy(quiz)
+    for q in sanitized_quiz.get("questions", []):
+        q.pop("correct_answer_index", None)
     return sanitized_quiz
 
 

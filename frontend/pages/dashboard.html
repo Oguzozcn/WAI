@@ -1,14 +1,4 @@
-<!DOCTYPE html><html class="light" lang="en"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>WisdomAI | Dashboard</title>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script id="tailwind-config">
+<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
   tailwind.config = {
     darkMode: "class",
     theme: {
@@ -102,207 +92,131 @@
                 "headline-lg": [
                         "Hanken Grotesk"
                 ]
-        },
-        "fontSize": {
-                "display-lg": [
-                        "48px",
-                        {
-                                "lineHeight": "56px",
-                                "letterSpacing": "-0.02em",
-                                "fontWeight": "800"
-                        }
-                ],
-                "body-md": [
-                        "16px",
-                        {
-                                "lineHeight": "24px",
-                                "fontWeight": "400"
-                        }
-                ],
-                "body-lg": [
-                        "18px",
-                        {
-                                "lineHeight": "28px",
-                                "fontWeight": "400"
-                        }
-                ],
-                "label-md": [
-                        "14px",
-                        {
-                                "lineHeight": "20px",
-                                "letterSpacing": "0.05em",
-                                "fontWeight": "500"
-                        }
-                ],
-                "headline-lg-mobile": [
-                        "24px",
-                        {
-                                "lineHeight": "32px",
-                                "fontWeight": "700"
-                        }
-                ],
-                "stats-number": [
-                        "24px",
-                        {
-                                "lineHeight": "24px",
-                                "fontWeight": "800"
-                        }
-                ],
-                "headline-md": [
-                        "20px",
-                        {
-                                "lineHeight": "28px",
-                                "fontWeight": "600"
-                        }
-                ],
-                "headline-lg": [
-                        "32px",
-                        {
-                                "lineHeight": "40px",
-                                "fontWeight": "700"
-                        }
-                ]
         }
-},
-    },
+      }
+    }
   }
-</script>
-<style>
-        body { font-family: 'Inter', sans-serif; }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .squishy-button {
-            transition: all 0.1s ease;
-            box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.1);
-        }
-        .squishy-button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.1);
-        }
-        .squishy-primary {
-            box-shadow: 0 4px 0 0 #004a75;
-        }
-        .squishy-primary:active {
-            box-shadow: 0 0 0 0 #004a75;
-        }
-        .squishy-gamified {
-            box-shadow: 0 4px 0 0 #3e8e00;
-        }
-        .squishy-gamified:active {
-            box-shadow: 0 0 0 0 #3e8e00;
-        }
-        .path-node-active {
-            box-shadow: 0 0 0 4px white, 0 0 0 8px #2abcfd;
-        }
-    </style>
-</head>
-<body class="bg-background text-on-background min-h-screen">
+}catch(_e){}</script></head><body class="bg-background text-on-background min-h-screen">
 <!-- Sidebar Navigation -->
-<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
-<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
+<aside id="sidebar" class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-56 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOLYm-GMNLcIFMiGOpd0NHp-i7_6dL12FtE4f-3mj1Xlq2Rtfz7VCNBGKOTvjRJAC52qjOQ5jhzhJqMm_YML8shfj4-B8Fa8E4c0s4xJp5lGrZNv1J89lWVlE9m-5Hq0i01ytKIuHiq3-iyMQksi1FxFAqb6Bnw_IhMgVtiG_zfR0qYMtDifsz70_8oyr4y0pV-VCv3sfzP2ckiuZcSUigUAItElFXhG4Yum2eQviXsurZVgMqrJUwJ39VS4HhR5y-OEhj5c8pLkK0"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
 <nav class="flex-1 space-y-1"><!-- Active State: Dashboard -->
-<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold translate-x-1 transition-transform duration-200" href="/">
 <span class="material-symbols-outlined">dashboard</span>
 <span class="font-label-md text-label-md">Dashboard</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/learning-path">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="/learning-path">
 <span class="material-symbols-outlined">route</span>
 <span class="font-label-md text-label-md">Learning Path</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="/knowledge-vault">
 <span class="material-symbols-outlined">folder</span>
 <span class="font-label-md text-label-md">Knowledge Vault</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<a id="support-link" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
 <span class="material-symbols-outlined">help</span>
 <span class="font-label-md text-label-md">Support</span>
 </a></nav>
 <div class="mt-auto pt-6 border-t border-outline-variant">
-
-<div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<div class="space-y-1">
+<a id="settings-link" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
 <span class="material-symbols-outlined">settings</span>
 <span class="font-label-md text-label-md">Settings</span>
-</a></div>
+</a>
+</div>
 </div>
 </aside>
 <!-- Top AppBar (Mobile & Global Elements) -->
-<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
-<div class="flex items-center gap-4">
-<button class="md:hidden p-2">
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-56 md:w-[calc(100%-14rem)]">
+<div class="flex items-center gap-4 flex-1">
+<button id="mobile-menu-btn" class="md:hidden p-2">
 <span class="material-symbols-outlined">menu</span>
 </button>
-<div class="relative hidden sm:block">
+<div class="relative hidden sm:block w-full max-w-sm">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-full focus:ring-2 focus:ring-primary text-sm h-10" placeholder="What do you want to learn today?" type="text">
 </div>
 </div>
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-6">
 <!-- Header Stats Group -->
-<div class="hidden lg:flex items-center gap-4 mr-4">
+<div class="hidden lg:flex items-center gap-4">
 <!-- Streak -->
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-streak-flame text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">local_fire_department</span>
+<span class="font-stats-number text-sm text-on-surface">10</span>
+</div>
 <!-- XP -->
 <div class="flex flex-col items-center">
 <div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
 <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
-<span class="font-stats-number text-sm text-on-surface">2.4k</span>
+<span class="font-stats-number text-sm text-on-surface">630</span>
 </div>
 </div>
-<!-- Quests Status -->
 </div>
 <!-- Profile Avatar -->
 <div class="flex items-center gap-3">
-<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+<img id="profile-avatar" alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
 </div>
 </div>
 </header>
 <!-- Main Canvas -->
-<main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
-<div class="max-w-[1000px] mx-auto">
-<!-- Welcome Section -->
-<div class="mb-gutter"><div class="flex flex-col lg:flex-row gap-gutter items-stretch">
-<div class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 lg:p-8 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden shadow-sm">
-<div class="absolute top-0 left-0 w-2 h-full bg-secondary"></div>
-<div class="flex-shrink-0 w-32 h-32 md:w-48 md:h-48 bg-secondary-fixed rounded-full flex items-center justify-center relative overflow-hidden">
-<img alt="Mascot Owl" class="w-3/4 h-3/4 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7vuTIvFZJ_NxLmFN7PaI3-VOU3eYgEgFiSoHEhcFjEKWcYTFN1niE3taM3MtDohs_D0TFWWe4ZkVmWy8x-2cQpT-FS-YclaUS3ezVLVb70DeLYH3KIZONhqooScnafYTZm5W5K7gPdP3toufb3lmJ88jAo7vnRYIfHH3BX-Ny5j3VLCpn8JR7ruNLOZd1qLMOEgHuvAKn48-sw8RFc3O4R2Xmm61I6eW-eKxljF5l8yjqqtDBmDSd">
-</div>
-<div class="flex-1 space-y-4">
-<div>
-<span class="font-label-md text-label-md text-secondary uppercase tracking-widest">Active Path</span>
-<h1 class="font-headline-lg text-headline-lg text-on-surface mt-1">Welcome back, Alex!</h1>
-</div>
-<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
-                <span id="dash-progress-text">Loading...</span>
-            </p>
-<div class="flex flex-wrap gap-4 pt-2">
-<a id="dash-resume-btn" href="/lesson" class="px-8 py-3 bg-tertiary-container text-on-tertiary-container rounded-xl font-bold squishy-button squishy-gamified flex items-center gap-2 no-underline">
-                    Resume Lesson <span class="material-symbols-outlined">play_arrow</span>
+<main class="md:ml-56 p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)] flex flex-col xl:flex-row gap-gutter items-start">
+<!-- Middle Column -->
+<div class="flex-1 w-full flex flex-col gap-8">
+<!-- Hero Section -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 lg:p-8 flex flex-col shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-2 h-full bg-primary"></div>
+<a id="hero-category" class="text-primary font-bold text-[10px] hover:underline mb-3 inline-block uppercase tracking-wider" href="/learning-path">Your Learning Path ›</a>
+<h1 id="hero-title" class="font-headline-lg text-[32px] leading-tight text-on-surface mb-2">Loading your next lesson...</h1>
+<p id="hero-subtitle" class="text-sm text-on-surface-variant mb-6">Fetching your learning path</p>
+<div class="flex items-center gap-6">
+<a id="hero-start-btn" href="/learning-path" class="px-8 py-2 bg-primary text-on-primary rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors squishy-button no-underline">
+Start <span class="material-symbols-outlined">chevron_right</span>
 </a>
-<a href="/learning-path" class="px-8 py-3 bg-surface-container-high text-on-surface rounded-xl font-bold squishy-button transition-colors no-underline">
-                    Review Progress
-                </a>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span id="hero-duration">—</span>
 </div>
 </div>
 </div>
-<div class="lg:w-[30%] bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-sm"><div class="relative mb-4"><div class="w-24 h-24 rounded-full border-8 border-surface-container-high flex items-center justify-center"><span class="font-display-lg text-display-lg text-streak-flame">12</span></div><span class="material-symbols-outlined absolute -top-2 -right-2 text-streak-flame text-4xl" style="font-variation-settings: &quot;FILL&quot; 1;">local_fire_department</span></div><h3 class="font-headline-md text-headline-md">Day Streak!</h3><p class="font-body-md text-body-md text-on-surface-variant mb-6">Keep it up, Alex!</p><div class="flex gap-2 w-full justify-between px-2"><div class="flex flex-col items-center gap-1"><span class="text-[10px] font-bold text-outline">MON</span><div class="w-8 h-8 rounded-full bg-streak-flame text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></div></div><div class="flex flex-col items-center gap-1"><span class="text-[10px] font-bold text-outline">TUE</span><div class="w-8 h-8 rounded-full bg-streak-flame text-white flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></div></div><div class="flex flex-col items-center gap-1"><span class="text-[10px] font-bold text-outline">WED</span><div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-dashed border-outline-variant"></div></div><div class="flex flex-col items-center gap-1"><span class="text-[10px] font-bold text-outline text-primary">THU</span><div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-primary animate-pulse"></div></div><div class="flex flex-col items-center gap-1"><span class="text-[10px] font-bold text-outline">FRI</span><div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-dashed border-outline-variant"></div></div></div></div>
-</div></div>
-<!-- Redesigned Learning Path Section -->
-<section>
-<div class="flex items-center justify-between mb-6">
-<h2 class="font-headline-md text-headline-md">Continue Your Path</h2>
-<a class="text-primary font-bold text-sm hover:underline" href="/learning-path">See full map</a>
+<!-- Tabs -->
+<div class="flex items-center gap-6 border-b border-outline-variant px-2 md:flex-1">
+<button id="tab-activities" class="pb-3 text-primary font-bold border-b-2 border-primary text-sm px-1">Activities</button>
+<button id="tab-paths" class="pb-3 text-on-surface-variant hover:text-on-surface font-medium text-sm px-1" onclick="window.location='/learning-path'">Paths</button>
 </div>
-<div class="bg-surface-container-low rounded-2xl p-12 flex flex-col items-center">
-<div class="relative w-full max-w-md">
-<!-- Straight Vertical Line -->
-<div class="absolute left-1/2 top-0 bottom-0 w-1 bg-outline-variant -translate-x-1/2 z-0"></div>
-<!-- Nodes -->
-<div id="dash-path-nodes" class="space-y-16 relative z-10">
+<!-- Course Cards Grid (dynamically rendered) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboard-activities">
+  <!-- Cards injected by JS -->
+  <div class="col-span-2 flex items-center justify-center py-12 text-on-surface-variant text-sm">Loading your courses...</div>
+</div>
+<div class="pt-2 pb-8">
+<a class="text-primary font-bold text-sm hover:underline" href="/learning-path">View all activities</a>
 </div>
 </div>
+<!-- Right Sidebar -->
+<aside class="w-full xl:w-80 flex-shrink-0 flex flex-col gap-6 px-6">
+<!-- Progress -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-4">
+<h3 class="font-headline-md text-lg mb-4 text-on-surface">Progress</h3>
+<div class="grid grid-cols-2 mb-0 gap-4">
+<div class="flex items-center gap-2 overflow-hidden">
+<div class="w-8 h-8 flex-shrink-0 bg-surface-container-low rounded-lg flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">menu_book</span></div>
+<div>
+<p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 truncate">Courses</p>
+<p class="font-stats-number text-xl leading-none text-on-surface" id="dash-course-count">12</p>
 </div>
-</section>
 </div>
+<div class="flex items-center gap-2 overflow-hidden">
+<div class="w-8 h-8 flex-shrink-0 bg-surface-container-low rounded-lg flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">school</span></div>
+<div>
+<p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 truncate">Lessons</p>
+<p class="font-stats-number text-xl leading-none text-on-surface" id="dash-lesson-count">156</p>
+</div>
+</div>
+</div>
+</div>
+
+</aside>
 </main>
 <!-- Mobile Navigation -->
 <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant flex justify-around items-center h-16 z-50">
@@ -319,131 +233,148 @@
 <span class="text-[10px] font-bold">Profile</span>
 </a>
 </nav>
-<script>
-        // Micro-interactions and hover effects
-        document.querySelectorAll('.squishy-button').forEach(button => {
-            button.addEventListener('mousedown', () => {
-                button.style.transform = 'scale(0.97) translateY(2px)';
-            });
-            button.addEventListener('mouseup', () => {
-                button.style.transform = 'scale(1) translateY(0)';
-            });
-            button.addEventListener('mouseleave', () => {
-                button.style.transform = 'scale(1) translateY(0)';
-            });
-        });
 
-        // Simple pulse for the active node
-        const activeNode = document.querySelector('.path-node-active');
-        if (activeNode) {
-            setInterval(() => {
-                activeNode.classList.toggle('scale-105');
-            }, 1000);
-        }
-    </script>
 <script src="/js/api-client.js"></script>
-<script src="/js/theme-toggle.js"></script>
 
+<!-- Toast notification container -->
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
+// ─── Toast Helper ────────────────────────────────────────────────────────────
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const colors = { info: 'bg-primary text-on-primary', warn: 'bg-error-container text-on-error-container' };
+    const toast = document.createElement('div');
+    toast.className = `px-5 py-3 rounded-lg shadow-lg font-bold text-sm pointer-events-auto transition-all duration-300 opacity-0 translate-y-2 ${colors[type] || colors.info}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'translate-y-2'); });
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ─── Micro-interactions ───────────────────────────────────────────────────────
+document.querySelectorAll('.squishy-button').forEach(button => {
+    button.addEventListener('mousedown', () => { button.style.transform = 'scale(0.97) translateY(2px)'; });
+    button.addEventListener('mouseup', () => { button.style.transform = 'scale(1) translateY(0)'; });
+    button.addEventListener('mouseleave', () => { button.style.transform = 'scale(1) translateY(0)'; });
+});
+
+// ─── Mobile Menu Toggle ───────────────────────────────────────────────────────
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const sidebar = document.getElementById('sidebar');
+if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+        sidebar.classList.toggle('flex');
+    });
+}
+
+// ─── Placeholder Links → "Coming Soon" toasts ─────────────────────────────────
+['support-link', 'settings-link'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', (e) => {
+        e.preventDefault();
+        showToast('Feature coming soon!');
+    });
+});
+const profileAvatar = document.getElementById('profile-avatar');
+if (profileAvatar) {
+    profileAvatar.addEventListener('click', () => showToast('Profile — Feature coming soon!'));
+}
+
+// ─── Main Data Loader ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        const userId = 'emp_001';
         const [path, progress] = await Promise.all([
-            WisdomAPI.getLearningPath('emp_001'),
-            WisdomAPI.getUserProgress('emp_001')
+            fetch('/api/learning-path/latest?user_id=' + userId).then(r => r.json()).catch(() => WisdomAPI.getLearningPath(userId)),
+            WisdomAPI.getUserProgress(userId)
         ]);
 
-        const completedSet = new Set(progress.completed_courses || []);
-        const totalCourses = path.courses.length;
-        const completedCount = completedSet.size;
-        const pct = Math.round((completedCount / totalCourses) * 100);
+        if (!path || !path.courses) return;
 
-        // Find current course
-        let currentCourse = null;
-        for (const c of path.courses) {
-            if (!completedSet.has(c.course_id)) {
-                currentCourse = c;
+        const completedSet = new Set(progress.completed_courses || []);
+
+        // 1. Find active course + lesson (first uncompleted)
+        let activeCourse = null;
+        let activeLessonId = null;
+        for (const course of path.courses) {
+            if (!completedSet.has(course.course_id)) {
+                activeCourse = course;
+                if (course.lessons && course.lessons.length > 0) {
+                    activeLessonId = course.lessons[0].lesson_id;
+                }
                 break;
             }
         }
 
-        // 1. Update welcome text
-        const progressText = document.getElementById('dash-progress-text');
-        if (progressText && currentCourse) {
-            progressText.innerHTML = `You\'re ${pct}% through <span class="font-bold text-on-surface">Vertex AI Engineer Path</span>. Next up: ${currentCourse.title}!`;
+        // 2. Update Hero Banner
+        if (activeCourse) {
+            const heroTitle = document.getElementById('hero-title');
+            const heroSubtitle = document.getElementById('hero-subtitle');
+            const heroStartBtn = document.getElementById('hero-start-btn');
+            const heroDuration = document.getElementById('hero-duration');
+
+            if (heroTitle) heroTitle.textContent = activeCourse.title;
+            if (heroSubtitle) heroSubtitle.textContent = activeCourse.description || 'Continue your learning journey';
+
+            const lessonUrl = activeLessonId
+                ? `/lesson?course=${activeCourse.course_id}&lesson=${activeLessonId}`
+                : `/lesson?course=${activeCourse.course_id}`;
+            if (heroStartBtn) heroStartBtn.href = lessonUrl;
+
+            const mins = activeLessonId && activeCourse.lessons
+                ? (activeCourse.lessons[0].estimated_minutes || 15) + ' min'
+                : (activeCourse.estimated_hours ? activeCourse.estimated_hours + 'h' : '—');
+            if (heroDuration) heroDuration.textContent = mins;
         }
 
-        // 2. Update Resume Lesson link
-        const resumeBtn = document.getElementById('dash-resume-btn');
-        if (resumeBtn && currentCourse) {
-            resumeBtn.href = `/lesson?course=${currentCourse.course_id}`;
-        }
+        // 3. Render course cards dynamically (up to 4)
+        const grid = document.getElementById('dashboard-activities');
+        if (grid) {
+            grid.innerHTML = '';
+            const visible = path.courses.slice(0, 4);
 
-        // 3. Render path nodes (show ~4 nodes around the current position)
-        const container = document.getElementById('dash-path-nodes');
-        if (container) {
-            container.innerHTML = '';
-            // Show: 2 completed + current + 1 locked
-            const startIdx = Math.max(0, completedCount - 2);
-            const endIdx = Math.min(totalCourses, completedCount + 2);
-            const visibleCourses = path.courses.slice(startIdx, endIdx);
-
-            visibleCourses.forEach((course, i) => {
-                const globalIdx = startIdx + i;
+            visible.forEach(course => {
                 const isCompleted = completedSet.has(course.course_id);
-                const isCurrent = currentCourse && course.course_id === currentCourse.course_id;
-                const isLeft = globalIdx % 2 === 0;
+                const isRemedial = course.is_remedial === true;
+                const lessonUrl = (course.lessons && course.lessons.length > 0)
+                    ? `/lesson?course=${course.course_id}&lesson=${course.lessons[0].lesson_id}`
+                    : `/lesson?course=${course.course_id}`;
 
-                let nodeHtml = '';
-                if (isCompleted) {
-                    nodeHtml = `
-                    <div class="flex items-center w-full">
-                        <div class="${isLeft ? 'flex-1 text-right pr-12' : 'flex-1 pr-12'}">
-                            ${isLeft ? `<h3 class="font-bold text-sm text-on-surface">${course.title}</h3><p class="text-[10px] text-primary font-bold uppercase">Passed</p>` : ''}
-                        </div>
-                        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-on-primary border-4 border-white shadow-md flex-shrink-0">
-                            <span class="material-symbols-outlined text-2xl">check</span>
-                        </div>
-                        <div class="${!isLeft ? 'flex-1 pl-12' : 'flex-1 pl-12'}">
-                            ${!isLeft ? `<h3 class="font-bold text-sm text-on-surface">${course.title}</h3><p class="text-[10px] text-primary font-bold uppercase">Passed</p>` : ''}
-                        </div>
-                    </div>`;
-                } else if (isCurrent) {
-                    nodeHtml = `
-                    <div class="flex items-center w-full">
-                        <div class="flex-1 text-right pr-12">
-                            <h3 class="font-bold text-base text-on-surface">${course.title}</h3>
-                            <p class="text-[10px] text-secondary font-extrabold uppercase">Current Unit</p>
-                        </div>
-                        <div class="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container path-node-active border-4 border-white shadow-lg flex-shrink-0 relative transition-transform duration-150 scale-105">
-                            <span class="material-symbols-outlined text-3xl">cloud_queue</span>
-                            <div class="absolute left-24 top-0 bg-surface-container-highest p-4 rounded-xl shadow-xl w-48 animate-bounce border border-outline-variant">
-                                <p class="text-xs font-bold mb-2">${course.title}</p>
-                                <a href="/lesson?course=${course.course_id}" class="block w-full py-1.5 bg-primary text-white text-[10px] rounded-lg font-bold uppercase text-center no-underline">Start +15 XP</a>
-                            </div>
-                        </div>
-                        <div class="flex-1 pl-12"></div>
-                    </div>`;
-                } else {
-                    nodeHtml = `
-                    <div class="flex items-center w-full">
-                        <div class="flex-1 text-right pr-12"></div>
-                        <div class="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center text-outline border-4 border-white shadow-sm flex-shrink-0 opacity-60">
-                            <span class="material-symbols-outlined text-2xl">lock</span>
-                        </div>
-                        <div class="flex-1 pl-12">
-                            <h3 class="font-bold text-sm text-on-surface-variant">${course.title}</h3>
-                            <p class="text-[10px] text-outline font-bold uppercase">Upcoming</p>
-                        </div>
-                    </div>`;
-                }
-                container.innerHTML += nodeHtml;
+                const badgeHtml = isRemedial
+                    ? `<span class="text-amber-600 text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">auto_fix_high</span> TARGETED REVIEW</span>`
+                    : `<span class="text-primary text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">menu_book</span> COURSE</span>`;
+
+                const completedPct = isCompleted ? 100 : 0;
+                const footerHtml = isCompleted
+                    ? `<div class="mt-auto"><div class="w-full bg-surface-container-low rounded-full h-1.5 mb-2"><div class="bg-primary h-1.5 rounded-full" style="width:100%"></div></div><div class="flex items-center justify-between"><span class="text-xs text-primary font-bold">Completed ✓</span></div></div>`
+                    : `<div class="flex justify-end mt-auto"><a href="${lessonUrl}" class="w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container-high flex items-center justify-center text-primary transition-colors no-underline"><span class="material-symbols-outlined">arrow_forward</span></a></div>`;
+
+                grid.innerHTML += `
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-2 mb-4">${badgeHtml}</div>
+                    <h3 class="font-headline-md text-xl text-on-surface mb-3 flex-1">${course.title}</h3>
+                    <p class="text-sm text-on-surface-variant mb-6 line-clamp-3">${course.description || 'Part of your personalized WisdomAI learning path.'}</p>
+                    ${footerHtml}
+                </div>`;
             });
         }
+
+        // 4. Update sidebar progress stats
+        document.getElementById('dash-course-count').textContent = path.courses.length;
+        let lessonCount = 0;
+        path.courses.forEach(c => {
+            lessonCount += (c.lessons ? c.lessons.length : 0);
+            if (c.has_final_assessment) lessonCount++;
+        });
+        document.getElementById('dash-lesson-count').textContent = lessonCount;
+
     } catch (err) {
         console.error('Dashboard load error', err);
     }
 });
-</script>
-
-</body></html>
+</script></body></html>

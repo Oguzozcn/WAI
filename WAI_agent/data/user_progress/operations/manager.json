@@ -3,7 +3,13 @@
   "department": "operations",
   "error_retention_matrix": {
     "generative_ai_beginner's_guide": 1,
-    "concept_2": 1
+    "concept_2": 4,
+    "introduction_to_cloud_computing": 3,
+    "concept_1": 1,
+    "concept_3": 2,
+    "general_knowledge": 5,
+    "concept_4": 1,
+    "concept_5": 1
   },
   "quiz_attempts": [
     {
@@ -61,6 +67,34 @@
       "total_questions": 5,
       "correct_answers": 5,
       "attempted_at": "2026-07-08T13:42:50.055640"
+    },
+    {
+      "quiz_id": "quiz_ce74eb3a",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-12T21:18:07.245788"
+    },
+    {
+      "quiz_id": "quiz_04d3615d",
+      "score": 0.0,
+      "total_questions": 3,
+      "correct_answers": 0,
+      "attempted_at": "2026-07-12T21:18:23.977705"
+    },
+    {
+      "quiz_id": "quiz_b6ef07b5",
+      "score": 0.4,
+      "total_questions": 5,
+      "correct_answers": 2,
+      "attempted_at": "2026-07-12T21:27:53.376055"
+    },
+    {
+      "quiz_id": "quiz_b8cc2ed2",
+      "score": 0.6,
+      "total_questions": 5,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-12T21:46:22.863926"
     }
   ],
   "assessment_scores": [
@@ -103,8 +137,84 @@
       "quiz_id": "quiz_549f0f2c",
       "score": 1.0,
       "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_ce74eb3a",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_04d3615d",
+      "score": 0.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_b6ef07b5",
+      "score": 0.4,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_b8cc2ed2",
+      "score": 0.6,
+      "type": "quiz"
     }
   ],
   "best_assessment_score": 1.0,
-  "last_updated": "2026-07-08T13:42:50.055655"
+  "last_updated": "2026-07-12T21:46:23.941890",
+  "remedial_courses": [
+    {
+      "course_id": "remedial_d84cbcdb",
+      "title": "Targeted Review: general_knowledge, concept_2, concept_3",
+      "description": "This remedial course focuses on the topics where you had difficulty: general_knowledge, concept_2, concept_3. Complete the lesson and quizzes to solidify your understanding.",
+      "topics": [
+        "general_knowledge",
+        "concept_2",
+        "concept_3"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "manager",
+      "gap_topics": [
+        "general_knowledge",
+        "concept_2",
+        "concept_3"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_1f6a79c2",
+      "final_assessment_id": "quiz_6a52ddc0",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Deep Dive: general_knowledge, concept_2, concept_3",
+          "content_summary": "This lesson revisits the core concepts around general_knowledge, concept_2, concept_3. Review the original course materials and pay special attention to the areas highlighted in your gap analysis.",
+          "key_points": [
+            "Master general_knowledge",
+            "Master concept_2",
+            "Master concept_3"
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_1f6a79c2",
+          "short_quiz": {
+            "quiz_id": "quiz_1f6a79c2",
+            "topic": "Targeted Review: general_knowledge, concept_2, concept_3",
+            "quiz_type": "short_quiz",
+            "question_count": 0,
+            "questions": [],
+            "created_at": "2026-07-12T21:46:23.941490"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_6a52ddc0",
+        "topic": "Targeted Review: general_knowledge, concept_2, concept_3",
+        "quiz_type": "final_assessment",
+        "question_count": 0,
+        "questions": [],
+        "created_at": "2026-07-12T21:46:23.941511"
+      },
+      "created_at": "2026-07-12T21:46:23.941527"
+    }
+  ]
 }

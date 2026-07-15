@@ -145,6 +145,7 @@ class DepartmentScopedStore:
         self.user_progress_path = self.base_path / "user_progress" / department_id
         self.knowledge_base_path = self.base_path / "knowledge_base" / department_id
         self.raw_documents_path = self.base_path / "knowledge_base" / department_id / "raw"
+        self.gap_cache_path = self.base_path / "knowledge_base" / department_id / "gap_cache" / "tokens"
         self.conflicts_path = self.base_path / "conflicts" / department_id
         self.kpi_store_path = self.base_path / "kpi_store"
         self.learning_paths_path = self.base_path / "learning_paths" / department_id
@@ -153,6 +154,7 @@ class DepartmentScopedStore:
         self.user_progress_path.mkdir(parents=True, exist_ok=True)
         self.knowledge_base_path.mkdir(parents=True, exist_ok=True)
         self.raw_documents_path.mkdir(parents=True, exist_ok=True)
+        self.gap_cache_path.mkdir(parents=True, exist_ok=True)
         self.conflicts_path.mkdir(parents=True, exist_ok=True)
         self.kpi_store_path.mkdir(parents=True, exist_ok=True)
         self.learning_paths_path.mkdir(parents=True, exist_ok=True)
@@ -234,6 +236,31 @@ class DepartmentScopedStore:
             f.name for f in self.raw_documents_path.iterdir()
             if f.is_file() and f.name not in (".gitkeep",)
         ]
+
+    # ── Gap Cache (Phase 7 — Atomic Snippet Cache, Tier A scoped) ──
+
+    def read_gap_cache(self, token_id: str) -> Optional[dict]:
+        """Read a cached atomic remediation snippet for a specific ConceptToken.
+
+        Cache is strictly scoped to this department's namespace:
+            data/knowledge_base/{department_id}/gap_cache/tokens/{token_id}.json
+
+        Returns None if no cached snippet exists for this token.
+        """
+        file_path = self.gap_cache_path / f"{token_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def write_gap_cache(self, token_id: str, data: dict) -> None:
+        """Persist an atomic remediation snippet for a ConceptToken.
+
+        Cache is strictly scoped to this department's namespace.
+        Subsequent employees who fail the same token receive this cached snippet instantly.
+        """
+        file_path = self.gap_cache_path / f"{token_id}.json"
+        data["cached_at"] = datetime.utcnow().isoformat()
+        file_path.write_text(json.dumps(data, indent=2))
 
     # ── Learning Path Persistence ──
 

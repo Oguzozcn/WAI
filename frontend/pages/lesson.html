@@ -274,13 +274,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         let courseIdx = 0;
 
         // Try to fetch dynamic lesson content first
+        const userId = urlParams.get('user') || 'emp_001';
         if (lessonId) {
             try {
-                const res = await fetch(`/api/lesson/${courseId}/${lessonId}`);
+                const res = await fetch(`/api/lesson/${courseId}/${lessonId}?user_id=${userId}`);
                 if (res.ok) {
                     const data = await res.json();
                     courseMeta = data.course;
                     lessonData = data.lesson;
+                    // Remedial lessons use content_summary + key_points instead of content
+                    if (lessonData) {
+                        if (!lessonData.content && lessonData.content_summary) {
+                            const parts = [lessonData.content_summary];
+                            if (lessonData.key_points && lessonData.key_points.length) {
+                                parts.push(lessonData.key_points.map(p => `- ${p}`).join('\n'));
+                            }
+                            lessonData.content = parts.join('\n\n');
+                        }
+                    }
                     lessonContent = lessonData ? lessonData.content : (courseMeta.content || '');
                     totalCourses = courseMeta.lessons ? courseMeta.lessons.length : 1;
                     courseIdx = lessonData ? (lessonData.order - 1) : 0;

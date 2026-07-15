@@ -3,20 +3,647 @@
   "department": "operations",
   "display_name": "Alex Chen",
   "entry_path": "veteran",
-  "current_state": "in_progress",
+  "current_state": "completed",
   "learning_path_id": "lp_vertex_ai_eng",
   "completed_courses": [
     "course_01",
-    "course_02"
+    "course_02",
+    "remedial_cecdfe77",
+    "remedial_51da2d44",
+    "course_57a77948"
   ],
   "current_course_id": "course_03",
-  "quiz_attempts": [],
-  "assessment_scores": [],
-  "best_assessment_score": 0.0,
-  "error_retention_matrix": {},
+  "quiz_attempts": [
+    {
+      "quiz_id": "quiz_8f1c2547",
+      "score": 0.7,
+      "total_questions": 10,
+      "correct_answers": 7,
+      "attempted_at": "2026-07-12T21:51:37.797249"
+    },
+    {
+      "quiz_id": "quiz_e8094e74",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-12T21:54:37.230167"
+    },
+    {
+      "quiz_id": "quiz_e8094e74",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-12T21:54:38.589626"
+    },
+    {
+      "quiz_id": "quiz_7c8a4c82",
+      "score": 0.8,
+      "total_questions": 10,
+      "correct_answers": 8,
+      "attempted_at": "2026-07-12T21:58:52.313887"
+    },
+    {
+      "quiz_id": "quiz_7c8a4c82",
+      "score": 0.8,
+      "total_questions": 10,
+      "correct_answers": 8,
+      "attempted_at": "2026-07-12T21:58:53.560774"
+    },
+    {
+      "quiz_id": "quiz_bb763885",
+      "score": 0.3,
+      "total_questions": 10,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-12T21:59:38.096221"
+    },
+    {
+      "quiz_id": "quiz_f4557cc9",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T07:14:50.618476"
+    },
+    {
+      "quiz_id": "quiz_2e0f335d",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T07:40:17.925330"
+    },
+    {
+      "quiz_id": "quiz_2e0f335d",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T07:40:19.273889"
+    },
+    {
+      "quiz_id": "quiz_03d04aeb",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T07:40:35.556912"
+    },
+    {
+      "quiz_id": "quiz_3f4379b9",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T07:41:59.589627"
+    },
+    {
+      "quiz_id": "quiz_93257ee0",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T07:44:18.235309"
+    },
+    {
+      "quiz_id": "quiz_73170f7c",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T08:55:01.586389"
+    },
+    {
+      "quiz_id": "quiz_73170f7c",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T08:55:03.168754"
+    },
+    {
+      "quiz_id": "quiz_60b50a5e",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T09:01:22.977325"
+    },
+    {
+      "quiz_id": "quiz_60b50a5e",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T09:01:24.457780"
+    },
+    {
+      "quiz_id": "quiz_60b50a5e",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T09:01:27.074189"
+    },
+    {
+      "quiz_id": "quiz_80810abc",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T09:02:03.306800"
+    },
+    {
+      "quiz_id": "quiz_80810abc",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T09:02:04.239932"
+    },
+    {
+      "quiz_id": "quiz_80810abc",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T09:02:05.338132"
+    },
+    {
+      "quiz_id": "quiz_d0a74874",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T09:52:17.570413"
+    },
+    {
+      "quiz_id": "quiz_d0a74874",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T09:52:18.800679"
+    },
+    {
+      "quiz_id": "quiz_d0a74874",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T09:52:19.468015"
+    },
+    {
+      "quiz_id": "quiz_465e9c23",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T09:53:01.216608"
+    },
+    {
+      "quiz_id": "quiz_465e9c23",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T09:53:04.467055"
+    },
+    {
+      "quiz_id": "quiz_465e9c23",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T09:53:06.753644"
+    },
+    {
+      "quiz_id": "quiz_f8834941",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T14:09:01.540968"
+    },
+    {
+      "quiz_id": "quiz_f8834941",
+      "score": 1.0,
+      "total_questions": 3,
+      "correct_answers": 3,
+      "attempted_at": "2026-07-13T14:09:03.490197"
+    },
+    {
+      "quiz_id": "quiz_0f5a1cfd",
+      "score": 0.7,
+      "total_questions": 10,
+      "correct_answers": 7,
+      "attempted_at": "2026-07-13T14:09:44.807223"
+    },
+    {
+      "quiz_id": "quiz_97ddca5e",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T14:10:34.921861"
+    },
+    {
+      "quiz_id": "quiz_97ddca5e",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T14:10:35.804608"
+    },
+    {
+      "quiz_id": "quiz_97ddca5e",
+      "score": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "attempted_at": "2026-07-13T14:10:36.440866"
+    }
+  ],
+  "assessment_scores": [
+    {
+      "quiz_id": "quiz_8f1c2547",
+      "score": 0.7,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_e8094e74",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_e8094e74",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_7c8a4c82",
+      "score": 0.8,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_7c8a4c82",
+      "score": 0.8,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_bb763885",
+      "score": 0.3,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_f4557cc9",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_2e0f335d",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_2e0f335d",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_03d04aeb",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_3f4379b9",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_93257ee0",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_73170f7c",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_73170f7c",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_60b50a5e",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_60b50a5e",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_60b50a5e",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_80810abc",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_80810abc",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_80810abc",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_d0a74874",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_d0a74874",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_d0a74874",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_465e9c23",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_465e9c23",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_465e9c23",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_f8834941",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_f8834941",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_0f5a1cfd",
+      "score": 0.7,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_97ddca5e",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_97ddca5e",
+      "score": 1.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_97ddca5e",
+      "score": 1.0,
+      "type": "quiz"
+    }
+  ],
+  "best_assessment_score": 1.0,
+  "error_retention_matrix": {
+    "57a77948": 7,
+    "concept_1": 1,
+    "concept_3": 5,
+    "concept_7": 2,
+    "concept_2": 4,
+    "remedial_cecdfe77": 7,
+    "concept_5": 1,
+    "concept_6": 1,
+    "concept_9": 1,
+    "concept_10": 2,
+    "cloud_computing_intro": 3
+  },
   "bypass_locked": false,
   "bypass_attempts": 0,
   "readiness_score": 0.2,
   "is_at_risk": false,
-  "enrolled_at": "2026-06-25T09:00:00Z"
+  "enrolled_at": "2026-06-25T09:00:00Z",
+  "last_updated": "2026-07-13T14:10:36.443199",
+  "remedial_courses": [
+    {
+      "course_id": "remedial_cecdfe77",
+      "title": "Targeted Review: 57a77948, concept_1, concept_3",
+      "description": "This remedial course focuses on the topics where you had difficulty: 57a77948, concept_1, concept_3. Complete the lesson and quizzes to solidify your understanding.",
+      "topics": [
+        "57a77948",
+        "concept_1",
+        "concept_3",
+        "concept_7"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "gap_topics": [
+        "57a77948",
+        "concept_1",
+        "concept_3",
+        "concept_7"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_d2f70295",
+      "final_assessment_id": "quiz_9bf83743",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Deep Dive: 57a77948, concept_1, concept_3",
+          "content_summary": "This lesson revisits the core concepts around 57a77948, concept_1, concept_3. Review the original course materials and pay special attention to the areas highlighted in your gap analysis.",
+          "key_points": [
+            "Master 57a77948",
+            "Master concept_1",
+            "Master concept_3"
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_d2f70295",
+          "short_quiz": {
+            "quiz_id": "quiz_d2f70295",
+            "topic": "Targeted Review: 57a77948, concept_1, concept_3",
+            "quiz_type": "short_quiz",
+            "question_count": 0,
+            "questions": [],
+            "created_at": "2026-07-12T21:51:39.065448"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_9bf83743",
+        "topic": "Targeted Review: 57a77948, concept_1, concept_3",
+        "quiz_type": "final_assessment",
+        "question_count": 0,
+        "questions": [],
+        "created_at": "2026-07-12T21:51:39.065468"
+      },
+      "created_at": "2026-07-12T21:51:39.065485"
+    },
+    {
+      "course_id": "remedial_bfed6419",
+      "title": "Targeted Review: remedial_cecdfe77, concept_2, concept_3",
+      "description": "This remedial course focuses on the topics where you had difficulty: remedial_cecdfe77, concept_2, concept_3. Complete the lesson and quizzes to solidify your understanding.",
+      "topics": [
+        "remedial_cecdfe77",
+        "concept_2",
+        "concept_3",
+        "concept_5",
+        "concept_6",
+        "concept_7",
+        "concept_9",
+        "concept_10"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "source_course_id": "remedial_cecdfe77",
+      "gap_topics": [
+        "remedial_cecdfe77",
+        "concept_2",
+        "concept_3",
+        "concept_5",
+        "concept_6",
+        "concept_7",
+        "concept_9",
+        "concept_10"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_7247a676",
+      "final_assessment_id": "quiz_24811f7a",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Deep Dive: remedial_cecdfe77, concept_2, concept_3",
+          "content_summary": "This lesson revisits the core concepts around remedial_cecdfe77, concept_2, concept_3. Review the original course materials and pay special attention to the areas highlighted in your gap analysis.",
+          "key_points": [
+            "Master remedial_cecdfe77",
+            "Master concept_2",
+            "Master concept_3"
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_7247a676",
+          "short_quiz": {
+            "quiz_id": "quiz_7247a676",
+            "topic": "Targeted Review: remedial_cecdfe77, concept_2, concept_3",
+            "quiz_type": "short_quiz",
+            "question_count": 0,
+            "questions": [],
+            "created_at": "2026-07-12T21:59:39.127228"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_24811f7a",
+        "topic": "Targeted Review: remedial_cecdfe77, concept_2, concept_3",
+        "quiz_type": "final_assessment",
+        "question_count": 0,
+        "questions": [],
+        "created_at": "2026-07-12T21:59:39.127250"
+      },
+      "created_at": "2026-07-12T21:59:39.127268"
+    },
+    {
+      "course_id": "remedial_51da2d44",
+      "title": "Targeted Review: cloud_computing_intro, concept_2, concept_3",
+      "description": "This remedial course focuses on the topics where you had difficulty: cloud_computing_intro, concept_2, concept_3. Complete the lesson and quizzes to solidify your understanding.",
+      "topics": [
+        "cloud_computing_intro",
+        "concept_2",
+        "concept_3",
+        "concept_10"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "source_course_id": "course_57a77948",
+      "gap_topics": [
+        "cloud_computing_intro",
+        "concept_2",
+        "concept_3",
+        "concept_10"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_31d4452d",
+      "final_assessment_id": "quiz_40549ff9",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Deep Dive: cloud_computing_intro, concept_2, concept_3",
+          "content_summary": "This lesson revisits the core concepts around cloud_computing_intro, concept_2, concept_3. Review the original course materials and pay special attention to the areas highlighted in your gap analysis.",
+          "key_points": [
+            "Master cloud_computing_intro",
+            "Master concept_2",
+            "Master concept_3"
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_31d4452d",
+          "short_quiz": {
+            "quiz_id": "quiz_31d4452d",
+            "topic": "Targeted Review: cloud_computing_intro, concept_2, concept_3",
+            "quiz_type": "short_quiz",
+            "question_count": 0,
+            "questions": [],
+            "created_at": "2026-07-13T14:09:45.930969"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_40549ff9",
+        "topic": "Targeted Review: cloud_computing_intro, concept_2, concept_3",
+        "quiz_type": "final_assessment",
+        "question_count": 0,
+        "questions": [],
+        "created_at": "2026-07-13T14:09:45.930990"
+      },
+      "created_at": "2026-07-13T14:09:45.931031"
+    }
+  ],
+  "mastery_vectors": {
+    "introduction_to_cloud_computing": {
+      "concept_id": "introduction_to_cloud_computing",
+      "ability_score": 1.0,
+      "last_seen": "2026-07-13T14:09:03.491401",
+      "half_life_days": 7.0,
+      "historical_attempts": 27,
+      "correct_count": 27
+    },
+    "deep_dive:_57a77948,_concept_1,_concept_3": {
+      "concept_id": "deep_dive:_57a77948,_concept_1,_concept_3",
+      "ability_score": 1.0,
+      "last_seen": "2026-07-13T09:52:19.469223",
+      "half_life_days": 7.0,
+      "historical_attempts": 18,
+      "correct_count": 18
+    },
+    "remedial_cecdfe77": {
+      "concept_id": "remedial_cecdfe77",
+      "ability_score": 1.0,
+      "last_seen": "2026-07-13T09:53:06.754690",
+      "half_life_days": 7.0,
+      "historical_attempts": 60,
+      "correct_count": 60
+    },
+    "cloud_computing_intro": {
+      "concept_id": "cloud_computing_intro",
+      "ability_score": 0.8,
+      "last_seen": "2026-07-13T14:09:44.808452",
+      "half_life_days": 7.0,
+      "historical_attempts": 10,
+      "correct_count": 7
+    },
+    "remedial_51da2d44": {
+      "concept_id": "remedial_51da2d44",
+      "ability_score": 1.0,
+      "last_seen": "2026-07-13T14:10:36.442208",
+      "half_life_days": 7.0,
+      "historical_attempts": 30,
+      "correct_count": 30
+    }
+  },
+  "luck_failures": {
+    "cloud_computing_intro": 3
+  }
 }

@@ -19,8 +19,11 @@ class QuizSessionController {
    * @param {number} opts.passThreshold — e.g. 0.80
    */
   constructor(opts = {}) {
-    this.userId = opts.userId || 'manager';
+    this.userId = opts.userId || 'emp_001';
     this.quizId = opts.quizId || '';
+    this.quizType = opts.quizType || '';
+    this.courseId = opts.courseId || '';
+    this.lessonId = opts.lessonId || '';
     this.questions = opts.questions || [];
     this.currentIndex = 0;
     this.deferredList = [];                // question IDs skipped
@@ -240,8 +243,14 @@ class QuizSessionController {
       titleSpan.classList.toggle('text-green-700', isCorrect);
       titleSpan.classList.toggle('text-red-700', !isCorrect);
     }
-    if (whyEl) whyEl.textContent = feedback.feedback_why || '';
-    if (howEl) howEl.textContent = feedback.feedback_how_to_think || '';
+    if (whyEl) {
+      whyEl.textContent = feedback.feedback_why || '';
+      whyEl.className = 'font-body-md text-body-md mb-2 font-medium ' + (isCorrect ? 'text-green-900' : 'text-red-900');
+    }
+    if (howEl) {
+      howEl.textContent = feedback.feedback_how_to_think || '';
+      howEl.className = 'font-body-md text-body-md ' + (isCorrect ? 'text-green-800' : 'text-red-800');
+    }
     if (correctEl) {
       if (!isCorrect) {
         correctEl.textContent = `Correct answer: ${feedback.correct_answer}`;
@@ -382,7 +391,7 @@ class QuizSessionController {
     if (this._dom.skipBtn) this._dom.skipBtn.style.display = 'none';
 
     try {
-      const result = await WisdomAPI.evaluateQuiz(this.quizId, this.userId, answers);
+      const result = await WisdomAPI.evaluateQuiz(this.quizId, this.userId, answers, this.quizType, this.courseId);
       this.attemptsRemaining = result.attempts_remaining ?? this.attemptsRemaining - 1;
       this.update_progress_ui();
       this._showFinalResults(result);
@@ -404,13 +413,26 @@ class QuizSessionController {
     }
 
     if (questionText) {
+      let mainMsg = passed
+        ? 'Great job! You have demonstrated a solid understanding of this topic.'
+        : `You need ${Math.round(this.passThreshold * 100)}% to pass. Review the materials and try again.`;
+
+      // Show remedial course notification for failed final assessments
+      let remedialBanner = '';
+      if (!passed && this.quizType === 'final_assessment' && result.remedial_course_generated) {
+        remedialBanner = `
+          <div class="mt-4 p-4 rounded-xl border-2 border-amber-400 bg-amber-50 text-amber-900 text-sm font-medium flex gap-3 items-start">
+            <span class="material-symbols-outlined text-amber-600 mt-0.5">auto_fix_high</span>
+            <div>
+              <p class="font-bold mb-1">Personalized Remedial Course Ready!</p>
+              <p>${result.remedial_message || 'A custom course has been added to your learning path based on your gap analysis.'}</p>
+              <a href="/learning-path" class="inline-block mt-2 px-4 py-1.5 bg-amber-500 text-white rounded-lg font-bold text-xs hover:bg-amber-600 transition-all">View My Learning Path</a>
+            </div>
+          </div>`;
+      }
+
       questionText.innerHTML = `
-        You scored <strong>${Math.round(result.score * 100)}%</strong>.
-        <br><br>
-        ${passed
-          ? 'Great job! You have demonstrated a solid understanding of this topic.'
-          : `You need ${Math.round(this.passThreshold * 100)}% to pass. Review the materials and try again.`
-        }
+        You scored <strong>${Math.round(result.score * 100)}%</strong>.<br><br>${mainMsg}${remedialBanner}
       `;
     }
 
@@ -419,9 +441,75 @@ class QuizSessionController {
 
     if (nextBtn) {
       if (passed) {
-        nextBtn.innerHTML = `Return to Learning Path <span class="material-symbols-outlined">route</span>`;
-        nextBtn.disabled = false;
-        nextBtn.onclick = () => window.location.href = '/learning-path';
+        // For short quizzes: navigate to the next lesson (or final assessment if last)
+        // Treat as short_quiz if quizType says so OR if a lessonId was set (by-lesson flow)
+        if ((this.quizType === 'short_quiz' || this.lessonId) && this.courseId) {
+          nextBtn.innerHTML = `Continue <span class="material-symbols-outlined">arrow_forward</span>`;
+          nextBtn.disabled = false;
+          nextBtn.onclick = async () => {
+            nextBtn.disabled = true;
+            nextBtn.innerHTML = `Loading... <span class="material-symbols-outlined animate-spin">progress_activity</span>`;
+            try {
+              const path = await fetch(`/api/learning-path/latest?user_id=${this.userId}`).then(r => r.json());
+              const course = (path.courses || []).find(c => c.course_id === this.courseId);
+              if (course) {
+                const lessons = course.lessons || [];
+                const currentIdx = lessons.findIndex(l => l.lesson_id === this.lessonId);
+                if (currentIdx !== -1 && currentIdx < lessons.length - 1) {
+                  // Go to next lesson
+                  const next = lessons[currentIdx + 1];
+                  window.location.href = `/lesson?course=${this.courseId}&lesson=${next.lesson_id}`;
+                } else if (course.has_final_assessment !== false) {
+                  // Last lesson — go to final assessment
+                  nextBtn.innerHTML = `Take Final Assessment <span class="material-symbols-outlined">workspace_premium</span>`;
+                  nextBtn.disabled = false;
+                  nextBtn.onclick = () => window.location.href = `/quiz?course=${this.courseId}&type=final_assessment`;
+                } else {
+                  window.location.href = '/learning-path';
+                }
+              } else {
+                window.location.href = '/learning-path';
+              }
+            } catch {
+              window.location.href = '/learning-path';
+            }
+          };
+        } else {
+          // Final assessment pass — check for next course
+          if (this.courseId) {
+            nextBtn.innerHTML = `Continue <span class="material-symbols-outlined">arrow_forward</span>`;
+            nextBtn.disabled = false;
+            nextBtn.onclick = async () => {
+              nextBtn.disabled = true;
+              nextBtn.innerHTML = `Loading... <span class="material-symbols-outlined">progress_activity</span>`;
+              try {
+                const path = await fetch(`/api/learning-path/latest?user_id=${this.userId}`).then(r => r.json());
+                const courses = (path.courses || []).filter(c => !c.is_remedial);
+                const currentIdx = courses.findIndex(c => c.course_id === this.courseId);
+                if (currentIdx !== -1 && currentIdx < courses.length - 1) {
+                  const nextCourse = courses[currentIdx + 1];
+                  const firstLesson = (nextCourse.lessons || [])[0];
+                  if (firstLesson) {
+                    window.location.href = `/lesson?course=${nextCourse.course_id}&lesson=${firstLesson.lesson_id}`;
+                  } else {
+                    window.location.href = `/lesson?course=${nextCourse.course_id}`;
+                  }
+                } else {
+                  // No next course — this is the last module
+                  nextBtn.innerHTML = `Return to Learning Path <span class="material-symbols-outlined">route</span>`;
+                  nextBtn.disabled = false;
+                  nextBtn.onclick = () => window.location.href = '/learning-path';
+                }
+              } catch {
+                window.location.href = '/learning-path';
+              }
+            };
+          } else {
+            nextBtn.innerHTML = `Return to Learning Path <span class="material-symbols-outlined">route</span>`;
+            nextBtn.disabled = false;
+            nextBtn.onclick = () => window.location.href = '/learning-path';
+          }
+        }
       } else {
         nextBtn.innerHTML = `Review & Retry <span class="material-symbols-outlined">refresh</span>`;
         nextBtn.disabled = false;
@@ -479,7 +567,11 @@ class QuizSessionController {
       nextBtn.innerHTML = `Next Question <span class="material-symbols-outlined">arrow_forward</span>`;
     }
     if (skipBtn) {
-      skipBtn.style.display = isDeferred ? 'none' : ''; // can't skip deferred items
+      if (this.quizType === 'short_quiz') {
+        skipBtn.style.display = 'none';
+      } else {
+        skipBtn.style.display = isDeferred ? 'none' : ''; // can't skip deferred items
+      }
     }
 
     this.update_progress_ui();
@@ -563,15 +655,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const courseId = urlParams.get('course') || urlParams.get('course_id');
   const lessonId = urlParams.get('lesson') || urlParams.get('lesson_id');
   const topic = urlParams.get('topic') || '';
-  const userId = urlParams.get('user') || 'manager';
+  const userId = urlParams.get('user') || 'emp_001';
 
   // Determine which initialization method to use
   let quizData = null;
 
   try {
     if (courseId && lessonId) {
-      // Lesson-scoped quiz (existing flow via by-lesson endpoint)
-      const res = await fetch(`/api/quiz/by-lesson/${courseId}/${lessonId}`);
+      // Lesson-scoped short quiz (existing flow via by-lesson endpoint)
+      const res = await fetch(`/api/quiz/by-lesson/${courseId}/${lessonId}?user_id=${userId}`);
+      if (!res.ok) throw new Error('Failed to load quiz');
+      quizData = await res.json();
+      // Add default attempt info if not present
+      quizData.attempts_remaining = quizData.attempts_remaining ?? 3;
+      quizData.max_attempts = quizData.max_attempts ?? 3;
+      quizData.pass_threshold = quizData.pass_threshold ?? 0.80;
+    } else if (courseId) {
+      // Course-level final assessment (no specific lesson)
+      const quizType = urlParams.get('type') || 'final_assessment';
+      const res = await fetch(`/api/quiz/by-course/${courseId}?type=${quizType}&user_id=${userId}`);
       if (!res.ok) throw new Error('Failed to load quiz');
       quizData = await res.json();
       // Add default attempt info if not present
@@ -580,7 +682,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       quizData.pass_threshold = quizData.pass_threshold ?? 0.80;
     } else if (topic) {
       // Topic-based quiz via new /api/quiz/start
-      quizData = await WisdomAPI.startQuiz(topic, userId);
+      const quizType = urlParams.get('type') || 'short_quiz';
+      quizData = await WisdomAPI.startQuiz(topic, userId, 'medium', 5, quizType);
     } else {
       // Fallback: generate a default quiz
       quizData = await WisdomAPI.startQuiz('General Knowledge', userId);
@@ -600,6 +703,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Initialize the controller
+  const quizTypeParam = urlParams.get('type');
   const controller = new QuizSessionController({
     userId,
     quizId: quizData.quiz_id,
@@ -607,11 +711,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     attemptsRemaining: quizData.attempts_remaining,
     maxAttempts: quizData.max_attempts,
     passThreshold: quizData.pass_threshold,
+    quizType: quizTypeParam,
+    courseId,
+    lessonId,
   });
 
-  // Set quiz title
+  // Set quiz title and dynamic subtitle
   const titleEl = document.querySelector('[data-quiz="title"]');
   if (titleEl) titleEl.textContent = quizData.topic || 'Knowledge Check';
+
+  const subtitleEl = document.querySelector('[data-quiz="subtitle"]');
+  if (subtitleEl) {
+    subtitleEl.textContent = quizTypeParam === 'short_quiz' ? 'Short Quiz' : 'Final Assessment';
+  }
+
+  // Hide skip button for short quizzes
+  if (quizTypeParam === 'short_quiz') {
+    const skipBtn = document.querySelector('[data-quiz="skip-btn"]');
+    if (skipBtn) skipBtn.style.display = 'none';
+  }
 
   controller.mount();
 

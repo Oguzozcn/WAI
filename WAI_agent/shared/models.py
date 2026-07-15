@@ -8,8 +8,42 @@ Using dataclasses + dict conversion for ADK compatibility (no Pydantic dependenc
 """
 
 from dataclasses import dataclass, field, asdict
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import datetime, date
+
+
+# ── Birdbrain / HLR Mastery Models (Phase 7) ──
+
+@dataclass
+class ConceptToken:
+    """A fine-grained, atomic sub-skill concept extracted from a lesson chunk."""
+    token_id: str             # e.g., "gemini_api_safety_settings"
+    display_name: str         # e.g., "Configuring Safety Settings in Gemini API"
+    parent_course_id: str     # e.g., "course_03"
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class MasteryVector:
+    """Birdbrain-style vector tracking mastery and memory decay for a single ConceptToken.
+
+    Used by the HLR engine to compute recall probability: p = 2^(-Δt / h)
+    """
+    concept_id: str
+    ability_score: float = 0.5   # Moving 0.0 – 1.0 score based on correct/incorrect history
+    last_seen: str = ""          # ISO datetime string of last quiz interaction
+    half_life_days: float = 7.0  # Estimated memory decay window (default 7 days)
+    historical_attempts: int = 0
+    correct_count: int = 0
+
+    def __post_init__(self):
+        if not self.last_seen:
+            self.last_seen = datetime.utcnow().isoformat()
+
+    def to_dict(self) -> dict:
+        return asdict(self)
 
 
 # ── Learning Path Models ──
@@ -24,6 +58,9 @@ class Lesson:
     estimated_minutes: int = 15
     order: int = 0
     has_quiz: bool = True  # 1 Short Quiz per lesson (standardized)
+    # Phase 7 extensions
+    content_reference: Optional[str] = None  # Path to raw uploaded chunk file
+    concept_tokens: list[str] = field(default_factory=list)  # Extracted Birdbrain token IDs
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -88,6 +125,8 @@ class QuizQuestion:
     correct_answer: str = ""
     concept_tags: list[str] = field(default_factory=list)
     difficulty: str = "medium"  # "easy" | "medium" | "hard"
+    # Phase 7: must map to exactly one ConceptToken from the lesson's token list
+    tested_concept_token: str = ""  # e.g., "gemini_api_safety_settings"
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -150,6 +189,7 @@ class UserProgress:
 
     # Failure tracking
     error_retention_matrix: dict = field(default_factory=dict)  # {concept_tag: failure_count}
+    luck_failures: dict = field(default_factory=dict)           # {concept_token_id: failure_count} (Phase 7 HLR)
     bypass_locked: bool = False
     bypass_attempts: int = 0
 
@@ -157,6 +197,9 @@ class UserProgress:
     readiness_score: float = 0.0
     is_at_risk: bool = False
     blocked_by: str = ""  # Topic causing the block
+
+    # Phase 7: Birdbrain mastery vectors — {concept_token_id: MasteryVector dict}
+    mastery_vectors: dict = field(default_factory=dict)
 
     # Timestamps
     enrolled_at: str = ""

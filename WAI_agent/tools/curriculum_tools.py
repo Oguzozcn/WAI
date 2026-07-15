@@ -7,6 +7,7 @@ Generates learning paths, daily agendas, and content gap analysis.
 
 import json
 import uuid
+import os
 from datetime import datetime
 
 from ..shared.persistence import DepartmentScopedStore
@@ -494,3 +495,233 @@ def trigger_curriculum_generation(
         "appended": bool(existing_path)
     }
 
+
+def generate_remedial_course(
+    incorrect_answers: list[dict],
+    user_id: str,
+    source_course_id: str = "",
+    department: str = DEFAULT_DEPARTMENT,
+) -> dict:
+    """Use Gemini LLM to perform gap analysis and generate a personalized remedial course.
+
+    Analyzes the user's incorrect quiz answers, identifies the concept gaps,
+    and generates a complete course structure (lesson + short quiz + final assessment)
+    targeted at those exact weaknesses.
+
+    Args:
+        incorrect_answers: List of answer dicts with question_text, user_answer,
+                           correct_answer, and concept_tags fields.
+        user_id: The user who failed the assessment.
+        department: The department scope.
+
+    Returns:
+        A complete course dict marked with is_remedial=True, ready to inject
+        into the user's learning path.
+    """
+    # Build a summary of mistakes for the LLM
+    gap_summary_lines = []
+    all_concept_tags = []
+    for i, ans in enumerate(incorrect_answers, 1):
+        tags = ans.get("concept_tags", [])
+        all_concept_tags.extend(tags)
+        gap_summary_lines.append(
+            f"{i}. Question: {ans.get('question_text', ans.get('question_id', 'Unknown'))}\n"
+            f"   User answered: {ans.get('user_answer', 'N/A')}\n"
+            f"   Correct answer: {ans.get('correct_answer', 'N/A')}\n"
+            f"   Topics: {', '.join(tags) if tags else 'general'}"
+        )
+
+    unique_tags = list(dict.fromkeys(all_concept_tags))  # preserve order, deduplicate
+    gap_text = "\n".join(gap_summary_lines) if gap_summary_lines else "General knowledge gaps detected."
+
+    prompt = f"""You are an expert corporate training curriculum designer.
+
+A learner failed their Final Assessment. Below are the questions they got wrong:
+
+{gap_text}
+
+Your task:
+1. Identify the core knowledge gaps from these mistakes.
+2. Generate a targeted remedial training course in strict JSON format.
+
+The JSON must follow EXACTLY this structure (no extra keys, no markdown, raw JSON only):
+{{
+  "course_title": "<short title for the remedial course, e.g. 'Targeted Review: Topic X'>",
+  "course_description": "<2-3 sentence description of what this course covers and why>",
+  "gap_topics": ["<topic 1>", "<topic 2>"],
+  "lesson": {{
+    "lesson_title": "<lesson title>",
+    "content_summary": "<3-4 paragraph explanation of the gap concepts in plain English>",
+    "key_points": ["<key point 1>", "<key point 2>", "<key point 3>"]
+  }},
+  "short_quiz": {{
+    "title": "<short quiz title>",
+    "questions": [
+      {{
+        "text": "<question text>",
+        "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
+        "correct_answer_index": 0,
+        "rationale": {{
+          "0": "<why option A is correct or wrong>",
+          "1": "<why option B is correct or wrong>",
+          "2": "<why option C is correct or wrong>",
+          "3": "<why option D is correct or wrong>"
+        }},
+        "concept_tags": ["<tag>"]
+      }}
+    ]
+  }},
+  "final_assessment": {{
+    "title": "<final assessment title>",
+    "questions": [
+      {{
+        "text": "<question text>",
+        "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
+        "correct_answer_index": 0,
+        "rationale": {{
+          "0": "<rationale>",
+          "1": "<rationale>",
+          "2": "<rationale>",
+          "3": "<rationale>"
+        }},
+        "concept_tags": ["<tag>"]
+      }}
+    ]
+  }}
+}}
+
+Generate exactly 3 questions for the short quiz and 5 questions for the final assessment.
+Focus strictly on the gap topics identified. Return ONLY valid JSON."""
+
+    # Call Gemini via Vertex AI using ADC (Application Default Credentials)
+    # This matches how the rest of the project connects — no API key needed.
+    try:
+        from google import genai
+
+        client = genai.Client(
+            vertexai=True,
+            project=os.getenv("GOOGLE_CLOUD_PROJECT"),
+            location=os.getenv("GOOGLE_CLOUD_LOCATION", "global"),
+        )
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
+        raw = response.text.strip()
+
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("```", 2)[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+
+        llm_data = json.loads(raw)
+
+    except Exception as e:
+        # Fallback: build a minimal remedial course without LLM
+        print(f"[generate_remedial_course] LLM call failed ({e}), using fallback.")
+        topic_label = ", ".join(unique_tags[:3]) if unique_tags else "Key Concepts"
+        llm_data = {
+            "course_title": f"Targeted Review: {topic_label}",
+            "course_description": (
+                f"This remedial course focuses on the topics where you had difficulty: "
+                f"{topic_label}. Complete the lesson and quizzes to solidify your understanding."
+            ),
+            "gap_topics": unique_tags or ["general"],
+            "lesson": {
+                "lesson_title": f"Deep Dive: {topic_label}",
+                "content_summary": (
+                    f"This lesson revisits the core concepts around {topic_label}. "
+                    "Review the original course materials and pay special attention to "
+                    "the areas highlighted in your gap analysis."
+                ),
+                "key_points": [f"Master {t}" for t in (unique_tags[:3] or ["key concept"])],
+            },
+            "short_quiz": {
+                "title": f"Short Quiz: {topic_label}",
+                "questions": [],
+            },
+            "final_assessment": {
+                "title": f"Final Assessment: {topic_label}",
+                "questions": [],
+            },
+        }
+
+    # Build course_id and lesson_id
+    course_id = f"remedial_{uuid.uuid4().hex[:8]}"
+    lesson_id = f"lesson_r01"
+    sq_quiz_id = f"quiz_{uuid.uuid4().hex[:8]}"
+    fa_quiz_id = f"quiz_{uuid.uuid4().hex[:8]}"
+
+    # Enrich questions with IDs
+    def _enrich_questions(raw_questions):
+        result = []
+        for q in raw_questions:
+            q["question_id"] = f"q_{uuid.uuid4().hex[:6]}"
+            result.append(q)
+        return result
+
+    sq_questions = _enrich_questions(llm_data.get("short_quiz", {}).get("questions", []))
+    fa_questions = _enrich_questions(llm_data.get("final_assessment", {}).get("questions", []))
+
+    # Persist quizzes to the store so they can be evaluated server-side
+    store = DepartmentScopedStore(department)
+
+    short_quiz_doc = {
+        "quiz_id": sq_quiz_id,
+        "topic": llm_data.get("course_title", "Remedial Review"),
+        "quiz_type": "short_quiz",
+        "question_count": len(sq_questions),
+        "questions": sq_questions,
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    final_assessment_doc = {
+        "quiz_id": fa_quiz_id,
+        "topic": llm_data.get("course_title", "Remedial Review"),
+        "quiz_type": "final_assessment",
+        "question_count": len(fa_questions),
+        "questions": fa_questions,
+        "created_at": datetime.utcnow().isoformat(),
+    }
+
+    # Build the full course structure
+    remedial_course = {
+        "course_id": course_id,
+        "title": llm_data.get("course_title", "Targeted Review"),
+        "description": llm_data.get("course_description", ""),
+        "topics": llm_data.get("gap_topics", unique_tags),
+        "estimated_hours": 1.0,
+        "order": 0,
+        "is_remedial": True,
+        "remedial_for_user": user_id,
+        "source_course_id": source_course_id,
+        "gap_topics": llm_data.get("gap_topics", unique_tags),
+        "has_final_assessment": True,
+        "short_quiz_id": sq_quiz_id,
+        "final_assessment_id": fa_quiz_id,
+        "lessons": [
+            {
+                "lesson_id": lesson_id,
+                "title": llm_data.get("lesson", {}).get("lesson_title", "Remedial Lesson"),
+                "content_summary": llm_data.get("lesson", {}).get("content_summary", ""),
+                "key_points": llm_data.get("lesson", {}).get("key_points", []),
+                "estimated_minutes": 20,
+                "has_quiz": True,
+                "short_quiz_id": sq_quiz_id,
+                "short_quiz": short_quiz_doc,
+            }
+        ],
+        "final_assessment": final_assessment_doc,
+        "created_at": datetime.utcnow().isoformat(),
+    }
+
+    # Persist remedial course to the user's progress record
+    progress = store.read_user_progress(user_id) or {"user_id": user_id, "department": department}
+    remedial_courses = progress.get("remedial_courses", [])
+    remedial_courses.append(remedial_course)
+    progress["remedial_courses"] = remedial_courses
+    store.write_user_progress(user_id, progress)
+
+    return remedial_course

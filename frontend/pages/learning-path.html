@@ -162,16 +162,6 @@
 <!-- Serpentine Learning Path -->
 <div class="relative w-full flex flex-col items-center">
 <div class="progress-line"></div>
-<!-- Section Header -->
-<div class="relative z-10 w-full max-w-lg mb-8">
-<div class="bg-primary text-on-primary p-6 rounded-2xl border-b-4 border-blue-900 flex justify-between items-center shadow-lg">
-<div>
-<p class="font-label-md text-xs opacity-80 uppercase tracking-widest">Current Module</p>
-<h3 class="font-headline-md text-white"><span id="lp-section-title">Loading...</span></h3>
-</div>
-<span class="material-symbols-outlined text-3xl">cloud_done</span>
-</div>
-</div>
 <!-- Path Nodes -->
 <div id="learning-path-container" class="serpentine-path w-full"></div>
 </div>
@@ -207,13 +197,9 @@
 <h4 class="font-headline-md font-bold">Weekly Goal</h4>
 <span class="material-symbols-outlined">trending_up</span>
 </div>
-<p class="text-sm mb-4 opacity-90">Keep it up! 3 more modules to reach your goal of 4 hours per week.</p>
-<div class="flex gap-2">
-<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"><div class="h-full bg-white rounded-full w-full"></div></div>
-<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"><div class="h-full bg-white rounded-full w-[40%]"></div></div>
-<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"></div>
-<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"></div>
-<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"></div>
+<p id="lp-weekly-text" class="text-sm mb-4 opacity-90">Keep it up! Complete 1 module per week to stay on track.</p>
+<div id="lp-weekly-bars" class="flex gap-2">
+<!-- Populated dynamically by JS -->
 </div>
 </section>
 </div>
@@ -273,138 +259,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const userId = 'emp_001';
 
-        // Try to get the latest dynamically generated path first
-        let path;
+        // 1. Fetch data
+        let path, progress;
         try {
-            const latestRes = await fetch('/api/learning-path/latest');
-            if (latestRes.ok) {
-                path = await latestRes.json();
-            }
-        } catch(e) {}
+            const [pathRes, progRes] = await Promise.all([
+                fetch('/api/learning-path/latest?user_id=' + userId),
+                WisdomAPI.getUserProgress(userId)
+            ]);
+            
+            if (pathRes.ok) path = await pathRes.json();
+            progress = progRes || { completed_courses: [] };
+        } catch(e) {
+            console.error('API Error:', e);
+            progress = { completed_courses: [] };
+        }
 
-        // Fallback to original API
+        // Fallback to original API if no dynamic path exists
         if (!path || !path.courses || path.courses.length === 0) {
             path = await WisdomAPI.getLearningPath(userId);
         }
 
-        let progress;
-        try {
-            progress = await WisdomAPI.getUserProgress(userId);
-        } catch(e) {
-            progress = { completed_courses: [] };
+        // 2. Setup Sets and Variables
+        const completedSet = new Set(progress.completed_courses || []);
+        let currentCourse = null;
+        let activeLessonId = null;
+        let activeCourseId = null;
+
+        // Find the first uncompleted course and lesson
+        for (const course of path.courses) {
+            if (!completedSet.has(course.course_id)) {
+                if (!currentCourse) currentCourse = course;
+                // If it has lessons, the active lesson is the first one (since we don't track lesson-level completion perfectly yet in MVP, we just use the first lesson of the uncompleted course)
+                if (course.lessons && course.lessons.length > 0 && !activeLessonId) {
+                    activeCourseId = course.course_id;
+                    activeLessonId = course.lessons[0].lesson_id;
+                } else if (!activeCourseId) {
+                    activeCourseId = course.course_id;
+                }
+                break;
+            }
         }
 
-        // Update Title & Desc
+        // 3. Update Title & Desc
         const titleText = path.source_document
             ? path.source_document.replace('.txt','').replace('.md','').replace(/_/g,' ')
             : 'Learning Path';
         document.getElementById('lp-title').textContent = titleText;
         document.getElementById('lp-desc').textContent = path.courses.length + ' modules • ' + (path.total_estimated_hours || '0') + 'h total';
-
-        // Render Nodes
-        const container = document.getElementById('learning-path-container');
-        container.innerHTML = '';
-
-        const completedSet = new Set(progress.completed_courses || []);
-
-        path.courses.forEach((course, courseIdx) => {
-            // Course Module Header
-            container.innerHTML += `
-            <div class="relative z-10 w-full max-w-lg my-4 mx-auto">
-                <div class="bg-primary text-on-primary p-6 rounded-2xl border-b-4 border-blue-900 flex justify-between items-center shadow-lg">
-                    <div>
-                        <p class="font-label-md text-xs opacity-80 uppercase tracking-widest">Module ${courseIdx + 1}</p>
-                        <h3 class="font-headline-md text-white">${course.title}</h3>
-                    </div>
-                    <span class="material-symbols-outlined text-3xl">school</span>
-                </div>
-            </div>
-            `;
-
-            // Render lesson nodes
-            const lessons = course.lessons || [];
-            if (lessons.length === 0) {
-                // Legacy course without lessons — render as single clickable node
-                const isCompleted = completedSet.has(course.course_id);
-                container.innerHTML += `
-                <div class="relative flex flex-col items-center">
-                    <a href="/lesson?course=${course.course_id}" class="w-20 h-20 rounded-full ${isCompleted ? 'bg-primary' : 'bg-secondary-container'} flex items-center justify-center text-white squishy-button cursor-pointer border-4 border-white no-underline" style="text-decoration:none">
-                        <span class="material-symbols-outlined text-3xl">${isCompleted ? 'check' : 'play_arrow'}</span>
-                    </a>
-                    <span class="mt-3 font-bold text-on-surface-variant text-sm text-center px-4">${course.title}</span>
-                </div>
-                `;
-            } else {
-                lessons.forEach((lesson, lessonIdx) => {
-                    const isFirst = lessonIdx === 0 && courseIdx === 0;
-                    container.innerHTML += `
-                    <div class="relative flex flex-col items-center group">
-                        ${isFirst ? '<div class="absolute -top-12 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-lg text-xs font-bold animate-bounce shadow-md border border-secondary">START HERE</div>' : ''}
-                        <a href="/lesson?course=${course.course_id}&lesson=${lesson.lesson_id}" class="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container squishy-button cursor-pointer border-4 border-white hover:ring-4 hover:ring-secondary-container/30 transition-all no-underline" style="text-decoration:none">
-                            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
-                        </a>
-                        <span class="mt-2 font-bold text-on-surface text-sm text-center px-2 max-w-[200px]">${lesson.title}</span>
-                        <span class="text-xs text-on-surface-variant">${lesson.estimated_minutes || 15} min</span>
-                    </div>
-                    `;
-
-                    // Short Quiz node after each lesson
-                    if (lesson.has_quiz !== false) {
-                        container.innerHTML += `
-                        <div class="relative flex flex-col items-center">
-                            <a href="/quiz?course=${course.course_id}&lesson=${lesson.lesson_id}&type=short_quiz" class="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center text-primary squishy-button cursor-pointer border-2 border-outline-variant hover:border-primary hover:bg-primary-fixed transition-all no-underline" style="text-decoration:none">
-                                <span class="material-symbols-outlined text-2xl">quiz</span>
-                            </a>
-                            <span class="mt-1 text-xs text-on-surface-variant font-bold">Short Quiz</span>
-                        </div>
-                        `;
-                    }
-                });
-
-                // Final Assessment node at the end of the module
-                if (course.has_final_assessment !== false) {
-                    container.innerHTML += `
-                    <div class="relative flex flex-col items-center my-4">
-                        <a href="/quiz?course=${course.course_id}&type=final_assessment" class="w-24 h-24 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container squishy-button cursor-pointer border-4 border-white hover:ring-4 hover:ring-tertiary-container/30 transition-all no-underline" style="text-decoration:none">
-                            <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
-                        </a>
-                        <span class="mt-3 font-bold text-tertiary text-sm bg-tertiary-fixed/20 px-3 py-1 rounded-full text-center">Final Assessment</span>
-                    </div>
-                    `;
-                }
-            }
-        });
-
-    } catch (err) {
-        console.error('Failed to load learning path', err);
-    }
-});
-</script>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const [path, progress] = await Promise.all([
-            WisdomAPI.getLearningPath('emp_001'),
-            WisdomAPI.getUserProgress('emp_001')
-        ]);
-
-        const completedSet = new Set(progress.completed_courses || []);
-        const totalCourses = path.courses.length;
-        const completedCount = completedSet.size;
-        const pct = Math.round((completedCount / totalCourses) * 100);
-
-        // Find current course
-        let currentCourse = null;
-        let currentIdx = 0;
-        for (let i = 0; i < path.courses.length; i++) {
-            if (!completedSet.has(path.courses[i].course_id)) {
-                currentCourse = path.courses[i];
-                currentIdx = i;
-                break;
-            }
-        }
 
         // Update section title
         const sectionTitle = document.getElementById('lp-section-title');
@@ -412,19 +313,116 @@ document.addEventListener('DOMContentLoaded', async () => {
             sectionTitle.textContent = currentCourse.title;
         }
 
-        // Update progress stats
+        // 4. Render Nodes
+        const container = document.getElementById('learning-path-container');
+        container.innerHTML = '';
+        let moduleNumber = 0;
+
+        path.courses.forEach((course) => {
+            const isRemedial = course.is_remedial === true;
+            if (!isRemedial) moduleNumber++;
+
+            // Course Module Header
+            if (isRemedial) {
+                container.innerHTML += `
+                <div class="relative z-10 w-full max-w-lg my-2 mx-auto">
+                    <div class="bg-amber-500 text-white p-4 rounded-2xl border-b-4 border-amber-700 flex justify-between items-center shadow-lg">
+                        <div>
+                            <p class="font-label-md text-xs opacity-80 uppercase tracking-widest flex items-center gap-1"><span class="material-symbols-outlined text-sm">auto_fix_high</span> Targeted Review</p>
+                            <h3 class="font-headline-sm text-white text-base">${course.title}</h3>
+                        </div>
+                        <span class="material-symbols-outlined text-2xl">psychology</span>
+                    </div>
+                </div>
+                `;
+            } else {
+                container.innerHTML += `
+                <div class="relative z-10 w-full max-w-lg my-4 mx-auto">
+                    <div class="bg-primary text-on-primary p-6 rounded-2xl border-b-4 border-blue-900 flex justify-between items-center shadow-lg">
+                        <div>
+                            <p class="font-label-md text-xs opacity-80 uppercase tracking-widest">Module ${moduleNumber}</p>
+                            <h3 class="font-headline-md text-white">${course.title}</h3>
+                        </div>
+                        <span class="material-symbols-outlined text-3xl">school</span>
+                    </div>
+                </div>
+                `;
+            }
+
+            // Render lesson nodes
+            const lessons = course.lessons || [];
+            if (lessons.length === 0) {
+                // Legacy course without lessons
+                const isCompleted = completedSet.has(course.course_id);
+                const isActive = activeCourseId === course.course_id && !activeLessonId;
+                
+                container.innerHTML += `
+                <div class="relative flex flex-col items-center">
+                    ${isActive ? '<div class="absolute -top-12 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-lg text-xs font-bold animate-bounce shadow-md border border-secondary z-30">START HERE</div>' : ''}
+                    <a href="/lesson?course=${course.course_id}" class="w-20 h-20 rounded-full ${isCompleted ? 'bg-primary' : 'bg-secondary-container'} flex items-center justify-center text-white squishy-button cursor-pointer border-4 border-white no-underline relative z-20" style="text-decoration:none">
+                        <span class="material-symbols-outlined text-3xl">${isCompleted ? 'check' : 'play_arrow'}</span>
+                    </a>
+                    <span class="mt-3 font-bold text-on-surface-variant text-sm text-center px-4 relative z-20 bg-background/80 rounded-full">${course.title}</span>
+                </div>
+                `;
+            } else {
+                lessons.forEach((lesson) => {
+                    const isActive = activeCourseId === course.course_id && activeLessonId === lesson.lesson_id;
+                    const lessonBg = isRemedial ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-secondary-container text-on-secondary-container border-white';
+                    container.innerHTML += `
+                    <div class="relative flex flex-col items-center group my-4">
+                        ${isActive ? '<div class="absolute -top-12 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-lg text-xs font-bold animate-bounce shadow-md border border-secondary z-30">START HERE</div>' : ''}
+                        <a href="/lesson?course=${course.course_id}&lesson=${lesson.lesson_id}" class="w-20 h-20 rounded-full ${lessonBg} flex items-center justify-center squishy-button cursor-pointer border-4 hover:ring-4 transition-all no-underline relative z-20" style="text-decoration:none">
+                            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">${isRemedial ? 'manage_search' : 'menu_book'}</span>
+                        </a>
+                        <span class="mt-2 font-bold text-on-surface text-sm text-center px-2 max-w-[200px] relative z-20 bg-background/80 rounded-full">${lesson.title}</span>
+                        <span class="text-xs text-on-surface-variant relative z-20 bg-background/80 rounded-full px-2">${lesson.estimated_minutes || 15} min</span>
+                    </div>
+                    `;
+                });
+
+                // Final Assessment node
+                if (course.has_final_assessment !== false) {
+                    const faColor = isRemedial
+                        ? 'bg-amber-200 text-amber-900 border-white hover:ring-amber-200/30'
+                        : 'bg-tertiary-container text-on-tertiary-container border-white hover:ring-tertiary-container/30';
+                    const faLabel = isRemedial ? 'Re-Assessment' : 'Final Assessment';
+                    container.innerHTML += `
+                    <div class="relative flex flex-col items-center my-6">
+                        <a href="/quiz?course=${course.course_id}&type=final_assessment" class="w-24 h-24 rounded-full ${faColor} flex items-center justify-center squishy-button cursor-pointer border-4 hover:ring-4 transition-all no-underline relative z-20" style="text-decoration:none">
+                            <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                        </a>
+                        <span class="mt-3 font-bold text-sm px-3 py-1 rounded-full text-center relative z-20 ${isRemedial ? 'text-amber-700 bg-amber-100' : 'text-tertiary bg-tertiary-fixed/20'}">${faLabel}</span>
+                    </div>
+                    `;
+                }
+            }
+        });
+
+        // 5. Calculate Stats
+        const totalCourses = path.courses.length;
+        
+        let completedCount = 0;
+        let completedHours = 0;
+        let totalHours = 0;
+        path.courses.forEach(c => {
+            const h = c.estimated_hours || 0;
+            totalHours += h;
+            if (completedSet.has(c.course_id)) {
+                completedHours += h;
+                completedCount++;
+            }
+        });
+        
+        const pct = totalCourses > 0 ? Math.round((completedCount / totalCourses) * 100) : 0;
+
         const pctEl = document.getElementById('lp-progress-pct');
         if (pctEl) pctEl.textContent = pct + '%';
 
         const barEl = document.getElementById('lp-progress-bar');
         if (barEl) barEl.style.width = pct + '%';
 
-        // Calculate time
-        const completedHours = path.courses
-            .filter(c => completedSet.has(c.course_id))
-            .reduce((sum, c) => sum + c.estimated_hours, 0);
-        const totalHours = path.total_estimated_hours;
-        const remainingHours = totalHours - completedHours;
+        const remainingHours = Math.max(0, totalHours - completedHours);
 
         const timeInvested = document.getElementById('lp-time-invested');
         if (timeInvested) timeInvested.textContent = completedHours.toFixed(1) + 'h';
@@ -432,8 +430,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeRemaining = document.getElementById('lp-time-remaining');
         if (timeRemaining) timeRemaining.textContent = remainingHours.toFixed(1) + 'h';
 
+        // 6. Calculate Weekly Goal (MVP: 1 module per week)
+        const weeklyBars = document.getElementById('lp-weekly-bars');
+        const weeklyText = document.getElementById('lp-weekly-text');
+        if (weeklyBars && weeklyText) {
+            weeklyBars.innerHTML = '';
+            // For MVP, if they completed ANY course recently, we'll mark the goal as complete.
+            // Since we don't track timestamps perfectly, we'll just say if completedCount > 0, they hit the weekly goal.
+            const hasMetGoal = completedCount > 0;
+            
+            if (hasMetGoal) {
+                weeklyText.textContent = "Great job! You've completed a module and hit your weekly goal!";
+            } else {
+                weeklyText.textContent = "Keep it up! Complete 1 module to reach your weekly goal.";
+            }
+
+            // Draw 4 segments for the month (1 per week)
+            for (let i = 0; i < 4; i++) {
+                if (i === 0 && hasMetGoal) {
+                    weeklyBars.innerHTML += `<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"><div class="h-full bg-white rounded-full w-full"></div></div>`;
+                } else {
+                    weeklyBars.innerHTML += `<div class="flex-1 h-2 bg-on-tertiary-container/20 rounded-full"></div>`;
+                }
+            }
+        }
+
     } catch (err) {
-        console.error('Learning path stats error', err);
+        console.error('Failed to load learning path', err);
     }
 });
 </script>

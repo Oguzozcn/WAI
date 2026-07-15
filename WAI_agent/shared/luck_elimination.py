@@ -16,6 +16,63 @@ Logic:
 from .constants import LUCK_FAILURE_THRESHOLD
 
 
+# ── HLR (Half-Life Regression) Engine (Phase 7) ──
+
+import math
+from datetime import datetime, timezone
+
+
+def calculate_hlr_retention(vector: dict) -> float:
+    """Compute the Duolingo HLR memory recall probability: p = 2^(-Δt / h).
+
+    Args:
+        vector: A MasteryVector dict with 'last_seen' (ISO str) and 'half_life_days' (float).
+
+    Returns:
+        Float in [0.0, 1.0] representing estimated recall probability right now.
+    """
+    try:
+        last_seen_dt = datetime.fromisoformat(vector.get("last_seen", ""))
+        if last_seen_dt.tzinfo is None:
+            last_seen_dt = last_seen_dt.replace(tzinfo=timezone.utc)
+        delta_t = (datetime.now(timezone.utc) - last_seen_dt).days
+    except (ValueError, TypeError):
+        delta_t = 0
+
+    h = vector.get("half_life_days", 7.0)
+    h = h if h > 0 else 1.0
+    return max(0.0, min(1.0, 2 ** (-delta_t / h)))
+
+
+def evaluate_luck_and_decay(user_progress: dict, concept_token_id: str) -> str:
+    """Upgraded routing decision fusing raw failure counts with HLR predictive decay.
+
+    Decision logic:
+      1. If luck_failures[token] >= LUCK_FAILURE_THRESHOLD → mandatory lockout (raw counter).
+      2. If HLR retention < 0.40 AND ability_score < 0.50 → mandatory lockout (predictive).
+      3. Otherwise → continue adaptive gap assessment.
+
+    Returns:
+        One of ACTION_FORCE_MANDATORY or ACTION_CONTINUE.
+    """
+    fail_count = user_progress.get("luck_failures", {}).get(concept_token_id, 0)
+
+    # 1. Strict failure threshold check
+    if fail_count >= LUCK_FAILURE_THRESHOLD:
+        return ACTION_FORCE_MANDATORY
+
+    # 2. HLR predictive check
+    vector = user_progress.get("mastery_vectors", {}).get(concept_token_id)
+    if vector:
+        retention = calculate_hlr_retention(vector)
+        ability = vector.get("ability_score", 1.0)
+        if retention < 0.40 and ability < 0.50:
+            return ACTION_FORCE_MANDATORY
+
+    return ACTION_CONTINUE
+
+
+
 # Return action constants
 ACTION_CONTINUE = "MAINTAIN_ADAPTIVE_GAP_ASSESSMENT"
 ACTION_FORCE_MANDATORY = "FORCE_MANDATORY_LEARNING_PATH"
