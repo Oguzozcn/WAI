@@ -580,21 +580,92 @@ async def api_kb_upload(
     if not content.strip():
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-    # Save raw document
+    # Save raw document (legacy location)
     store = DepartmentScopedStore(department)
     store.write_raw_document(file.filename, content)
 
+    # Save to catalog/inputs/ (new catalog structure)
+    store.write_catalog_input(file.filename, content)
+
+    return {"status": "success", "message": f"File {file.filename} uploaded successfully.", "filename": file.filename}
+
+class GenerateFromInputRequest(BaseModel):
+    filename: str
+    department: str = DEFAULT_DEPARTMENT
+    append_to_latest: bool = False
+
+@app.post("/api/kb/generate-from-input")
+async def api_generate_from_input(req: GenerateFromInputRequest):
+    """Generate a curriculum from an existing file in the catalog/inputs directory."""
+    store = DepartmentScopedStore(req.department)
+    
+    # Check if file exists in catalog inputs
+    inputs = store.list_catalog_inputs()
+    if not any(f["filename"] == req.filename for f in inputs):
+        raise HTTPException(status_code=404, detail=f"File {req.filename} not found in catalog inputs.")
+    
     # Trigger curriculum generation pipeline
     result = trigger_curriculum_generation(
-        filename=file.filename,
-        department=department,
-        append_to_latest=append_to_latest,
+        filename=req.filename,
+        department=req.department,
+        append_to_latest=req.append_to_latest,
     )
-
+    
     if result.get("status") != "success":
         raise HTTPException(status_code=500, detail=result.get("message", "Curriculum generation failed."))
 
+    # Save the generated learning path to catalog/standard_paths/
+    if result.get("path_id"):
+        path_data = store.read_learning_path(result["path_id"])
+        if path_data:
+            path_data["source_input_files"] = [req.filename]
+            store.write_standard_path(result["path_id"], path_data)
+
     return result
+
+
+# ── Catalog API Endpoints ──
+
+@app.get("/api/kb/catalog/inputs")
+async def api_catalog_inputs(department: str = DEFAULT_DEPARTMENT):
+    """List all input files (uploaded learning materials) in the catalog."""
+    store = DepartmentScopedStore(department)
+    inputs = store.list_catalog_inputs()
+    return {"inputs": inputs, "count": len(inputs)}
+
+
+@app.get("/api/kb/catalog/learning-paths")
+async def api_catalog_learning_paths(
+    department: str = DEFAULT_DEPARTMENT,
+    user_id: str | None = None,
+):
+    """List all learning paths (official + unofficial) from the catalog.
+
+    Aggregates standard_paths and unofficial_paths into a single response.
+    If user_id is provided, unofficial paths are filtered to that user.
+    """
+    store = DepartmentScopedStore(department)
+    official = store.list_standard_paths()
+    unofficial = store.list_unofficial_paths(user_id=user_id)
+    all_paths = official + unofficial
+    return {
+        "learning_paths": all_paths,
+        "count": len(all_paths),
+        "official_count": len(official),
+        "unofficial_count": len(unofficial),
+    }
+
+
+# ── Catalog Frontend Pages ──
+
+@app.get("/learning-materials", response_class=HTMLResponse)
+async def page_learning_materials():
+    return _serve_page("learning-materials.html")
+
+
+@app.get("/learning-paths-catalog", response_class=HTMLResponse)
+async def page_learning_paths_catalog():
+    return _serve_page("learning-paths-catalog.html")
 
 
 # ── Dynamic Learning Path ──

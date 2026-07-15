@@ -1,44 +1,61 @@
-<!DOCTYPE html><html class="light" lang="en"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>WisdomAI | Knowledge Base</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<style>
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>WisdomAI | Knowledge Base</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+
         .squishy-button {
             transition: transform 0.1s ease, box-shadow 0.1s ease;
             box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.15);
         }
+
         .squishy-button:active {
             transform: translateY(2px);
             box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.15);
         }
+
         .primary-squishy {
             box-shadow: 0 4px 0 0 #004a75;
         }
+
         .primary-squishy:active {
             box-shadow: 0 0 0 0 #004a75;
         }
+
         .folder-card:hover .folder-icon {
             transform: scale(1.1) rotate(-5deg);
         }
+
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
+
         .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
+
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #dfe3e6;
             border-radius: 10px;
         }
     </style>
-<script id="tailwind-config">
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -116,478 +133,572 @@
                         "body-lg": ["Inter"]
                     },
                     "fontSize": {
-                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
-                        "stats-number": ["24px", {"lineHeight": "24px", "fontWeight": "800"}],
-                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
-                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
-                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
-                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
-                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "stats-number": ["24px", { "lineHeight": "24px", "fontWeight": "800" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
                     }
                 },
             },
         }
     </script>
 </head>
+
 <body class="bg-background text-on-background font-body-md min-h-screen flex">
-<!-- SideNavBar -->
-<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
-<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
-<nav class="flex-1 space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-label-md text-label-md">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/learning-path">
-<span class="material-symbols-outlined">route</span>
-<span class="font-label-md text-label-md">Learning Path</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/knowledge-vault">
-<span class="material-symbols-outlined">folder</span>
-<span class="font-label-md text-label-md">Knowledge Vault</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">help</span>
-<span class="font-label-md text-label-md">Support</span>
-</a></nav>
-<div class="mt-auto pt-6 border-t border-outline-variant">
-<div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-label-md text-label-md">Settings</span>
-</a></div>
-</div>
-</aside>
-<div class="flex-1 flex flex-col min-w-0">
-<!-- TopNavBar -->
-<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
-<div class="flex items-center gap-4">
-<button class="md:hidden p-2">
-<span class="material-symbols-outlined">menu</span>
-</button>
-<div class="relative hidden sm:block">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
-</div>
-</div>
-<div class="flex items-center gap-3">
-<div class="hidden lg:flex items-center gap-4 mr-4">
-<div class="flex flex-col items-center">
-<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
-<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
-<span class="font-stats-number text-sm text-on-surface">2.4k</span>
-</div>
-</div>
-</div>
-<div class="flex items-center gap-3">
-<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
-</div>
-</div>
-</header>
-<!-- Main Content Area -->
-<main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
-<div class="max-w-[1200px] mx-auto space-y-gutter">
-<!-- Header Section -->
-<section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-<div>
-<h2 class="font-display-lg text-display-lg text-on-surface">Knowledge Base Vault</h2>
-<p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">
+    <!-- SideNavBar -->
+    <aside
+        class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
+        <div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span
+                class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
+                href="/">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
+                href="/learning-path">
+                <span class="material-symbols-outlined">route</span>
+                <span class="font-label-md text-label-md">Learning Path</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200"
+                href="/knowledge-vault">
+                <span class="material-symbols-outlined">folder</span>
+                <span class="font-label-md text-label-md">Knowledge Vault</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
+                href="#">
+                <span class="material-symbols-outlined">help</span>
+                <span class="font-label-md text-label-md">Support</span>
+            </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-outline-variant">
+            <div class="space-y-1"><a
+                    class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
+                    href="#">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="font-label-md text-label-md">Settings</span>
+                </a></div>
+        </div>
+    </aside>
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- TopNavBar -->
+        <header
+            class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden p-2">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="relative hidden sm:block">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input
+                        class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10"
+                        placeholder="Search..." type="text">
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden lg:flex items-center gap-4 mr-4">
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
+                            <span class="material-symbols-outlined text-primary text-sm"
+                                style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
+                            <span class="font-stats-number text-sm text-on-surface">2.4k</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+                </div>
+            </div>
+        </header>
+        <!-- Main Content Area -->
+        <main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
+            <div class="max-w-[1200px] mx-auto space-y-gutter">
+                <!-- Header Section -->
+                <section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="font-display-lg text-display-lg text-on-surface">Knowledge Base Vault</h2>
+                        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">
                             Centralized storage for all your learning resources and course materials.
                         </p>
-</div>
-<div class="flex items-center gap-3">
-</div>
-</section>
-<!-- Bento Upload Area -->
-<section class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap">
-<!-- Drag & Drop Zone -->
-<div class="lg:col-span-8 bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-3xl p-10 flex flex-col items-center justify-center text-center hover:border-primary hover:bg-primary-container/5 transition-all group cursor-pointer">
-<div class="w-20 h-20 bg-primary-container/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-<span class="material-symbols-outlined text-4xl text-primary" data-icon="cloud_upload">cloud_upload</span>
-</div>
-<h3 class="font-headline-lg text-headline-lg text-on-surface">Drop files to upload</h3>
-<p class="font-body-md text-on-surface-variant mt-2 mb-6">Support for PDF, DOCX, ZIP and high-res images up to 100MB.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                    </div>
+                </section>
+                <!-- Bento Upload Area -->
+                <section class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap">
+                    <!-- Drag & Drop Zone -->
+                    <div
+                        class="lg:col-span-8 bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-3xl p-10 flex flex-col items-center justify-center text-center hover:border-primary hover:bg-primary-container/5 transition-all group cursor-pointer">
+                        <div
+                            class="w-20 h-20 bg-primary-container/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-4xl text-primary"
+                                data-icon="cloud_upload">cloud_upload</span>
+                        </div>
+                        <h3 class="font-headline-lg text-headline-lg text-on-surface">Drop files to upload</h3>
+                        <p class="font-body-md text-on-surface-variant mt-2 mb-6">Support for PDF, DOCX, ZIP and
+                            high-res images up to 100MB.</p>
 
-<label class="flex items-center gap-2 mb-8 cursor-pointer relative z-10" onclick="event.stopPropagation()">
-    <input type="checkbox" id="append-checkbox" checked class="w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary">
-    <span class="font-label-md text-on-surface">Append to existing Learning Path</span>
-</label>
+                        <label class="flex items-center gap-2 mb-8 cursor-pointer relative z-10"
+                            onclick="event.stopPropagation()">
+                            <input type="checkbox" id="append-checkbox" checked
+                                class="w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary">
+                            <span class="font-label-md text-on-surface">Append to existing Learning Path</span>
+                        </label>
 
-<button class="px-8 py-3 bg-primary text-on-primary rounded-xl font-headline-md text-headline-md squishy-button primary-squishy">
+                        <button
+                            class="px-8 py-3 bg-primary text-on-primary rounded-xl font-headline-md text-headline-md squishy-button primary-squishy">
                             Browse Files
                         </button>
-</div>
-<!-- Quick Stats/Info Card -->
-<div class="lg:col-span-4 flex flex-col gap-card-gap">
-<div class="bg-tertiary-container text-on-tertiary-container rounded-3xl p-6 flex-1 flex flex-col justify-between overflow-hidden relative justify-center">
-<div class="relative z-10 text-left">
-<span class="material-symbols-outlined text-4xl mb-4" data-icon="auto_awesome">auto_awesome</span>
-<h4 class="font-headline-md text-headline-md">Smart Indexing</h4>
-<p class="font-body-md mt-2 opacity-90">All uploaded documents are automatically transcribed and indexed for AI-powered global search.</p>
-</div>
-<div class="absolute -bottom-4 -right-4 opacity-20">
-<span class="material-symbols-outlined text-[120px]" data-icon="psychology">psychology</span>
-</div>
-</div>
-<div class="bg-secondary-container text-on-secondary-container rounded-3xl p-6 flex-1 flex flex-col justify-between">
-<div>
-<h4 class="font-headline-md text-headline-md">Recent Activity</h4>
-<div class="mt-4 space-y-3">
-<div class="flex items-center gap-3 text-sm">
-<div class="w-2 h-2 rounded-full bg-on-secondary-container"></div>
-<p class="">Added <span class="font-bold">Ethics_Guide.pdf</span></p>
-</div>
-<div class="flex items-center gap-3 text-sm opacity-80">
-<div class="w-2 h-2 rounded-full bg-on-secondary-container/40"></div>
-<p class="">Shared <span class="font-bold">Project_Alpha</span> folder</p>
-</div>
-</div>
-</div>
-<a class="text-sm font-bold underline mt-4" href="#">View activity log</a>
-</div>
-</div>
-</section>
-<!-- Storage Explorer -->
-<section class="space-y-6">
-<div class="flex items-center justify-between border-b border-outline-variant items-end">
-<div class="flex items-center gap-6 flex-row">
-<button class="font-label-md text-label-md text-primary border-b-2 border-primary pb-4 whitespace-nowrap">All Materials</button>
-<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors pb-4 whitespace-nowrap border-b-2 border-transparent">Shared with Me</button>
-<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors pb-4 whitespace-nowrap border-b-2 border-transparent">Starred</button>
-</div>
-<div class="flex items-center gap-2 pb-2">
-<button class="p-2 rounded-lg bg-surface-container-high text-on-surface">
-<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
-</button>
-<button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined" data-icon="view_list">view_list</span>
-</button>
-</div>
-</div>
-<!-- Folders Grid -->
-<div>
-<h4 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-4 mt-4">Folders</h4>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-card-gap">
-<!-- Folder 1 -->
-<div class="folder-card bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group px-6 py-4">
-<div class="folder-icon w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center transition-transform">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="folder" style="font-variation-settings: &quot;FILL&quot; 1;">folder</span>
-</div>
-<div class="flex-1">
-<p class="font-headline-md text-on-surface text-body-lg font-bold">AI Architecture</p>
-<p class="text-xs text-on-surface-variant">24 files • 1.2 GB</p>
-</div>
-<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</span>
-</div>
-<!-- Folder 2 -->
-<div class="folder-card bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group px-6 py-4">
-<div class="folder-icon w-12 h-12 bg-secondary-fixed rounded-xl flex items-center justify-center transition-transform">
-<span class="material-symbols-outlined text-secondary text-3xl" data-icon="folder" style="font-variation-settings: &quot;FILL&quot; 1;">folder</span>
-</div>
-<div class="flex-1">
-<p class="font-headline-md text-on-surface text-body-lg font-bold">Development Guides</p>
-<p class="text-xs text-on-surface-variant">12 files • 450 MB</p>
-</div>
-<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</span>
-</div>
-<!-- Folder 3 -->
-<div class="folder-card bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group px-6 py-4">
-<div class="folder-icon w-12 h-12 bg-tertiary-fixed rounded-xl flex items-center justify-center transition-transform">
-<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="folder" style="font-variation-settings: &quot;FILL&quot; 1;">folder</span>
-</div>
-<div class="flex-1">
-<p class="font-headline-md text-on-surface text-body-lg font-bold">Reference Materials</p>
-<p class="text-xs text-on-surface-variant">56 files • 2.1 GB</p>
-</div>
-<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</span>
-</div>
-<!-- Folder 4 -->
-<div class="folder-card bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group px-6 py-4">
-<div class="folder-icon w-12 h-12 bg-surface-container-highest rounded-xl flex items-center justify-center transition-transform">
-<span class="material-symbols-outlined text-on-surface-variant text-3xl" data-icon="folder" style="font-variation-settings: &quot;FILL&quot; 1;">folder</span>
-</div>
-<div class="flex-1">
-<p class="font-headline-md text-on-surface text-body-lg font-bold">UI/UX Assets</p>
-<p class="text-xs text-on-surface-variant">8 files • 120 MB</p>
-</div>
-<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</span>
-</div>
-</div>
-</div>
-<!-- Files Table-style Grid -->
-<div class="mt-10">
-<h4 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-4">Individual Files</h4>
-<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden">
-<table class="w-full text-left border-collapse">
-<thead class="bg-surface-container-low border-b border-outline-variant">
-<tr>
-<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant">Name</th>
-<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant hidden md:table-cell">Size</th>
-<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant hidden sm:table-cell">Date Added</th>
-<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant text-right">Actions</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-outline-variant/30">
-<!-- File 1 -->
-<tr class="hover:bg-surface-container transition-colors group cursor-pointer">
-<td class="px-6 py-4">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-error" data-icon="picture_as_pdf">picture_as_pdf</span>
-<span class="font-body-md text-on-surface font-semibold">Q3_Learning_Roadmap.pdf</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-on-surface-variant hidden md:table-cell">2.4 MB</td>
-<td class="px-6 py-4 text-sm text-on-surface-variant hidden sm:table-cell">Oct 12, 2023</td>
-<td class="px-6 py-4 text-right">
-<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-1 hover:text-primary"><span class="material-symbols-outlined text-xl" data-icon="download">download</span></button>
-<button class="p-1 hover:text-primary"><span class="material-symbols-outlined text-xl" data-icon="share">share</span></button>
-<button class="p-1 hover:text-error"><span class="material-symbols-outlined text-xl" data-icon="delete">delete</span></button>
-</div>
-</td>
-</tr>
-<!-- File 2 -->
-<tr class="hover:bg-surface-container transition-colors group cursor-pointer">
-<td class="px-6 py-4">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-blue-500" data-icon="description">description</span>
-<span class="font-body-md text-on-surface font-semibold">Architecture_Review_V2.docx</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-on-surface-variant hidden md:table-cell">850 KB</td>
-<td class="px-6 py-4 text-sm text-on-surface-variant hidden sm:table-cell">Oct 10, 2023</td>
-<td class="px-6 py-4 text-right">
-<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-1 hover:text-primary"><span class="material-symbols-outlined text-xl" data-icon="download">download</span></button>
-<button class="p-1 hover:text-primary"><span class="material-symbols-outlined text-xl" data-icon="share">share</span></button>
-<button class="p-1 hover:text-error"><span class="material-symbols-outlined text-xl" data-icon="delete">delete</span></button>
-</div>
-</td>
-</tr>
-<!-- File 3 -->
-<tr class="hover:bg-surface-container transition-colors group cursor-pointer">
-<td class="px-6 py-4">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-tertiary" data-icon="image">image</span>
-<span class="font-body-md text-on-surface font-semibold">Hero_Banner_Draft.png</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-on-surface-variant hidden md:table-cell">12.2 MB</td>
-<td class="px-6 py-4 text-sm text-on-surface-variant hidden sm:table-cell">Oct 05, 2023</td>
-<td class="px-6 py-4 text-right">
-<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-1 hover:text-primary"><span class="material-symbols-outlined text-xl" data-icon="download">download</span></button>
-<button class="p-1 hover:text-primary"><span class="material-symbols-outlined text-xl" data-icon="share">share</span></button>
-<button class="p-1 hover:text-error"><span class="material-symbols-outlined text-xl" data-icon="delete">delete</span></button>
-</div>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-</div>
-</main>
-</div>
-<!-- Mobile Navigation (BottomNavBar) -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant flex justify-around items-center py-3 px-6 z-50">
-<button class="flex flex-col items-center gap-1 text-on-surface-variant">
-<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-<span class="text-[10px] font-label-md">Home</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant">
-<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
-<span class="text-[10px] font-label-md">Learning</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-primary">
-<span class="material-symbols-outlined" data-icon="folder_open" style="font-variation-settings: &quot;FILL&quot; 1;">folder_open</span>
-<span class="text-[10px] font-label-md">Library</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant">
-<span class="material-symbols-outlined" data-icon="settings">settings</span>
-<span class="text-[10px] font-label-md">Settings</span>
-</button>
-</nav>
-<script>
-    // ── Functional File Upload System ──
-    const dropZone = document.querySelector('.lg\\:col-span-8');
-    const browseBtn = dropZone ? dropZone.querySelector('button') : null;
+                    </div>
+                    <!-- Quick Stats/Info Card -->
+                    <div class="lg:col-span-4 flex flex-col gap-card-gap">
+                        <div
+                            class="bg-tertiary-container text-on-tertiary-container rounded-3xl p-6 flex-1 flex flex-col justify-between overflow-hidden relative justify-center">
+                            <div class="relative z-10 text-left">
+                                <span class="material-symbols-outlined text-4xl mb-4"
+                                    data-icon="auto_awesome">auto_awesome</span>
+                                <h4 class="font-headline-md text-headline-md">Smart Indexing</h4>
+                                <p class="font-body-md mt-2 opacity-90">All uploaded documents are automatically
+                                    transcribed and indexed for AI-powered global search.</p>
+                            </div>
+                            <div class="absolute -bottom-4 -right-4 opacity-20">
+                                <span class="material-symbols-outlined text-[120px]"
+                                    data-icon="psychology">psychology</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-secondary-container text-on-secondary-container rounded-3xl p-6 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-headline-md text-headline-md">Recent Activity</h4>
+                                <div class="mt-4 space-y-3">
+                                    <div class="flex items-center gap-3 text-sm">
+                                        <div class="w-2 h-2 rounded-full bg-on-secondary-container"></div>
+                                        <p class="">Added <span class="font-bold">Ethics_Guide.pdf</span></p>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-sm opacity-80">
+                                        <div class="w-2 h-2 rounded-full bg-on-secondary-container/40"></div>
+                                        <p class="">Shared <span class="font-bold">Project_Alpha</span> folder</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a class="text-sm font-bold underline mt-4" href="#">View activity log</a>
+                        </div>
+                    </div>
+                </section>
+                <!-- Storage Explorer -->
+                <section class="space-y-6">
+                    <div class="flex items-center justify-between border-b border-outline-variant items-end">
+                        <div class="flex items-center gap-6 flex-row">
+                            <button
+                                class="font-label-md text-label-md text-primary border-b-2 border-primary pb-4 whitespace-nowrap">All
+                                Materials</button>
+                            <button
+                                class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors pb-4 whitespace-nowrap border-b-2 border-transparent">Shared
+                                with Me</button>
+                            <button
+                                class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors pb-4 whitespace-nowrap border-b-2 border-transparent">Starred</button>
+                        </div>
+                        <div class="flex items-center gap-2 pb-2">
+                            <button class="p-2 rounded-lg bg-surface-container-high text-on-surface">
+                                <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+                            </button>
+                            <button
+                                class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
+                                <span class="material-symbols-outlined" data-icon="view_list">view_list</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Folders Grid -->
+                    <div>
+                        <h4
+                            class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-4 mt-4">
+                            Folders</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-card-gap">
+                            <!-- Folder 1: Learning Materials -->
+                            <a href="/learning-materials"
+                                class="folder-card bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group px-6 py-4 no-underline">
+                                <div
+                                    class="folder-icon w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center transition-transform">
+                                    <span class="material-symbols-outlined text-primary text-3xl" data-icon="folder"
+                                        style="font-variation-settings: &quot;FILL&quot; 1;">folder</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-headline-md text-on-surface text-body-lg font-bold">Learning
+                                        Materials</p>
+                                    <p class="text-xs text-on-surface-variant" id="materials-count">Loading...</p>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity"
+                                    data-icon="arrow_forward">arrow_forward</span>
+                            </a>
+                            <!-- Folder 2: Learning Paths -->
+                            <a href="/learning-paths-catalog"
+                                class="folder-card bg-surface-container-lowest border border-outline-variant rounded-2xl flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group px-6 py-4 no-underline">
+                                <div
+                                    class="folder-icon w-12 h-12 bg-secondary-fixed rounded-xl flex items-center justify-center transition-transform">
+                                    <span class="material-symbols-outlined text-secondary text-3xl" data-icon="folder"
+                                        style="font-variation-settings: &quot;FILL&quot; 1;">folder</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-headline-md text-on-surface text-body-lg font-bold">Learning Paths
+                                    </p>
+                                    <p class="text-xs text-on-surface-variant" id="paths-count">Loading...</p>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity"
+                                    data-icon="arrow_forward">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Files Table-style Grid -->
+                    <div class="mt-10">
+                        <h4 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-4">
+                            Individual Files</h4>
+                        <div
+                            class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-surface-container-low border-b border-outline-variant">
+                                    <tr>
+                                        <th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant">Name
+                                        </th>
+                                        <th
+                                            class="px-6 py-4 font-label-md text-label-md text-on-surface-variant hidden md:table-cell">
+                                            Size</th>
+                                        <th
+                                            class="px-6 py-4 font-label-md text-label-md text-on-surface-variant hidden sm:table-cell">
+                                            Date Added</th>
+                                        <th
+                                            class="px-6 py-4 font-label-md text-label-md text-on-surface-variant text-right">
+                                            Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant/30">
+                                    <!-- File 1 -->
+                                    <tr class="hover:bg-surface-container transition-colors group cursor-pointer">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <span class="material-symbols-outlined text-error"
+                                                    data-icon="picture_as_pdf">picture_as_pdf</span>
+                                                <span
+                                                    class="font-body-md text-on-surface font-semibold">Q3_Learning_Roadmap.pdf</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-on-surface-variant hidden md:table-cell">2.4
+                                            MB</td>
+                                        <td class="px-6 py-4 text-sm text-on-surface-variant hidden sm:table-cell">Oct
+                                            12, 2023</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div
+                                                class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button class="p-1 hover:text-primary"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="download">download</span></button>
+                                                <button class="p-1 hover:text-primary"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="share">share</span></button>
+                                                <button class="p-1 hover:text-error"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="delete">delete</span></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- File 2 -->
+                                    <tr class="hover:bg-surface-container transition-colors group cursor-pointer">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <span class="material-symbols-outlined text-blue-500"
+                                                    data-icon="description">description</span>
+                                                <span
+                                                    class="font-body-md text-on-surface font-semibold">Architecture_Review_V2.docx</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-on-surface-variant hidden md:table-cell">850
+                                            KB</td>
+                                        <td class="px-6 py-4 text-sm text-on-surface-variant hidden sm:table-cell">Oct
+                                            10, 2023</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div
+                                                class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button class="p-1 hover:text-primary"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="download">download</span></button>
+                                                <button class="p-1 hover:text-primary"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="share">share</span></button>
+                                                <button class="p-1 hover:text-error"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="delete">delete</span></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- File 3 -->
+                                    <tr class="hover:bg-surface-container transition-colors group cursor-pointer">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <span class="material-symbols-outlined text-tertiary"
+                                                    data-icon="image">image</span>
+                                                <span
+                                                    class="font-body-md text-on-surface font-semibold">Hero_Banner_Draft.png</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-on-surface-variant hidden md:table-cell">12.2
+                                            MB</td>
+                                        <td class="px-6 py-4 text-sm text-on-surface-variant hidden sm:table-cell">Oct
+                                            05, 2023</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div
+                                                class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button class="p-1 hover:text-primary"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="download">download</span></button>
+                                                <button class="p-1 hover:text-primary"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="share">share</span></button>
+                                                <button class="p-1 hover:text-error"><span
+                                                        class="material-symbols-outlined text-xl"
+                                                        data-icon="delete">delete</span></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <!-- Mobile Navigation (BottomNavBar) -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant flex justify-around items-center py-3 px-6 z-50">
+        <button class="flex flex-col items-center gap-1 text-on-surface-variant">
+            <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span class="text-[10px] font-label-md">Home</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-on-surface-variant">
+            <span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+            <span class="text-[10px] font-label-md">Learning</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-primary">
+            <span class="material-symbols-outlined" data-icon="folder_open"
+                style="font-variation-settings: &quot;FILL&quot; 1;">folder_open</span>
+            <span class="text-[10px] font-label-md">Library</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-on-surface-variant">
+            <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            <span class="text-[10px] font-label-md">Settings</span>
+        </button>
+    </nav>
+    <script>
+            // ── Load Catalog Folder Counts ──
+            (async function loadCatalogCounts() {
+                try {
+                    const [inputsRes, pathsRes] = await Promise.all([
+                        fetch('/api/kb/catalog/inputs'),
+                        fetch('/api/kb/catalog/learning-paths'),
+                    ]);
+                    const inputs = await inputsRes.json();
+                    const paths = await pathsRes.json();
 
-    // Create hidden file input
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.txt,.md';
-    fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
+                    const materialsEl = document.getElementById('materials-count');
+                    if (materialsEl) {
+                        const totalSize = inputs.inputs.reduce((sum, f) => sum + f.size_bytes, 0);
+                        const sizeStr = totalSize > 1048576 ? `${(totalSize / 1048576).toFixed(1)} MB` : `${(totalSize / 1024).toFixed(0)} KB`;
+                        materialsEl.textContent = `${inputs.count} files • ${sizeStr}`;
+                    }
 
-    // Create loading overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'upload-overlay';
-    overlay.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden';
-    overlay.innerHTML = `
+                    const pathsEl = document.getElementById('paths-count');
+                    if (pathsEl) {
+                        pathsEl.textContent = `${paths.count} paths • ${paths.official_count} official`;
+                    }
+                } catch (e) {
+                    const materialsEl = document.getElementById('materials-count');
+                    if (materialsEl) materialsEl.textContent = '0 files';
+                    const pathsEl = document.getElementById('paths-count');
+                    if (pathsEl) pathsEl.textContent = '0 paths';
+                }
+            })();
+
+        // ── Functional File Upload System ──
+        const dropZone = document.querySelector('.lg\\:col-span-8');
+        const browseBtn = dropZone ? dropZone.querySelector('button') : null;
+
+        // Create hidden file input
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt,.md';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        // Create loading overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'upload-overlay';
+        overlay.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden';
+        overlay.innerHTML = `
         <div class="bg-surface-container-lowest rounded-3xl p-10 max-w-md w-full mx-4 text-center shadow-2xl border border-outline-variant">
             <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-primary-container/20 flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl text-primary animate-spin">sync</span>
             </div>
-            <h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Analyzing Document</h3>
-            <p class="font-body-md text-on-surface-variant mb-6">Splitting content into curriculum, generating lessons and quizzes...</p>
+            <h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Uploading Document</h3>
+            <p class="font-body-md text-on-surface-variant mb-6">Saving file to your Learning Materials catalog...</p>
             <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
                 <div class="bg-primary h-full rounded-full animate-pulse" style="width: 70%"></div>
             </div>
         </div>
     `;
-    document.body.appendChild(overlay);
+        document.body.appendChild(overlay);
 
-    // Browse button triggers file input
-    if (browseBtn) {
-        browseBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            fileInput.click();
-        });
-    }
-
-    // File input change handler
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            uploadFile(e.target.files[0]);
-        }
-    });
-
-    // Drag & Drop handlers
-    if (dropZone) {
-        ['dragenter', 'dragover'].forEach(event => {
-            dropZone.addEventListener(event, (e) => {
+        // Browse button triggers file input
+        if (browseBtn) {
+            browseBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.add('border-primary', 'bg-primary-container/10', 'scale-[1.02]');
-                dropZone.classList.remove('border-outline-variant');
-            });
-        });
-
-        ['dragleave', 'drop'].forEach(event => {
-            dropZone.addEventListener(event, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.remove('border-primary', 'bg-primary-container/10', 'scale-[1.02]');
-                dropZone.classList.add('border-outline-variant');
-            });
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                uploadFile(files[0]);
-            }
-        });
-
-        // Make the whole zone clickable
-        dropZone.addEventListener('click', (e) => {
-            if (e.target === dropZone || e.target.closest('.lg\\:col-span-8') === dropZone) {
                 fileInput.click();
+            });
+        }
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                uploadFile(e.target.files[0]);
             }
         });
-    }
 
-    async function uploadFile(file) {
-        // Validate file type
-        const ext = file.name.split('.').pop().toLowerCase();
-        if (!['txt', 'md'].includes(ext)) {
-            showToast('Only .txt and .md files are supported.', 'error');
-            return;
-        }
-
-        // Show loading overlay
-        overlay.classList.remove('hidden');
-
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            const appendCheckbox = document.getElementById('append-checkbox');
-            if (appendCheckbox) {
-                formData.append('append_to_latest', appendCheckbox.checked);
-            }
-
-            const res = await fetch('/api/kb/upload', {
-                method: 'POST',
-                body: formData,
+        // Drag & Drop handlers
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(event => {
+                dropZone.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.add('border-primary', 'bg-primary-container/10', 'scale-[1.02]');
+                    dropZone.classList.remove('border-outline-variant');
+                });
             });
 
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
-                throw new Error(err.detail || 'Upload failed');
+            ['dragleave', 'drop'].forEach(event => {
+                dropZone.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.remove('border-primary', 'bg-primary-container/10', 'scale-[1.02]');
+                    dropZone.classList.add('border-outline-variant');
+                });
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    uploadFile(files[0]);
+                }
+            });
+
+            // Make the whole zone clickable
+            dropZone.addEventListener('click', (e) => {
+                if (e.target === dropZone || e.target.closest('.lg\\:col-span-8') === dropZone) {
+                    fileInput.click();
+                }
+            });
+        }
+
+        async function uploadFile(file) {
+            // Validate file type
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!['txt', 'md'].includes(ext)) {
+                showToast('Only .txt and .md files are supported.', 'error');
+                return;
             }
 
-            const result = await res.json();
+            // Show loading overlay
+            overlay.classList.remove('hidden');
 
-            // Update overlay to success state
-            overlay.querySelector('.animate-spin').textContent = 'check_circle';
-            overlay.querySelector('.animate-spin').classList.remove('animate-spin');
-            overlay.querySelector('.animate-spin')?.classList.add('text-tertiary');
-            overlay.querySelector('h3').textContent = 'Curriculum Generated!';
-            overlay.querySelector('p').textContent = `Created ${result.total_lessons} lessons • ${result.total_estimated_hours}h estimated`;
-            overlay.querySelector('.animate-pulse').style.width = '100%';
-            overlay.querySelector('.animate-pulse').classList.remove('animate-pulse');
-            overlay.querySelector('.animate-pulse')?.classList.add('bg-tertiary');
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
 
-            // Add navigation button
-            const btnContainer = document.createElement('div');
-            btnContainer.className = 'mt-6 flex gap-3 justify-center';
-            btnContainer.innerHTML = `
-                <a href="/learning-path" class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold squishy-button primary-squishy no-underline flex items-center gap-2">
-                    <span class="material-symbols-outlined">route</span>
-                    View Learning Path
-                </a>
-                <button onclick="document.getElementById('upload-overlay').classList.add('hidden')" class="px-6 py-3 border-2 border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all">
-                    Close
-                </button>
-            `;
-            overlay.querySelector('.bg-surface-container-lowest').appendChild(btnContainer);
+                const appendCheckbox = document.getElementById('append-checkbox');
+                if (appendCheckbox) {
+                    formData.append('append_to_latest', appendCheckbox.checked);
+                }
 
-        } catch (err) {
-            overlay.querySelector('.animate-spin').textContent = 'error';
-            overlay.querySelector('.animate-spin').classList.remove('animate-spin');
-            overlay.querySelector('h3').textContent = 'Upload Failed';
-            overlay.querySelector('p').textContent = err.message;
+                const res = await fetch('/api/kb/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
 
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                // Reset overlay for next use
-                resetOverlay();
-            }, 3000);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+                    throw new Error(err.detail || 'Upload failed');
+                }
+
+                const result = await res.json();
+
+                // Update overlay to success state
+                overlay.querySelector('.animate-spin').textContent = 'check_circle';
+                overlay.querySelector('.animate-spin').classList.remove('animate-spin');
+                overlay.querySelector('.animate-spin')?.classList.add('text-tertiary');
+                overlay.querySelector('h3').textContent = 'Upload Successful!';
+                overlay.querySelector('p').textContent = `Redirecting to Learning Materials...`;
+                overlay.querySelector('.animate-pulse').style.width = '100%';
+                overlay.querySelector('.animate-pulse').classList.remove('animate-pulse');
+                overlay.querySelector('.animate-pulse')?.classList.add('bg-tertiary');
+
+                // Redirect after a brief moment
+                setTimeout(() => {
+                    window.location.href = '/learning-materials';
+                }, 800);
+
+            } catch (err) {
+                overlay.querySelector('.animate-spin').textContent = 'error';
+                overlay.querySelector('.animate-spin').classList.remove('animate-spin');
+                overlay.querySelector('h3').textContent = 'Upload Failed';
+                overlay.querySelector('p').textContent = err.message;
+
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    // Reset overlay for next use
+                    resetOverlay();
+                }, 3000);
+            }
         }
-    }
 
-    function resetOverlay() {
-        const icon = overlay.querySelector('.material-symbols-outlined');
-        if (icon) {
-            icon.textContent = 'sync';
-            icon.classList.add('animate-spin');
+        function resetOverlay() {
+            const icon = overlay.querySelector('.material-symbols-outlined');
+            if (icon) {
+                icon.textContent = 'sync';
+                icon.classList.add('animate-spin');
+            }
+            const h3 = overlay.querySelector('h3');
+            if (h3) h3.textContent = 'Analyzing Document';
+            const p = overlay.querySelector('p');
+            if (p) p.textContent = 'Splitting content into curriculum, generating lessons and quizzes...';
+            const pulse = overlay.querySelector('.bg-primary, .bg-tertiary');
+            if (pulse) {
+                pulse.style.width = '70%';
+                pulse.classList.add('animate-pulse');
+            }
+            // Remove nav buttons if they exist
+            const btns = overlay.querySelector('.mt-6.flex');
+            if (btns) btns.remove();
         }
-        const h3 = overlay.querySelector('h3');
-        if (h3) h3.textContent = 'Analyzing Document';
-        const p = overlay.querySelector('p');
-        if (p) p.textContent = 'Splitting content into curriculum, generating lessons and quizzes...';
-        const pulse = overlay.querySelector('.bg-primary, .bg-tertiary');
-        if (pulse) {
-            pulse.style.width = '70%';
-            pulse.classList.add('animate-pulse');
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all ${type === 'error' ? 'bg-error' : 'bg-primary'}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
-        // Remove nav buttons if they exist
-        const btns = overlay.querySelector('.mt-6.flex');
-        if (btns) btns.remove();
-    }
+    </script>
 
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all ${type === 'error' ? 'bg-error' : 'bg-primary'}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-</script>
+    <script src="/js/api-client.js"></script>
+    <script src="/js/theme-toggle.js"></script>
+</body>
 
-<script src="/js/api-client.js"></script>
-<script src="/js/theme-toggle.js"></script>
-</body></html>
+</html>

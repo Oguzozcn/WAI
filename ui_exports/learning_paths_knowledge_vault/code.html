@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#d6dbdd",
+                        "on-secondary-container": "#004966",
+                        "surface": "#f6fafd",
+                        "on-surface": "#171c1f",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#95ccff",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#c5e7ff",
+                        "tertiary": "#255f00",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#0070ad",
+                        "primary": "#005787",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#2c3134",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f6fafd",
+                        "on-primary-fixed": "#001d32",
+                        "secondary-container": "#2abcfd",
+                        "on-primary-fixed-variant": "#004a75",
+                        "surface-container": "#eaeef1",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#001e2d",
+                        "primary-fixed": "#cde5ff",
+                        "tertiary-container": "#327a00",
+                        "on-secondary-fixed-variant": "#004c6a",
+                        "surface-container-low": "#f0f4f7",
+                        "surface-container-high": "#e5e9ec",
+                        "secondary-fixed-dim": "#80d0ff",
+                        "on-tertiary-container": "#bbff92",
+                        "surface-container-highest": "#dfe3e6",
+                        "on-tertiary-fixed-variant": "#1f5100",
+                        "tertiary-fixed-dim": "#6be026",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dfe3e6",
+                        "primary-fixed-dim": "#95ccff",
+                        "on-background": "#171c1f",
+                        "surface-tint": "#00639a",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#87fe45",
+                        "on-primary-container": "#e0eeff",
+                        "on-tertiary-fixed": "#082100",
+                        "outline": "#707881",
+                        "inverse-on-surface": "#edf1f4",
+                        "secondary": "#00658c",
+                        "background": "#f6fafd",
+                        "on-surface-variant": "#404750",
+                        "outline-variant": "#c0c7d1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-desktop": "40px",
+                        "card-gap": "20px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "stats-number": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "label-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "stats-number": ["24px", { "lineHeight": "24px", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLtbVyrsB4MLy2ewhWMTkI7NGDk30E7oCKgFDMOoADNghIrSf4SvYo-poGQTreWbjXeYpR9rFhDDv1s01EFwHdAdRXQsFEUaxFvRXLL0QQGaivkejpuIf-MGtlyZaN36D9XJrfc3CgglukGdBbs_CwdvW9KQrmVXvNAC_kAqF1vOszp13oVAvv9wRByO0dzQxel1ATYKKa2Bc70q4a1XF3YhR6-ocdfPW_DslkHLG8QK2-SSTNQAu6_5VopDvOtxB-PnqMppdp4WJg"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">route</span>
+<span class="font-label-md text-label-md">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-label-md text-label-md">Knowledge Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a></nav>
+<div class="mt-auto pt-6 border-t border-outline-variant">
+<div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a></div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col w-full min-w-0 relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden lg:flex items-center gap-4 mr-4">
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
+<span class="font-stats-number text-sm text-on-surface">2.4k</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 w-full max-w-[1000px] mx-auto p-margin-mobile md:p-margin-desktop md:ml-64">
+<!-- Breadcrumbs & Header -->
+<div class="mb-8">
+<div class="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
+<a class="hover:text-primary transition-colors font-body-md" href="#">Knowledge Vault</a>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="font-body-md text-on-surface font-medium">Learning Paths</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Learning Paths</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Curated curriculums designed to elevate your professional expertise.</p>
+</div>
+<!-- Path Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
+<!-- Card 1: AI Architect Foundation -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col group hover:shadow-[0_4px_0_0_#0070ad] hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+<div class="h-32 bg-primary/10 relative flex items-center justify-center border-b border-outline-variant">
+<span class="material-symbols-outlined text-5xl text-primary" data-icon="architecture">architecture</span>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 rounded text-xs font-label-md text-primary font-bold shadow-sm">AI &amp; ML</div>
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">AI Architect Foundation</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4 flex-1">Master the principles of designing scalable and robust artificial intelligence solutions for enterprise applications.</p>
+<div class="mt-auto">
+<div class="flex justify-between items-end mb-2">
+<div class="flex flex-col">
+<span class="text-xs font-label-md text-on-surface-variant uppercase tracking-wider">Progress</span>
+<span class="font-stats-number text-stats-number text-primary">75%</span>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">view_module</span> 12 Modules</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">schedule</span> 15 hrs</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full" style="width: 75%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Cloud DevOps Masterclass -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col group hover:shadow-[0_4px_0_0_#0070ad] hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+<div class="h-32 bg-secondary/10 relative flex items-center justify-center border-b border-outline-variant">
+<span class="material-symbols-outlined text-5xl text-secondary" data-icon="cloud_sync">cloud_sync</span>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 rounded text-xs font-label-md text-secondary font-bold shadow-sm">DevOps</div>
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Cloud DevOps Masterclass</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4 flex-1">Comprehensive guide to CI/CD pipelines, container orchestration, and infrastructure as code across major cloud providers.</p>
+<div class="mt-auto">
+<div class="flex justify-between items-end mb-2">
+<div class="flex flex-col">
+<span class="text-xs font-label-md text-on-surface-variant uppercase tracking-wider">Progress</span>
+<span class="font-stats-number text-stats-number text-tertiary">100%</span>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">view_module</span> 8 Modules</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">emoji_events</span> Earned Badge</span>
+</div>
+</div>
+<div class="w-full bg-tertiary h-2 rounded-full overflow-hidden"></div>
+</div>
+</div>
+</div>
+<!-- Card 3: Data Engineering Essentials -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col group hover:shadow-[0_4px_0_0_#0070ad] hover:-translate-y-1 transition-all duration-200 cursor-pointer opacity-80">
+<div class="h-32 bg-surface-variant/30 relative flex items-center justify-center border-b border-outline-variant">
+<span class="material-symbols-outlined text-5xl text-on-surface-variant" data-icon="database">database</span>
+<div class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 rounded text-xs font-label-md text-on-surface-variant font-bold shadow-sm">Data</div>
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Data Engineering Essentials</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4 flex-1">Learn to build robust data pipelines, implement ETL processes, and manage large-scale data warehouses efficiently.</p>
+<div class="mt-auto">
+<div class="flex justify-between items-end mb-2">
+<div class="flex flex-col">
+<span class="text-xs font-label-md text-on-surface-variant uppercase tracking-wider">Status</span>
+<span class="font-label-md text-label-md text-on-surface-variant mt-1">Not Started</span>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">view_module</span> 15 Modules</span>
+<span class="text-xs text-on-surface-variant flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">schedule</span> 22 hrs</span>
+</div>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+
+
+
+
+</body></html>

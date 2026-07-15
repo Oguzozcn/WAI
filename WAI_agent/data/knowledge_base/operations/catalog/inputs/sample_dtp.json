@@ -1,0 +1,166 @@
+{
+  "dtp_id": "dtp_capital_cities_v1",
+  "title": "Capital Cities of the World — Training Manual",
+  "version": "1.0",
+  "department": "operations",
+  "description": "Comprehensive Desktop Procedure for learning world capital cities organized by region. This DTP covers identification, geographical mapping, and edge cases.",
+  "courses": [
+    {
+      "course_id": "course_01",
+      "title": "European Capitals — Western Europe",
+      "description": "Learn the capital cities of Western European nations",
+      "estimated_hours": 1.5,
+      "topics": ["european_capitals", "western_europe"],
+      "content": "Western European Capitals:\n- France → Paris\n- Germany → Berlin\n- Spain → Madrid\n- Portugal → Lisbon\n- Italy → Rome\n- Netherlands → Amsterdam (constitutional), The Hague (governmental)\n- Belgium → Brussels\n- Luxembourg → Luxembourg City\n- Austria → Vienna\n- Switzerland → Bern\n\nKey Edge Case: The Netherlands has two capitals. Amsterdam is the constitutional capital, but The Hague is the seat of government.",
+      "key_facts": [
+        {"country": "France", "capital": "Paris"},
+        {"country": "Germany", "capital": "Berlin"},
+        {"country": "Spain", "capital": "Madrid"},
+        {"country": "Portugal", "capital": "Lisbon"},
+        {"country": "Italy", "capital": "Rome"},
+        {"country": "Netherlands", "capital": "Amsterdam / The Hague"},
+        {"country": "Belgium", "capital": "Brussels"},
+        {"country": "Austria", "capital": "Vienna"},
+        {"country": "Switzerland", "capital": "Bern"}
+      ]
+    },
+    {
+      "course_id": "course_02",
+      "title": "European Capitals — Eastern & Northern Europe",
+      "description": "Learn the capital cities of Eastern and Northern European nations",
+      "estimated_hours": 1.5,
+      "topics": ["european_capitals", "eastern_europe", "northern_europe"],
+      "content": "Eastern & Northern European Capitals:\n- Poland → Warsaw\n- Czech Republic → Prague\n- Hungary → Budapest\n- Romania → Bucharest\n- Greece → Athens\n- Sweden → Stockholm\n- Norway → Oslo\n- Finland → Helsinki\n- Denmark → Copenhagen\n- Iceland → Reykjavik\n\nKey Facts: Budapest is actually two cities (Buda and Pest) united in 1873. Prague is one of the oldest capitals in Europe.",
+      "key_facts": [
+        {"country": "Poland", "capital": "Warsaw"},
+        {"country": "Czech Republic", "capital": "Prague"},
+        {"country": "Hungary", "capital": "Budapest"},
+        {"country": "Romania", "capital": "Bucharest"},
+        {"country": "Greece", "capital": "Athens"},
+        {"country": "Sweden", "capital": "Stockholm"},
+        {"country": "Norway", "capital": "Oslo"},
+        {"country": "Finland", "capital": "Helsinki"},
+        {"country": "Denmark", "capital": "Copenhagen"}
+      ]
+    },
+    {
+      "course_id": "course_03",
+      "title": "Asian Capitals — East Asia",
+      "description": "Learn the capital cities of East Asian nations",
+      "estimated_hours": 1.5,
+      "topics": ["asian_capitals", "east_asia"],
+      "content": "East Asian Capitals:\n- China → Beijing\n- Japan → Tokyo\n- South Korea → Seoul\n- North Korea → Pyongyang\n- Mongolia → Ulaanbaatar\n- Taiwan → Taipei\n\nKey Facts: Tokyo is the most populous metropolitan area in the world. Beijing means 'Northern Capital' in Mandarin.",
+      "key_facts": [
+        {"country": "China", "capital": "Beijing"},
+        {"country": "Japan", "capital": "Tokyo"},
+        {"country": "South Korea", "capital": "Seoul"},
+        {"country": "Mongolia", "capital": "Ulaanbaatar"},
+        {"country": "Taiwan", "capital": "Taipei"}
+      ]
+    },
+    {
+      "course_id": "course_04",
+      "title": "Asian Capitals — South & Southeast Asia",
+      "description": "Learn the capital cities of South and Southeast Asian nations",
+      "estimated_hours": 1.5,
+      "topics": ["asian_capitals", "south_asia", "southeast_asia"],
+      "content": "South & Southeast Asian Capitals:\n- India → New Delhi\n- Pakistan → Islamabad\n- Bangladesh → Dhaka\n- Sri Lanka → Sri Jayawardenepura Kotte (legislative), Colombo (commercial)\n- Thailand → Bangkok\n- Vietnam → Hanoi\n- Philippines → Manila\n- Indonesia → Jakarta (moving to Nusantara)\n- Malaysia → Kuala Lumpur (official), Putrajaya (administrative)\n- Myanmar → Naypyidaw\n- Singapore → Singapore (city-state)\n\nKey Edge Cases:\n- Myanmar moved its capital from Yangon to Naypyidaw in 2006\n- Indonesia is relocating its capital from Jakarta to Nusantara\n- Malaysia has two capitals: KL is official, Putrajaya is administrative",
+      "key_facts": [
+        {"country": "India", "capital": "New Delhi"},
+        {"country": "Thailand", "capital": "Bangkok"},
+        {"country": "Vietnam", "capital": "Hanoi"},
+        {"country": "Indonesia", "capital": "Jakarta / Nusantara"},
+        {"country": "Myanmar", "capital": "Naypyidaw"},
+        {"country": "Malaysia", "capital": "Kuala Lumpur / Putrajaya"}
+      ]
+    },
+    {
+      "course_id": "course_05",
+      "title": "Americas — North & Central America",
+      "description": "Learn the capital cities of North and Central American nations",
+      "estimated_hours": 1.0,
+      "topics": ["american_capitals", "north_america", "central_america"],
+      "content": "North & Central American Capitals:\n- United States → Washington, D.C.\n- Canada → Ottawa\n- Mexico → Mexico City\n- Guatemala → Guatemala City\n- Cuba → Havana\n- Panama → Panama City\n- Costa Rica → San José\n- Jamaica → Kingston\n\nKey Facts: Many people incorrectly think New York or Toronto are capitals. Washington D.C. is a federal district, not a state.",
+      "key_facts": [
+        {"country": "United States", "capital": "Washington, D.C."},
+        {"country": "Canada", "capital": "Ottawa"},
+        {"country": "Mexico", "capital": "Mexico City"},
+        {"country": "Cuba", "capital": "Havana"},
+        {"country": "Costa Rica", "capital": "San José"}
+      ]
+    },
+    {
+      "course_id": "course_06",
+      "title": "Americas — South America",
+      "description": "Learn the capital cities of South American nations",
+      "estimated_hours": 1.0,
+      "topics": ["american_capitals", "south_america"],
+      "content": "South American Capitals:\n- Brazil → Brasília\n- Argentina → Buenos Aires\n- Colombia → Bogotá\n- Peru → Lima\n- Chile → Santiago\n- Venezuela → Caracas\n- Ecuador → Quito\n- Bolivia → Sucre (constitutional), La Paz (governmental)\n- Paraguay → Asunción\n- Uruguay → Montevideo\n\nKey Edge Case: Bolivia has two capitals — Sucre is the constitutional capital and seat of the judiciary, while La Paz is the seat of government and executive/legislative branches.",
+      "key_facts": [
+        {"country": "Brazil", "capital": "Brasília"},
+        {"country": "Argentina", "capital": "Buenos Aires"},
+        {"country": "Colombia", "capital": "Bogotá"},
+        {"country": "Peru", "capital": "Lima"},
+        {"country": "Bolivia", "capital": "Sucre / La Paz"}
+      ]
+    },
+    {
+      "course_id": "course_07",
+      "title": "African Capitals — North & West Africa",
+      "description": "Learn the capital cities of North and West African nations",
+      "estimated_hours": 1.5,
+      "topics": ["african_capitals", "north_africa", "west_africa"],
+      "content": "North & West African Capitals:\n- Egypt → Cairo\n- Morocco → Rabat\n- Algeria → Algiers\n- Tunisia → Tunis\n- Libya → Tripoli\n- Nigeria → Abuja\n- Ghana → Accra\n- Senegal → Dakar\n- Ivory Coast → Yamoussoukro (official), Abidjan (economic)\n\nKey Facts: Nigeria moved its capital from Lagos to Abuja in 1991. Many people still think Lagos is the capital.",
+      "key_facts": [
+        {"country": "Egypt", "capital": "Cairo"},
+        {"country": "Morocco", "capital": "Rabat"},
+        {"country": "Nigeria", "capital": "Abuja"},
+        {"country": "Ghana", "capital": "Accra"},
+        {"country": "Ivory Coast", "capital": "Yamoussoukro / Abidjan"}
+      ]
+    },
+    {
+      "course_id": "course_08",
+      "title": "African Capitals — East & Southern Africa",
+      "description": "Learn the capital cities of East and Southern African nations",
+      "estimated_hours": 1.5,
+      "topics": ["african_capitals", "east_africa", "southern_africa"],
+      "content": "East & Southern African Capitals:\n- Kenya → Nairobi\n- Ethiopia → Addis Ababa\n- Tanzania → Dodoma (official), Dar es Salaam (former, largest city)\n- South Africa → Pretoria (executive), Bloemfontein (judicial), Cape Town (legislative)\n- Zimbabwe → Harare\n- Mozambique → Maputo\n- Madagascar → Antananarivo\n\nKey Edge Case: South Africa has THREE capitals — Pretoria (executive), Bloemfontein (judicial), and Cape Town (legislative). This is the most complex multi-capital arrangement in the world.",
+      "key_facts": [
+        {"country": "Kenya", "capital": "Nairobi"},
+        {"country": "Ethiopia", "capital": "Addis Ababa"},
+        {"country": "South Africa", "capital": "Pretoria / Bloemfontein / Cape Town"},
+        {"country": "Tanzania", "capital": "Dodoma"}
+      ]
+    },
+    {
+      "course_id": "course_09",
+      "title": "Middle East & Oceania",
+      "description": "Learn the capital cities of Middle Eastern and Oceanian nations",
+      "estimated_hours": 1.0,
+      "topics": ["middle_east_capitals", "oceania_capitals"],
+      "content": "Middle Eastern Capitals:\n- Turkey → Ankara\n- Saudi Arabia → Riyadh\n- UAE → Abu Dhabi\n- Israel → Jerusalem (declared), Tel Aviv (international recognition)\n- Iraq → Baghdad\n- Iran → Tehran\n\nOceanian Capitals:\n- Australia → Canberra\n- New Zealand → Wellington\n- Fiji → Suva\n- Papua New Guinea → Port Moresby\n\nKey Facts: Many people think Sydney is Australia's capital (it's Canberra). Istanbul is Turkey's largest city but Ankara is the capital.",
+      "key_facts": [
+        {"country": "Turkey", "capital": "Ankara"},
+        {"country": "Saudi Arabia", "capital": "Riyadh"},
+        {"country": "UAE", "capital": "Abu Dhabi"},
+        {"country": "Australia", "capital": "Canberra"},
+        {"country": "New Zealand", "capital": "Wellington"}
+      ]
+    },
+    {
+      "course_id": "course_10",
+      "title": "Comprehensive Review & Edge Cases",
+      "description": "Review all regions and master the tricky edge cases — countries with multiple capitals, recent capital changes, and common misconceptions",
+      "estimated_hours": 2.0,
+      "topics": ["comprehensive_review", "edge_cases", "multiple_capitals"],
+      "content": "EDGE CASES — Countries with Multiple Capitals:\n1. South Africa: Pretoria (executive), Bloemfontein (judicial), Cape Town (legislative)\n2. Bolivia: Sucre (constitutional), La Paz (governmental)\n3. Malaysia: Kuala Lumpur (official), Putrajaya (administrative)\n4. Netherlands: Amsterdam (constitutional), The Hague (governmental)\n5. Sri Lanka: Sri Jayawardenepura Kotte (legislative), Colombo (commercial)\n6. Ivory Coast: Yamoussoukro (official), Abidjan (economic)\n7. Tanzania: Dodoma (official), Dar es Salaam (former)\n\nRECENT CAPITAL CHANGES:\n- Myanmar: Yangon → Naypyidaw (2006)\n- Nigeria: Lagos → Abuja (1991)\n- Brazil: Rio de Janeiro → Brasília (1960)\n- Indonesia: Jakarta → Nusantara (ongoing)\n\nCOMMON MISCONCEPTIONS:\n- New York is NOT the capital of the USA (Washington, D.C.)\n- Sydney is NOT the capital of Australia (Canberra)\n- Istanbul is NOT the capital of Turkey (Ankara)\n- Toronto is NOT the capital of Canada (Ottawa)\n- São Paulo is NOT the capital of Brazil (Brasília)\n- Lagos is NOT the capital of Nigeria (Abuja)",
+      "key_facts": [
+        {"topic": "South Africa has 3 capitals", "details": "Pretoria, Bloemfontein, Cape Town"},
+        {"topic": "Myanmar changed capital in 2006", "details": "Yangon → Naypyidaw"},
+        {"topic": "Common mistake: Sydney ≠ Australia's capital", "details": "Canberra is the capital"},
+        {"topic": "Common mistake: New York ≠ USA's capital", "details": "Washington, D.C. is the capital"}
+      ]
+    }
+  ]
+}
