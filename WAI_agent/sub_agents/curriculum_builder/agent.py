@@ -3,7 +3,7 @@
 from google.adk.agents.llm_agent import Agent
 
 from .prompt import CURRICULUM_BUILDER_PROMPT
-from ...tools.curriculum_tools import (
+from src.services.curriculum_service import (
     generate_learning_path,
     generate_daily_agenda,
     identify_content_gaps,

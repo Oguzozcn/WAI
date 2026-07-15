@@ -10,3 +10,4 @@ build/
 *.log
 .agents/
 .gemini/
+data/

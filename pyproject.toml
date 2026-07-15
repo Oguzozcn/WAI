@@ -1,0 +1,19 @@
+[project]
+name = "wisdom-ai-mvp"
+version = "0.1.0"
+description = "Transition Execution AI Platform (TEAP) MVP"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v --tb=short"
+testpaths = ["tests"]
+
+[tool.pyright]
+include = ["src", "WAI_agent", "tests"]
+extraPaths = ["."]

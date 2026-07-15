@@ -134,9 +134,9 @@ class DepartmentScopedStore:
         self.department_id = department_id
 
         if base_path is None:
-            # Default to the data/ directory inside WAI_agent/
+            # Default to the data/ directory at the project root
             base_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                 "data"
             )
         self.base_path = Path(base_path)
@@ -527,7 +527,7 @@ class KPIStoreReader:
     def __init__(self, base_path: str | None = None):
         if base_path is None:
             base_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                 "data"
             )
         self.kpi_store_path = Path(base_path) / "kpi_store"

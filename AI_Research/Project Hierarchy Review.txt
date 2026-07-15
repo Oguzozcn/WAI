@@ -1,0 +1,270 @@
+﻿Architectural Assessment and Professional Reorganization Blueprint for the WisdomAI Platform
+The architectural assessment of the WisdomAI Transition Execution AI Platform (TEAP) reveals a system with highly specialized functional capabilities, including dynamic curriculum generation, adaptive routing, and namespace-isolated corporate reporting1. However, in its current prototype stage, the directory structure and code organization present significant architectural coupling that will impede enterprise scalability, team-based development, and production deployment1.
+This report provides a structural critique of the current layout, defines a refactoring strategy based on FastAPI best practices, aligns the agentic runtime with the Google Antigravity Software Development Kit (SDK) and Agent Development Kit (ADK) specifications, and outlines an enterprise-grade deployment and evaluation framework.
+Structural Critique of the Current Codebase Hierarchy
+The legacy directory structure of the WisdomAI prototype utilizes a flat, co-located layout that mixes web presentation layers, core business logic, agentic execution environments, and local file-based databases within a single root folder1. This design creates immediate operational challenges, as configurations, execution scripts, and static templates compete for the same namespace, violating standard software packaging boundaries2.
+WAI-main/ ├── server.py ← FastAPI application entry point ├── requirements.txt ← Python dependencies ├── scope_project.md ← Master architecture and scope document ├── verify_agents.py ← Verification script for agent checking
+A primary structural anti-pattern is the location of the WAI_agent/data/ folder1. Co-locating runtime-generated JSON files, uploaded corporate training documents, and database seeding scripts directly inside the source code tree is a critical security vulnerability1. In a continuous integration and deployment pipeline, this configuration risks leaking corporate data, department-scoped statistics, or personally identifiable information (PII) directly into git version control repositories4.
+Standard git-ignore patterns must be utilized to isolate the entire data namespace from the repository codebase4.
+Furthermore, grouping the backend agentic routines into generic subfolders like sub_agents/, tools/, and shared/ under WAI_agent/ introduces a highly coupled monolithic design1. Under this organization, any modifications to a specific capability—such as altering the quiz scoring logic—require navigating changes across multiple decoupled files, including quiz_tools.py, models.py, and agent.py1.
+The comparative analysis in Table 1 contrasts the architectural limitations of the legacy prototype with the professional target state.
+
+
+Architectural Dimension
+	Legacy Prototype Layout
+	Professional Target State
+	Operational Mitigations
+	Root Cleanliness
+	Scattering of execution scripts and documentation in the root path1.
+	Separation of code (/src), declarative manifests, and evaluation structures8.
+	Prevents namespace pollution and standardizes operational tooling targets2.
+	Volatile Data Isolation
+	Dynamic files and training manuals are stored in the application package folder1.
+	Dynamic states are moved to a project-level, git-ignored /data directory2.
+	Eliminates risks of data corruption and accidental publication of PII4.
+	Web Server Design
+	A single monolithic entry point (server.py) handling all business domains1.
+	Domain-driven routers grouped into functional directories inside the source folder9.
+	Encourages modular team development and eliminates route namespace collisions9.
+	Agent Configuration
+	Python-wrapped agents with hardcoded prompt blocks1.
+	Directory-based skills following the standardized agentskills.io specification10.
+	Reduces baseline context window requirements and allows cross-platform reuse12.
+	Test Integration
+	Ad-hoc scripts executed manually with no automated pipelines1.
+	Formal test suites grouping unit, integration, and agentic evaluation runs8.
+	Guarantees system regression testing and automates agent compliance metrics8.
+	Refactoring the Web and Data Layer using FastAPI Best Practices
+To transition WisdomAI into an enterprise-ready API, the web server layer must be completely refactored. The legacy application relies on a single server.py to initialize the FastAPI app, define global dependencies, and register endpoints across entirely separate business domains1. As additional capabilities are introduced, this centralized structure becomes a bottleneck for development and testing9.
+Domain-Driven Modular Monolith Architecture
+Following industry-standard FastAPI conventions, the codebase should transition to a domain-driven modular structure, often referred to as the Netflix Dispatch pattern9. Rather than grouping files globally by technical type, the application should partition its core capabilities into self-contained domain directories inside a unified /src folder9.
+For WisdomAI, these boundaries map directly to its primary functional requirements1:
+* Curriculum Domain (src/curriculum): Governs multi-day path planning, training ingestion, and content generation1.
+* Coaching Domain (src/coaching): Coordinates user quizzes, active evaluations, and cognitive review cycles1.
+* Validation Domain (src/validation): Detects contradictions and validates consistency across uploaded documents1.
+* Reporting Domain (src/reporting): Aggregates department-level KPI metrics, scrubbing PII prior to summary drafting1.
+* User Management Domain (src/users): Tracks readiness scores and state progressions from enrolled to certified1.
+Each domain package houses its own endpoints (router.py), validation metrics (schemas.py), internal database mappings (models.py), and operational handlers (service.py)9. When a domain must interact with another module, it executes an explicit, fully qualified package import, ensuring clear trace-ability and preventing circular dependencies2.
+Event Loop Preservation and Non-Blocking File I/O
+FastAPI achieves high performance by executing asynchronous endpoints (defined via async def) directly on the single-threaded Python event loop9. When an endpoint is declared as asynchronous, the framework expects that all internal network, database, or disk operations are completely non-blocking and invoked with await9. Conversely, if a route is defined as synchronous (using def), FastAPI offloads the entire execution path to an external thread pool, preventing it from halting the event loop9.
+The legacy persistence layer in persistence.py uses blocking local disk operations via the DepartmentScopedStore1. If these blocking calls are invoked directly within asynchronous endpoints, the single-threaded event loop will freeze, preventing the server from accepting or processing any parallel incoming network requests9.
+To prevent event loop starvation, the application must offload blocking file reads and writes to a thread pool using Starlette's run_in_threadpool utility, or utilize fully asynchronous file system libraries9. For long-running, CPU-bound operations—such as parsing training manuals or generating complex multi-day agendas—the application should offload the work entirely to an asynchronous task queue like Celery, Arq, or RQ, rather than relying on FastAPI's in-process BackgroundTasks1.
+Serialization and Schema Optimization
+The current serialization layout can be optimized to prevent double-instantiation performance penalties9. In many FastAPI architectures, endpoints manually instantiate Pydantic model objects and return them directly9.
+However, if a route decorator defines an explicit response_model, the framework is forced to validate the outgoing data twice: first when the developer instantiates the model within the endpoint, and second when FastAPI's internal jsonable_encoder serializes it against the decorator schema9.
+The optimized pattern requires database service layers to yield raw dictionaries or mapping objects, allowing the framework to perform validation and serialization in a single pass9.
+To ensure structural consistency across all domains, a global custom base model should be implemented, standardizing common data patterns9:
+
+
+
+
+
+
+Python
+from datetime import datetime
+from typing import Any
+from zoneinfo import ZoneInfo
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, ConfigDict, field_serializer
+
+class CustomModel(BaseModel):
+   model_config = ConfigDict(populate_by_name=True)
+
+    @field_serializer("*", when_used="json", check_fields=False)
+   def _serialize_datetimes(self, value: Any) -> Any:
+       if isinstance(value, datetime):
+           if value.tzinfo is None:
+               value = value.replace(tzinfo=ZoneInfo("UTC"))
+           return value.strftime("%Y-%m-%dT%H:%M:%S%z")
+       return value
+
+   def serializable_dict(self, **kwargs):
+       """Yields a clean dictionary containing only JSON-serializable values."""
+       default_dict = self.model_dump()
+       return jsonable_encoder(default_dict)
+
+Furthermore, raising custom ValueErrors inside field-level validation schemas (utilizing the @field_validator decorator) allows the framework to automatically catch validation anomalies9. FastAPI intercepts these errors and formats them into standard HTTP    validation responses, removing the need for boilerplate try-except blocks inside API controllers9.
+Relational Database and Database Migrations
+Although the MVP currently uses JSON file databases, the architecture documentation outlines a migration path toward BigQuery or Google Cloud Storage1. To support this transition, the database schema layer must be structured from day zero using explicit naming conventions and managed schema migrations via Alembic9.
+SQLAlchemy metadata should be configured with a standardized index and key naming convention rather than relying on database-specific default constraints9:
+
+
+
+
+
+
+Python
+from sqlalchemy import MetaData
+
+POSTGRES_INDEXES_NAMING_CONVENTION = {
+   "ix": "%(column_0_label)s_idx",
+   "uq": "%(table_name)s_%(column_0_name)s_key",
+   "ck": "%(table_name)s_%(constraint_name)s_check",
+   "fk": "%(table_name)s_%(column_0_name)s_fkey",
+   "pk": "%(table_name)s_pkey",
+}
+
+metadata = MetaData(naming_convention=POSTGRES_INDEXES_NAMING_CONVENTION)
+
+To maintain architectural consistency as relational tables are defined, the schema definitions must adhere to strict structural constraints9:
+* Table Formatting: Table names must be singular, formatted in lowercase snake_case, and prefixed by their parent domain module (e.g., coaching_quiz, coaching_question, reporting_department_summary)9.
+* Field Naming Suffixes: Datetime fields must utilize an _at suffix (such as completed_at), and date fields must use a _date suffix (such as reporting_date)9.
+* Migration Integrity: All database migrations managed via Alembic must be designed to be completely static and reversible9. If dynamic data hydration is required, only the underlying table contents may be dynamic, never the structural schema9. The migration template inside alembic.ini should utilize a readable naming convention:
+
+
+
+
+
+
+Ini, TOML
+file_template = %%(year)d-%%(month).2d-%%(day).2d_%%(slug)s
+
+Aligning the Agent Framework with the Google Antigravity SDK and ADK Guidelines
+The MVP implementation of WisdomAI's AI orchestration layer is powered by the Google Antigravity SDK using the gemini-3.5-flash model1. However, the physical placement of agents, tools, and shared files within the WAI_agent/ directory is misaligned with the declarative standards established in the SDK's v2.0+ engine1.
+Decoupling High-Level Agent Behaviors from Web Execution
+The Google Antigravity SDK is designed around a decoupled, three-layer model that separates high-level agentic behaviors from low-level communication protocols14.
+* Layer 1 (The Agent): Serves as the primary declarative configuration entry point, exposing an asynchronous context manager that handles binary initialization, tool registration, and global safety policy compilation14.
+* Layer 2 (The Conversation): Manages the stateful session context, accumulating run logs, token usage metrics, and historical steps14.
+* Layer 3 (The Connection): Controls transport-level mechanics14. For local executions, it establishes a WebSocket connection with a Go-based local harness, serializing commands via highly structured protobuf messages14.
+The orchestrator script in the legacy prototype (WAI_agent/agent.py) mixes API route processing with agent state tracking1. To resolve this, the system should configure a dedicated Agent session for each user interaction using the SDK's native asynchronous context manager, ensuring clean execution sandboxes and resource isolation14.
+Declarative Skills over Imperative Prompts
+The current prototype packages agent logic within standard Python classes in the sub_agents/ directory1. Under the Google ADK and Antigravity specifications, this imperative approach is deprecated in favor of a declarative skill-based architecture17.
+By encapsulating prompts, rules, and reference materials into standardized directory-based Agent Skills conforming to the agentskills.io specification, the codebase achieves separation of concerns10.
+A directory-based skill separates instructions and resources into a predictable folder layout11:
+.agents/ └── skills/ ├── curriculum-builder/ │ ├── SKILL.md ← YAML frontmatter and behavioral guidelines │ └── references/ │ └── curriculum_standards.md ← Structural constraints for learning paths
+Transitioning the curriculum_builder, knowledge_coach, and kb_validator into file-based skills enables the runtime to load domain-specific prompts on-demand1. The main orchestrator uses the SkillToolset class to dynamically search, load, and run skills based on user intent12.
+This progressive disclosure pattern avoids passing large blocks of instructions to the LLM on every turn, reducing baseline context usage by up to   , minimizing latency, and optimizing token consumption12.
+Furthermore, Antigravity v2.0+ enforces project isolation; the engine no longer scans global directories for active commands or custom workflows15. To compile and load skills properly, all custom directories must be placed within a project-local configuration folder, specifically .agents/skills/15.
+The configuration of the workspace context should utilize the strict folder groupings defined in the SDK guidelines18:
+* Rules (In .agents/rules/): Always-active system instructions that are globally appended to every conversation in the active project directory18.
+* Skills (In .agents/skills/): On-demand operational capabilities loaded dynamically when the user's prompt matches the skill's description field12.
+* Workflows (In .agents/workflows/): Repeatable, multi-step prompt sequences triggered using custom / commands18.
+Multi-Agent Orchestration via Agent-to-Agent (A2A) Protocols
+WisdomAI uses a central orchestrator (agent.py) that delegates work to five specialized sub-agents1. ADK handles this hierarchy natively using a structured parent-subagent tree19. This topology limits conversation transfer pathways, making multi-turn dialogs more predictable and easier to debug19.
+To support complex multi-step workflows—such as generating a lesson path and immediately drafting a corresponding quiz—the system can leverage ADK's built-in workflow agents, including SequentialAgent, LoopAgent, and ParallelAgent19.
+Furthermore, Python ADK agents natively support the Agent-to-Agent (A2A) service model8. When an agent is initialized, the framework automatically mounts JSON-RPC endpoints that serve standard A2A protocols, allowing agents to coordinate as independent microservices8. This allows the supervisor and sub-agents to run as separate processes on different ports, isolating context windows and preventing the context-window traps common in single-agent architectures8.
+Dynamic Hook Interception and Runtime Policies
+The "Luck Elimination" mechanism in WisdomAI blocks user progress if the student fails a specific concept twice1. In the prototype, this is implemented as an external Python script (luck_elimination.py)1.
+Under the Antigravity SDK, this rule should be refactored into a declarative safety policy executed at the hook layer14. The SDK's hook system allows developers to intercept, inspect, and modify agent decisions across strict execution phases14.
+To enforce the "Luck Elimination" rule, the platform should register a PreToolCallDecideHook14:
+1. When the agent attempts to trigger a routing tool (e.g., routing_tools.py) to fast-track a user, the hook intercepts the request1.
+2. The hook evaluates the user's error_retention_matrix within the SessionContext1.
+3. If the user's error count for the current concept satisfies   , the hook denies execution, returning allow=False1.
+4. The hook injects a denial message back to the model, forcing it to bypass the fast-track path and route the user to remedial lessons1.
+The declarative configuration of these guardrails should utilize the priority-based evaluation model built into the SDK's policy engine14. This enforces safety rules at the runtime level, ensuring that critical data policies are evaluated before any tools are allowed to execute14.
+RAG Optimization with Managed Recipes
+The legacy prototype implements custom document processing in curriculum_tools.py, using simple heuristic splitting to chunk raw files and generate lessons1. To improve retrieval accuracy and reduce custom code maintenance, the platform should adopt ADK's native RAG (Retrieval-Augmented Generation) patterns8.
+Developers can integrate one of two standard RAG recipes8:
+   * Vector Search Integration (rag-vector-search): Connects the platform to Vertex AI Vector Search 2.0, utilizing managed embedding and similarity search pipelines8.
+   * Agent Search Integration (rag-agent-search): Uses Agent Platform Search (Discovery Engine) paired with a managed Google Cloud Storage (GCS) Data Connector8. Users can drop raw manuals directly into a storage bucket, and the managed pipeline automatically handles parsing, document chunking, and metadata indexing, removing the need for manual file parsing code1.
+Consolidated System Reorganization Blueprint
+To implement these refactoring recommendations, the WisdomAI project tree must be reorganized to separate front-end modules, core python packages, declarative agent contexts, local data stores, and testing directories2.
+WisdomAI/ ├── .agents/ ← Local configuration for the Antigravity CLI15 │ ├── rules/ ← Globally-applied architectural and validation rules18 │ │ └── enterprise_policies.md │ ├── skills/ ← Declarative on-demand agent skill directories11 │ │ ├── curriculum-builder/ │ │ │ └── SKILL.md │ │ ├── knowledge-coach/ │ │ │ └── SKILL.md │ │ └── kb-validator/ │ │ └── SKILL.md │ └── workflows/ ← Saved multi-step prompt sequences18 │ └── sdd_pipeline.yaml │ ├── src/ ← High-level root for the python package9 │ ├── api/ ← Web Presentation and Routing Layer25 │ │ ├── main.py ← FastAPI server initialization9 │ │ ├── dependencies.py ← Global HTTP authentication and DB dependencies9 │ │ └── routes/ ← Self-contained domain endpoint routers9 │ │ ├── curriculum.py ← Paths, DTP uploads, and agenda routes1 │ │ ├── quizzes.py ← Quiz rendering, retakes, and evaluation routes1 │ │ ├── reports.py ← Daily KPI summaries and corporate metrics1 │ │ └── users.py ← User progress tracking and enrollment status1 │ │ │ ├── core/ ← Application engine primitives25 │ │ ├── config.py ← Environment configs via Pydantic9 │ │ ├── database.py ← SQL/BigQuery database connection engine9 │ │ └── security.py ← Google ADC credential helpers1 │ │ │ ├── services/ ← Service layers isolating domain business logic26 │ │ ├── curriculum_service.py ← Lesson building and curriculum scheduling1 │ │ ├── quiz_service.py ← Scoring logic, statistics, and review loops1 │ │ └── user_service.py ← Progress states and readiness matrices1 │ │ │ └── agents/ ← Programmatic Antigravity SDK integration8 │ ├── init.py ← Exports active agent configurations8 │ ├── agent.py ← Root steering agent config8 │ ├── tools.py ← Unified Python tools for agent execution8 │ └── hooks.py ← Decoupled tracking, policy, and safety hooks8 │ ├── tests/ ← Testing directory parallel to the source tree9 │ ├── unit/ ← Unit tests for isolated database and file utilities8 │ │ └── test_persistence.py │ ├── integration/ ← Endpoint testing verifying HTTP contracts8 │ │ └── test_api.py │ └── eval/ ← Agent evaluation configs and metrics8 │ ├── datasets/ │ │ └── basic-dataset.json ← Input dataset for offline agent evaluations8 │ └── eval_config.yaml ← Validation rules and LLM evaluation rubrics8 │ ├── data/ ← Dynamic local data directory (GIT-IGNORED)2 │ ├── knowledge_base/ ← Dynamic training files1 │ ├── user_progress/ ← State records sorted by department_id1 │ └── kpi_store/ ← Daily aggregated KPI metrics1 │ ├── frontend/ ← Static UI presentation folder1 │ ├── assets/ │ ├── js/ │ └── pages/ │ ├── .env ← Key-value configurations for local development8 ├── .gitignore ← Rules to exclude data/, .env, and local caches4 ├── agents-cli-manifest.yaml ← Deployment and environment CLI metadata8 ├── GEMINI.md ← Standard code rules parsed by coding assistants8 ├── pyproject.toml ← Unified package definitions and project settings8 └── README.md ← Operational instructions and platform description2
+This proposed structure clarifies separation of concerns by isolating the web server (/src/api), the dynamic local database (/data), and the agent configurations (/.agents) into clean, independent architectural layers2.
+Enterprise Development, Evaluation, and Deployment Lifecycles
+To ensure reliability during architectural transitions, the WisdomAI platform must adopt professional development, evaluation, and deployment processes8.
+Virtual Environments and Dependencies
+Modern Python development requires virtual environment isolation and locked dependency resolution to guarantee environment parity across local, staging, and production environments3.
+Using the uv package manager, the platform initializes its environment and manages active packages via lockfiles8. This approach ensures that all dependencies are explicitly pinned and resolved without version conflicts during build steps3.
+Continuous Code Quality and Linting
+To maintain code quality across the codebase, standard formatting tools should be automated5.
+The platform implements Ruff to manage linting, formatting, and import organization9. Running Ruff checks via the command-line interface ensures compliance with PEP 8 standards3:
+
+
+
+
+
+
+Bash
+# Analyze, format, and verify the codebase layout using Ruff
+agents-cli lint
+
+This automated verification step prevents common syntax errors, dead imports, and formatting inconsistencies from entering the shared repository2.
+Standardized Agentic Evaluation Pipeline
+Legacy agent testing in the prototype relies on manual verification scripts1. Under the Google ADK, agents are validated using a rigorous, automated evaluation loop driven by the GenAI Eval SDK8.
+This evaluation setup relies on two core configuration files8:
+   * tests/eval/datasets/basic-dataset.json: Contains baseline evaluation cases that define mock user prompts paired with expected system contexts8.
+   * tests/eval/eval_config.yaml: Declares active evaluation metrics and their respective LLM-as-a-judge rubrics8.
+The platform should evaluate its agent submodules against specific metrics to ensure compliance with enterprise requirements1. The evaluation matrices are defined in Table 2.
+
+
+WisdomAI Target Agent
+	Primary Metric
+	Evaluation Scope
+	Justification for Metric Selection
+	curriculum_builder
+	instruction_following
+[cite: 8]
+	Verifies that learning paths are output as valid, sequential multi-day markdown nodes1.
+	Prevents UI rendering failures inside the serpentine lesson dashboard1.
+	knowledge_coach
+	multi_turn_trajectory_quality
+[cite: 8]
+	Validates dialog accuracy, error tracking, and correct reflection prompt generation1.
+	Confirms the validity of the coaching model before advancing states1.
+	kb_validator
+	grounding & hallucination
+[cite: 8]
+	Asserts that conflict logs refer exclusively to the source documents1.
+	Prevents false positives or hallucinations during document analysis1.
+	department_reporter
+	safety (PII extraction)8
+	Scans final summaries to confirm that all employee names and emails are scrubbed1.
+	Enforces corporate compliance and namespace isolation1.
+	The evaluation lifecycle follows an iterative Eval-Fix Loop to optimize agent prompts and tools before production deployment8:
+   1. Generate Traces: Execute the agent against the evaluation dataset to capture conversation trajectories:
+Bash
+agents-cli eval generate --dataset tests/eval/datasets/basic-dataset.json
+
+   2. Grade Traces: Run the grading step to score the generated traces against configured metrics:
+Bash
+agents-cli eval grade --metrics safety grounding instruction_following
+
+   3. Analyze Failures: Identify failing runs, identify underlying issues, adjust prompts or tools, and re-run the evaluation loop8. Developers can leverage advanced commands to streamline this analysis8:
+Bash
+# Cluster and summarize common failure modes from grading runs
+agents-cli eval analyze --eval-result grade_results.json
+
+   4. Compare Progress: Compare grading results side-by-side to track performance changes across optimization cycles:
+Bash
+agents-cli eval compare baseline_results.json optimized_results.json
+
+Enterprise Deployment and Monitoring
+The Antigravity CLI separates cloud resource configuration from application code deployments8. This allows infrastructure changes to be managed independently of core application updates8.
+      * Infrastructure (agents-cli infra): Provisions necessary GCP resources—such as service accounts, IAM policies, and GCS storage buckets—using Terraform8.
+      * Deployment (agents-cli deploy): Packages the application into a Docker container, pushes it to a private container registry, and deploys it to the target runtime, such as Google Cloud Run or Google Kubernetes Engine (GKE)8.
+Once deployed, the platform utilizes native GCP monitoring to track system health and operational metrics8. Cloud Trace provides distributed tracing for all API endpoints and agent execution steps, while BigQuery Agent Analytics tracks real-time token consumption, user journey flows, and automated evaluations, ensuring full observability into production workloads8.
+Architectural Conclusions
+The functional capabilities of WisdomAI—including dynamic curriculum planning, adaptive user routing, and conflict analysis—are well-designed for enterprise training needs1. However, scaling the platform for enterprise deployment requires refactoring its structural layout to align with modern web and agentic patterns1.
+Reorganizing the codebase into self-contained domain directories ensures scalability and clean separation of concerns as new features are added9. Decoupling dynamic local storage from application code directories mitigates security risks, such as accidental data leaks, while preparing the platform for its planned SQL database migration1.
+At the AI execution layer, moving from hardcoded Python agents to declarative Agent Skills (under .agents/skills/) simplifies prompt management and reduces context token usage11. Implementing "Luck Elimination" through native SDK Lifecycle Hooks and Policies ensures that business rules are enforced safely and consistently1. Finally, establishing automated testing, asynchronous test fixtures, and CLI-driven evaluation pipelines ensures long-term reliability, positioning WisdomAI for successful enterprise deployment5.
+Works cited
+      1. project_documentation.md
+      2. File Organization in Python: A Beginner's Guide to Managing Your Code Like a Pro, https://learn.modernagecoders.com/blog/file-organization-in-python
+      3. What are the best practices for structuring a Python project as a beginner? - Reddit, https://www.reddit.com/r/learnpython/comments/1ptsk5b/what_are_the_best_practices_for_structuring_a/
+      4. Git best practices - Python for Data Science 24.3.0, https://www.python4data.science/en/24.3.0/productive/git/best-practices.html
+      5. 7 Ways to Make Your Python Project Structure More Elegant | Towards Data Science, https://towardsdatascience.com/python-project-structure-best-practices-d9d0b174ad5d/
+      6. Python Repository Structure - by Georgios Goniotakis - Medium, https://medium.com/@GeorgiosGoniotakis/python-repository-structure-5015655cb9a7
+      7. The optimal python project structure - Away with ideas, https://awaywithideas.com/the-optimal-python-project-structure/
+      8. Project Structure - agents-cli - Google, https://google.github.io/agents-cli/guide/project-structure/
+      9. FastAPI Best Practices and Conventions we used at our startup - GitHub, https://github.com/zhanymkanov/fastapi-best-practices
+      10. Building Multi-Agent Applications with Deep Agents - LangChain, https://www.langchain.com/blog/building-multi-agent-applications-with-deep-agents
+      11. Google ADK - Agent Skills | Ravikanth Chaganti, https://ravichaganti.com/blog/google-adk-agent-skills/
+      12. Developer's Guide to Building ADK Agents with Skills, https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/
+      13. google-io-2026 - Google Antigravity Blog, https://antigravity.google/blog/google-io-2026
+      14. Building an Autonomous UI Agent Critic with the New Google Antigravity SDK 2.0 - Medium, https://medium.com/google-cloud/building-an-autonomous-ui-agent-critic-with-the-new-google-antigravity-sdk-2-0-141232d21c4f
+      15. Super confused about skills directory structure after AG2.0 : r/google_antigravity - Reddit, https://www.reddit.com/r/google_antigravity/comments/1tmjuvz/super_confused_about_skills_directory_structure/
+      16. google-antigravity/antigravity-sdk-python: A Python library for building AI agents that leverage the full power of Google Antigravity. - GitHub, https://github.com/google-antigravity/antigravity-sdk-python
+      17. Your First ADK Agent | The AI Agent Factory - Panaversity, https://agentfactory.panaversity.org/docs/Building-Agent-Factories/google-adk-reliable-agents/your-first-adk-agent
+      18. Spec-Driven ADK Agent Development with Antigravity and Spec-kit - Google Codelabs, https://codelabs.developers.google.com/sdd-adk-antigravity
+      19. Build Multi-Agent Systems with ADK - Google Codelabs, https://codelabs.developers.google.com/codelabs/production-ready-ai-with-gc/3-developing-agents/build-a-multi-agent-system-with-adk
+      20. Build Multi-Agent Systems with ADK | Google Skills for Partners, https://partner.skills.google/focuses/125061?parent=catalog
+      21. Building a Multi-Agent System with Google ADK: A Deep Dive into the MultiAgent Project, https://medium.com/@ruupesh/building-a-multi-agent-system-with-google-adk-a-deep-dive-into-the-multiagent-project-16bbadb7e13c
+      22. Multi-Agent Systems: The Architecture Shift from Monolithic LLMs to Collaborative Intelligence - Comet, https://www.comet.com/site/blog/multi-agent-systems/
+      23. Google Antigravity SDK, https://antigravity.google/blog/introducing-google-antigravity-sdk
+      24. Google Antigravity SDK - Google Antigravity Documentation, https://antigravity.google/docs/sdk/overview
+      25. FastAPI Best Practices - Auth0, https://auth0.com/blog/fastapi-best-practices/
+      26. FastAPI for MLOps: Python Project Structure and API Best Practices - PyImageSearch, https://pyimagesearch.com/2026/04/13/fastapi-for-mlops-python-project-structure-and-api-best-practices/
+      27. Structuring a FastAPI Project: Best Practices - DEV Community, https://dev.to/mohammad222pr/structuring-a-fastapi-project-best-practices-53l6
+      28. Building AI Agents with ADK: The Foundation - Google Codelabs, https://codelabs.developers.google.com/devsite/codelabs/build-agents-with-adk-foundation
+      29. Command and control: Orchestrate app development with Gemini and MCP, https://codelabs.developers.google.com/gemini-mcp-agy
