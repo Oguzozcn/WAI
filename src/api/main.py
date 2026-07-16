@@ -11,8 +11,14 @@ from src.api.routes import pages, progress, learning_path, quiz, department, kno
 
 app = FastAPI(title="WisdomAI MVP", version="0.1.0")
 
-app.mount("/js", StaticFiles(directory=str(PROJECT_ROOT / "frontend" / "js")), name="js")
-app.mount("/assets", StaticFiles(directory=str(PROJECT_ROOT / "frontend" / "assets")), name="assets")
+# Ensure static directories exist to prevent RuntimeError on new environments
+js_dir = PROJECT_ROOT / "frontend" / "js"
+assets_dir = PROJECT_ROOT / "frontend" / "assets"
+js_dir.mkdir(parents=True, exist_ok=True)
+assets_dir.mkdir(parents=True, exist_ok=True)
+
+app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
+app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
 app.include_router(pages.router)
 app.include_router(progress.router)

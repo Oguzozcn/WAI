@@ -10,4 +10,8 @@ build/
 *.log
 .agents/
 .gemini/
-data/
+data/knowledge_base/
+data/user_progress/
+data/kpi_store/
+data/learning_paths/
+data/conflicts/
