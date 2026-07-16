@@ -7,7 +7,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from src.api.routes import pages, progress, learning_path, quiz, department, knowledge_base
+from src.api.routes import pages, progress, learning_path, quiz, department, knowledge_base, manager
 
 app = FastAPI(title="WisdomAI MVP", version="0.1.0")
 
@@ -20,3 +20,4 @@ app.include_router(learning_path.router)
 app.include_router(quiz.router)
 app.include_router(department.router)
 app.include_router(knowledge_base.router)
+app.include_router(manager.router)

@@ -8,7 +8,8 @@ Generates learning paths, daily agendas, and content gap analysis.
 import json
 import uuid
 import os
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any
 
 from WAI_agent.shared.persistence import DepartmentScopedStore
 from WAI_agent.shared.constants import MAX_COURSES, DEFAULT_DEPARTMENT, DEFAULT_TIMEFRAME_WEEKS
@@ -77,7 +78,7 @@ def generate_learning_path(
         "hours_per_week": round(hours_per_week, 1),
         "days_per_course": round(days_per_course, 1),
         "courses": courses,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     return learning_path
@@ -175,7 +176,7 @@ def generate_daily_agenda(
         "day_number": day_number,
         "learning_path_id": learning_path_id,
         "course_module": course_index + 1,
-        "total_hours": sum(a["duration_hours"] for a in activities),
+        "total_hours": sum(float(a["duration_hours"]) for a in activities),
         "activities": activities,
         "objectives": [
             f"Complete all Day {day_number} activities",
@@ -237,6 +238,108 @@ def identify_content_gaps(
         })
 
     return analysis
+
+
+
+# ── Chunking Utilities ──
+
+def recursive_character_splitter(
+    text: str,
+    max_tokens: int = 1024,
+    overlap: int = 200,
+) -> list[dict]:
+    """Split text into overlapping chunks using recursive character splitting.
+
+    Attempts to split on semantic boundaries in priority order:
+      1. Double newlines (paragraph breaks)
+      2. Single newlines (line breaks)
+      3. Sentence-ending punctuation (. ! ?)
+      4. Spaces (word boundaries)
+      5. Raw character slicing (last resort)
+
+    Args:
+        text: The raw text to split.
+        max_tokens: Maximum characters per chunk (approximate token proxy).
+        overlap: Number of characters to carry over between consecutive chunks
+                 to preserve context across boundaries.
+
+    Returns:
+        A list of chunk dicts, each with:
+          - ``text``: The chunk content.
+          - ``char_start``: Starting character offset in the original text.
+          - ``char_end``: Ending character offset in the original text.
+          - ``chunk_index``: 0-based sequential index.
+    """
+    if not text or not text.strip():
+        return []
+
+    # Priority order of split separators (most preferred → least preferred)
+    _SEPARATORS = ["\n\n", "\n", ". ", "! ", "? ", " ", ""]
+
+    def _split_on_separator(s: str, sep: str) -> list[str]:
+        """Split string on separator, re-attaching the separator to each segment."""
+        if not sep:
+            # Last resort: raw character slices
+            return [s[i:i + max_tokens] for i in range(0, len(s), max_tokens - overlap)]
+        parts = s.split(sep)
+        # Re-attach separator to all but the last segment
+        return [p + sep if i < len(parts) - 1 else p for i, p in enumerate(parts) if p]
+
+    def _merge_splits(splits: list[str]) -> list[str]:
+        """Greedily merge small splits up to max_tokens, then start a new chunk."""
+        merged: list[str] = []
+        current = ""
+        for split in splits:
+            if len(current) + len(split) <= max_tokens:
+                current += split
+            else:
+                if current:
+                    merged.append(current)
+                # If a single split exceeds max_tokens, recurse with the next separator
+                current = split
+        if current:
+            merged.append(current)
+        return merged
+
+    def _recursive_split(s: str, sep_index: int = 0) -> list[str]:
+        """Recursively split using separators in priority order."""
+        if len(s) <= max_tokens:
+            return [s] if s.strip() else []
+
+        sep = _SEPARATORS[sep_index] if sep_index < len(_SEPARATORS) else ""
+        splits = _split_on_separator(s, sep)
+        result: list[str] = []
+        for part in splits:
+            if len(part) <= max_tokens:
+                if part.strip():
+                    result.append(part)
+            else:
+                # Recurse with the next separator
+                next_idx = sep_index + 1 if sep_index < len(_SEPARATORS) - 1 else sep_index
+                result.extend(_recursive_split(part, next_idx))
+        return result
+
+    raw_chunks = _merge_splits(_recursive_split(text))
+
+    # Apply overlap: each chunk (after the first) starts `overlap` chars before
+    # where the previous chunk ended, preserving retrieval context.
+    chunks: list[dict] = []
+    char_cursor = 0
+    for i, chunk_text in enumerate(raw_chunks):
+        # Find the start position of this chunk in the original text
+        search_from = max(0, char_cursor - overlap) if i > 0 else 0
+        pos = text.find(chunk_text[:50].strip(), search_from)
+        char_start = pos if pos != -1 else char_cursor
+        char_end = char_start + len(chunk_text)
+        chunks.append({
+            "text": chunk_text.strip(),
+            "char_start": char_start,
+            "char_end": char_end,
+            "chunk_index": i,
+        })
+        char_cursor = char_end
+
+    return chunks
 
 
 # ── Document-to-Curriculum Pipeline ──
@@ -480,7 +583,7 @@ def trigger_curriculum_generation(
                 "days_per_course": 2,
                 "source_document": filename,
                 "courses": [course],
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
 
         store.write_learning_path(path_id, learning_path)
@@ -595,6 +698,36 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
 
     # Call Gemini via Vertex AI using ADC (Application Default Credentials)
     # This matches how the rest of the project connects — no API key needed.
+
+    # Pre-declare llm_data as dict so the type checker always sees a dict,
+    # regardless of whether the LLM call succeeds or falls back.
+    topic_label = ", ".join(unique_tags[:3]) if unique_tags else "Key Concepts"
+    llm_data: dict[str, Any] = {
+        "course_title": f"Targeted Review: {topic_label}",
+        "course_description": (
+            f"This remedial course focuses on the topics where you had difficulty: "
+            f"{topic_label}. Complete the lesson and quizzes to solidify your understanding."
+        ),
+        "gap_topics": unique_tags or ["general"],
+        "lesson": {
+            "lesson_title": f"Deep Dive: {topic_label}",
+            "content_summary": (
+                f"This lesson revisits the core concepts around {topic_label}. "
+                "Review the original course materials and pay special attention to "
+                "the areas highlighted in your gap analysis."
+            ),
+            "key_points": [f"Master {t}" for t in (unique_tags[:3] or ["key concept"])],
+        },
+        "short_quiz": {
+            "title": f"Short Quiz: {topic_label}",
+            "questions": [],
+        },
+        "final_assessment": {
+            "title": f"Final Assessment: {topic_label}",
+            "questions": [],
+        },
+    }
+
     try:
         from google import genai
 
@@ -608,7 +741,9 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
             model="gemini-3.5-flash",
             contents=prompt,
         )
-        raw = response.text.strip()
+        raw = (response.text or "").strip()
+        if not raw:
+            raise ValueError("LLM returned an empty response.")
 
         # Strip markdown code fences if present
         if raw.startswith("```"):
@@ -618,36 +753,15 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
             raw = raw.rsplit("```", 1)[0].strip()
 
         llm_data = json.loads(raw)
+        # Ensure the LLM returned a dict, not a list or scalar
+        if not isinstance(llm_data, dict):
+            raise ValueError(f"LLM returned unexpected type: {type(llm_data).__name__}")
 
     except Exception as e:
-        # Fallback: build a minimal remedial course without LLM
+        # llm_data is already pre-initialised to the fallback dict above the try block.
+        # Just log the failure — the fallback value is used automatically.
         print(f"[generate_remedial_course] LLM call failed ({e}), using fallback.")
-        topic_label = ", ".join(unique_tags[:3]) if unique_tags else "Key Concepts"
-        llm_data = {
-            "course_title": f"Targeted Review: {topic_label}",
-            "course_description": (
-                f"This remedial course focuses on the topics where you had difficulty: "
-                f"{topic_label}. Complete the lesson and quizzes to solidify your understanding."
-            ),
-            "gap_topics": unique_tags or ["general"],
-            "lesson": {
-                "lesson_title": f"Deep Dive: {topic_label}",
-                "content_summary": (
-                    f"This lesson revisits the core concepts around {topic_label}. "
-                    "Review the original course materials and pay special attention to "
-                    "the areas highlighted in your gap analysis."
-                ),
-                "key_points": [f"Master {t}" for t in (unique_tags[:3] or ["key concept"])],
-            },
-            "short_quiz": {
-                "title": f"Short Quiz: {topic_label}",
-                "questions": [],
-            },
-            "final_assessment": {
-                "title": f"Final Assessment: {topic_label}",
-                "questions": [],
-            },
-        }
+
 
     # Build course_id and lesson_id
     course_id = f"remedial_{uuid.uuid4().hex[:8]}"
@@ -675,7 +789,7 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
         "quiz_type": "short_quiz",
         "question_count": len(sq_questions),
         "questions": sq_questions,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     final_assessment_doc = {
         "quiz_id": fa_quiz_id,
@@ -683,7 +797,7 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
         "quiz_type": "final_assessment",
         "question_count": len(fa_questions),
         "questions": fa_questions,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     # Build the full course structure
@@ -714,7 +828,7 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
             }
         ],
         "final_assessment": final_assessment_doc,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     # Persist remedial course to the user's progress record

@@ -3,7 +3,7 @@
 from google.adk.agents.llm_agent import Agent
 
 from .prompt import KBVALIDATOR_PROMPT
-from ...tools.curriculum_tools import identify_content_gaps
+from src.services.curriculum_service import identify_content_gaps
 
 kb_validator_agent = Agent(
     model="gemini-3.5-flash",

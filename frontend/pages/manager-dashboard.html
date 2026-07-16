@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Manager Dashboard — WisdomAI</title>
+<meta name="description" content="Manager view: team KPIs, individual progress, and strategic benchmarks for your direct reports.">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">try{
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-variant": "#dfe3e6",
+          "surface-bright": "#f6fafd",
+          "on-secondary-container": "#004966",
+          "secondary-fixed": "#c5e7ff",
+          "on-tertiary-fixed-variant": "#1f5100",
+          "on-surface-variant": "#404750",
+          "error-container": "#ffdad6",
+          "surface-container-low": "#f0f4f7",
+          "outline": "#707881",
+          "primary": "#005787",
+          "on-primary-container": "#e0eeff",
+          "on-background": "#171c1f",
+          "primary-fixed-dim": "#95ccff",
+          "on-primary-fixed": "#001d32",
+          "on-error": "#ffffff",
+          "primary-container": "#0070ad",
+          "on-secondary": "#ffffff",
+          "on-surface": "#171c1f",
+          "tertiary-container": "#327a00",
+          "surface-tint": "#00639a",
+          "error": "#ba1a1a",
+          "secondary": "#00658c",
+          "inverse-on-surface": "#edf1f4",
+          "on-tertiary-container": "#bbff92",
+          "surface-dim": "#d6dbdd",
+          "surface-container-lowest": "#ffffff",
+          "tertiary": "#255f00",
+          "primary-fixed": "#cde5ff",
+          "on-tertiary": "#ffffff",
+          "on-error-container": "#93000a",
+          "surface": "#f6fafd",
+          "secondary-container": "#2abcfd",
+          "on-primary": "#ffffff",
+          "inverse-surface": "#2c3134",
+          "surface-container": "#eaeef1",
+          "background": "#f6fafd",
+          "surface-container-highest": "#dfe3e6",
+          "outline-variant": "#c0c7d1",
+          "rag-green": "#22c55e",
+          "rag-amber": "#f59e0b",
+          "rag-red": "#ef4444"
+        },
+        fontFamily: {
+          "display": ["Hanken Grotesk"],
+          "body": ["Inter"]
+        }
+      }
+    }
+  }
+}catch(e){}</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background: #f6fafd; color: #171c1f; }
+  .font-display { font-family: 'Hanken Grotesk', sans-serif; }
+
+  /* RAG badges */
+  .rag-green  { background: #dcfce7; color: #15803d; }
+  .rag-amber  { background: #fef3c7; color: #b45309; }
+  .rag-red    { background: #fee2e2; color: #b91c1c; }
+
+  /* Delta chips */
+  .delta-pos  { background: #dcfce7; color: #15803d; }
+  .delta-neg  { background: #fee2e2; color: #b91c1c; }
+  .delta-neu  { background: #f1f5f9; color: #475569; }
+
+  /* Subtle card hover */
+  .kpi-card { transition: box-shadow .2s, transform .2s; }
+  .kpi-card:hover { box-shadow: 0 8px 24px rgba(0,87,135,.12); transform: translateY(-1px); }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+  .skeleton {
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 6px;
+  }
+
+  /* Progress bar */
+  .progress-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+
+  /* Table */
+  .report-table { border-collapse: separate; border-spacing: 0; }
+  .report-table th { background: #f0f4f7; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: #404750; padding: .625rem 1rem; }
+  .report-table th:first-child { border-radius: 8px 0 0 8px; }
+  .report-table th:last-child  { border-radius: 0 8px 8px 0; }
+  .report-table tr.report-row { transition: background .15s; }
+  .report-table tr.report-row:hover td { background: #f0f4f7; }
+  .report-table td { padding: .75rem 1rem; border-bottom: 1px solid #e9ecef; font-size: .875rem; }
+
+  /* Sidebar nav */
+  .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px;
+              color: #404750; font-size: .875rem; font-weight: 500; transition: background .15s, color .15s; text-decoration: none; }
+  .nav-link:hover, .nav-link.active { background: #cde5ff; color: #004a75; }
+  .nav-link .material-symbols-outlined { font-size: 1.25rem; }
+
+  /* Section reveal animation */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:none } }
+  .fade-up { animation: fadeUp .4s ease both; }
+  .fade-up-2 { animation: fadeUp .4s .1s ease both; }
+  .fade-up-3 { animation: fadeUp .4s .2s ease both; }
+</style>
+</head>
+<body class="min-h-screen flex">
+
+<!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+<aside class="hidden lg:flex flex-col w-60 bg-white border-r border-outline-variant px-3 py-6 gap-1 shrink-0">
+  <div class="flex items-center gap-2 px-2 mb-6">
+    <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings:'FILL' 1">school</span>
+    <span class="font-display font-bold text-lg text-on-surface">WisdomAI</span>
+  </div>
+
+  <a href="/" class="nav-link"><span class="material-symbols-outlined">dashboard</span>My Dashboard</a>
+  <a href="/learning-path" class="nav-link"><span class="material-symbols-outlined">route</span>Learning Path</a>
+  <a href="/knowledge-vault" class="nav-link"><span class="material-symbols-outlined">library_books</span>Knowledge Vault</a>
+  <a href="/manager-dashboard" class="nav-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">groups</span>Team Dashboard</a>
+  <a href="/learning-paths-catalog" class="nav-link"><span class="material-symbols-outlined">menu_book</span>Catalog</a>
+
+  <div class="mt-auto border-t border-outline-variant pt-4 px-2">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-sm">M</div>
+      <div>
+        <div class="text-sm font-semibold text-on-surface" id="sidebar-name">Manager</div>
+        <div class="text-xs text-on-surface-variant capitalize" id="sidebar-dept">—</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ─────────────────────────────────────────────────────────────── -->
+<main class="flex-1 overflow-y-auto">
+
+  <!-- Top bar -->
+  <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">groups</span>
+      <h1 class="font-display font-bold text-xl text-on-surface">Team Dashboard</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <label for="dept-select" class="sr-only">Department</label>
+        <select id="dept-select" class="text-sm border border-outline-variant rounded-lg px-3 py-1.5 bg-surface focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="operations">Operations</option>
+        </select>
+      </div>
+      <div class="relative">
+        <label for="manager-input" class="sr-only">Manager ID</label>
+        <input id="manager-input" type="text" placeholder="Manager ID" value="manager"
+          class="text-sm border border-outline-variant rounded-lg px-3 py-1.5 bg-surface focus:outline-none focus:ring-2 focus:ring-primary w-36">
+      </div>
+      <button id="refresh-btn" onclick="loadAll()"
+        class="flex items-center gap-1.5 bg-primary text-on-primary text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-primary-container transition-colors">
+        <span class="material-symbols-outlined text-base">refresh</span>Load
+      </button>
+    </div>
+  </header>
+
+  <div class="px-6 py-6 max-w-6xl mx-auto space-y-10">
+
+    <!-- ══ BUCKET 1: Team KPIs (Headline) ═══════════════════════════════ -->
+    <section id="section-team" class="fade-up">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">leaderboard</span>
+        <h2 class="font-display font-bold text-lg text-on-surface">Team Health Overview</h2>
+        <span id="rag-badge" class="ml-auto text-xs font-semibold px-3 py-1 rounded-full hidden"></span>
+      </div>
+
+      <!-- KPI Cards grid -->
+      <div id="team-kpis-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <!-- Skeletons while loading -->
+        <div class="skeleton h-24 rounded-xl col-span-1"></div>
+        <div class="skeleton h-24 rounded-xl col-span-1"></div>
+        <div class="skeleton h-24 rounded-xl col-span-1"></div>
+        <div class="skeleton h-24 rounded-xl col-span-1"></div>
+        <div class="skeleton h-24 rounded-xl col-span-1"></div>
+        <div class="skeleton h-24 rounded-xl col-span-1"></div>
+      </div>
+      <p id="team-error" class="hidden text-sm text-error mt-3 flex items-center gap-1">
+        <span class="material-symbols-outlined text-base">error</span>
+        <span id="team-error-msg"></span>
+      </p>
+    </section>
+
+    <!-- Divider -->
+    <hr class="border-outline-variant">
+
+    <!-- ══ BUCKET 2: Individual Performance ══════════════════════════════ -->
+    <section id="section-reports" class="fade-up-2">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">person_search</span>
+        <h2 class="font-display font-bold text-lg text-on-surface">Individual Progress</h2>
+        <span class="text-xs text-on-surface-variant ml-1" id="reports-subtitle"></span>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
+        <!-- Search bar -->
+        <div class="px-4 py-3 border-b border-outline-variant flex items-center gap-2">
+          <span class="material-symbols-outlined text-outline text-lg">search</span>
+          <input id="reports-search" type="text" placeholder="Filter by name or status…"
+            class="flex-1 text-sm bg-transparent outline-none text-on-surface placeholder:text-outline"
+            oninput="filterReports(this.value)">
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="report-table w-full">
+            <thead>
+              <tr>
+                <th class="text-left">Employee</th>
+                <th class="text-left">Status</th>
+                <th class="text-left">Current Course</th>
+                <th class="text-right">Completion</th>
+                <th class="text-right">Readiness</th>
+                <th class="text-center">RAG</th>
+              </tr>
+            </thead>
+            <tbody id="reports-tbody">
+              <!-- Skeleton rows -->
+              <tr><td colspan="6" class="py-6 text-center text-on-surface-variant text-sm">Loading direct reports…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p id="reports-error" class="hidden text-sm text-error mt-3"></p>
+    </section>
+
+    <!-- Divider -->
+    <hr class="border-outline-variant">
+
+    <!-- ══ BUCKET 3: Strategic Benchmarking ══════════════════════════════ -->
+    <section id="section-strategic" class="fade-up-3">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1">insights</span>
+        <h2 class="font-display font-bold text-lg text-on-surface">Strategic Benchmarking</h2>
+        <span class="text-xs text-on-surface-variant ml-1" id="strategic-date-label"></span>
+      </div>
+
+      <!-- Comparison cards -->
+      <div id="strategic-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="skeleton h-44 rounded-2xl"></div>
+        <div class="skeleton h-44 rounded-2xl"></div>
+      </div>
+      <p id="strategic-error" class="hidden text-sm text-error mt-3"></p>
+    </section>
+
+  </div><!-- /max-w -->
+</main>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const getManagerId  = () => document.getElementById('manager-input').value.trim() || 'manager';
+const getDepartment = () => document.getElementById('dept-select').value;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function ragClass(color) {
+  return { green: 'rag-green', amber: 'rag-amber', red: 'rag-red' }[color] ?? 'rag-amber';
+}
+function ragIcon(color) {
+  return { green: 'check_circle', amber: 'warning', red: 'dangerous' }[color] ?? 'help';
+}
+function fmtPct(v) { return v == null ? '—' : `${v.toFixed(1)}%`; }
+function fmtScore(v) { return v == null ? '—' : (v * 100).toFixed(0); }
+
+function deltaChip(delta, label) {
+  if (delta == null) return '<span class="delta-neu text-xs px-2 py-0.5 rounded-full font-medium">No baseline</span>';
+  const cls = delta >= 0 ? 'delta-pos' : 'delta-neg';
+  const icon = delta >= 0 ? '▲' : '▼';
+  return `<span class="${cls} text-xs px-2 py-0.5 rounded-full font-semibold">${icon} ${Math.abs(delta).toFixed(1)}% vs dept ${label}</span>`;
+}
+
+function kpiCard(icon, label, value, sub = '') {
+  return `
+    <div class="kpi-card bg-white rounded-2xl border border-outline-variant p-4 flex flex-col gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings:'FILL' 1">${icon}</span>
+      <div class="font-display font-bold text-2xl text-on-surface">${value}</div>
+      <div class="text-xs text-on-surface-variant font-medium">${label}</div>
+      ${sub ? `<div class="text-xs text-on-surface-variant mt-0.5">${sub}</div>` : ''}
+    </div>`;
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let _allReports = [];
+
+// ── BUCKET 1: Team KPIs ──────────────────────────────────────────────────────
+async function loadTeamKpis(managerId, dept) {
+  const grid = document.getElementById('team-kpis-grid');
+  const errEl = document.getElementById('team-error');
+  const errMsg = document.getElementById('team-error-msg');
+  const ragBadge = document.getElementById('rag-badge');
+
+  grid.innerHTML = [1,2,3,4,5,6].map(() =>
+    '<div class="skeleton h-24 rounded-xl"></div>'
+  ).join('');
+  errEl.classList.add('hidden');
+  ragBadge.classList.add('hidden');
+
+  try {
+    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/team-kpis?department=${dept}`);
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load team KPIs');
+
+    // RAG badge
+    const rag = d.rag_status ?? 'amber';
+    ragBadge.className = `ml-auto text-xs font-semibold px-3 py-1 rounded-full ${ragClass(rag)} flex items-center gap-1`;
+    ragBadge.innerHTML = `<span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">${ragIcon(rag)}</span>${rag.toUpperCase()}`;
+    ragBadge.classList.remove('hidden');
+
+    // Sidebar info
+    document.getElementById('sidebar-name').textContent = managerId;
+    document.getElementById('sidebar-dept').textContent = dept;
+
+    grid.innerHTML = [
+      kpiCard('groups',      'Team Size',        d.team_size),
+      kpiCard('bolt',        'Active Learners',  d.active_learners),
+      kpiCard('task_alt',    'Completed',        d.completed_count),
+      kpiCard('percent',     'Avg Completion',   fmtPct(d.avg_completion_rate_pct)),
+      kpiCard('star',        'Pass Rate',        fmtPct(d.pass_rate_pct)),
+      kpiCard('warning',     'At Risk',          d.at_risk_count,
+        d.top_gap_areas?.length ? 'Top gap: ' + d.top_gap_areas[0] : ''),
+    ].join('');
+
+  } catch (e) {
+    grid.innerHTML = '';
+    errMsg.textContent = e.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+// ── BUCKET 2: Individual Reports ─────────────────────────────────────────────
+async function loadReports(managerId, dept) {
+  const tbody = document.getElementById('reports-tbody');
+  const errEl = document.getElementById('reports-error');
+  const subtitle = document.getElementById('reports-subtitle');
+
+  tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-on-surface-variant text-sm">Loading…</td></tr>`;
+  errEl.classList.add('hidden');
+
+  try {
+    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/reports?department=${dept}`);
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load reports');
+
+    _allReports = d.reports ?? [];
+    subtitle.textContent = `${d.report_count} direct report${d.report_count !== 1 ? 's' : ''}`;
+    renderReports(_allReports);
+
+  } catch (e) {
+    tbody.innerHTML = '';
+    errEl.textContent = e.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+function renderReports(rows) {
+  const tbody = document.getElementById('reports-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-on-surface-variant text-sm">No records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const rag = r.rag_color ?? 'amber';
+    const pct = r.completion_rate_pct ?? 0;
+    const fillColor = rag === 'green' ? '#22c55e' : rag === 'amber' ? '#f59e0b' : '#ef4444';
+    const atRiskBadge = r.is_at_risk
+      ? `<span class="rag-red text-xs px-2 py-0.5 rounded-full font-semibold ml-1">At Risk</span>` : '';
+
+    return `
+      <tr class="report-row" data-name="${r.display_name}" data-status="${r.status}">
+        <td>
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full bg-secondary-container text-on-secondary flex items-center justify-center font-bold text-xs shrink-0">
+              ${(r.display_name || r.user_id || '?')[0].toUpperCase()}
+            </div>
+            <div>
+              <div class="font-medium text-on-surface">${r.display_name || r.user_id}</div>
+              <div class="text-xs text-on-surface-variant capitalize">${r.job_level?.replace('_',' ') ?? '—'}</div>
+            </div>
+          </div>
+        </td>
+        <td>${r.status}${atRiskBadge}</td>
+        <td class="text-on-surface-variant">${r.current_course_id || '<span class="italic opacity-60">—</span>'}</td>
+        <td class="text-right min-w-[120px]">
+          <div class="flex items-center justify-end gap-2">
+            <div class="progress-bar w-20">
+              <div class="progress-bar-fill" style="width:${pct}%;background:${fillColor}"></div>
+            </div>
+            <span class="font-semibold text-xs w-10 text-right">${pct.toFixed(1)}%</span>
+          </div>
+        </td>
+        <td class="text-right font-semibold">${fmtScore(r.readiness_score)}<span class="text-on-surface-variant font-normal">/100</span></td>
+        <td class="text-center">
+          <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;color:${fillColor}">${ragIcon(rag)}</span>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function filterReports(query) {
+  if (!query.trim()) { renderReports(_allReports); return; }
+  const q = query.toLowerCase();
+  renderReports(_allReports.filter(r =>
+    (r.display_name || '').toLowerCase().includes(q) ||
+    (r.status || '').toLowerCase().includes(q) ||
+    (r.user_id || '').toLowerCase().includes(q)
+  ));
+}
+
+// ── BUCKET 3: Strategic ───────────────────────────────────────────────────────
+async function loadStrategic(managerId, dept) {
+  const grid = document.getElementById('strategic-grid');
+  const errEl = document.getElementById('strategic-error');
+  const dateLabel = document.getElementById('strategic-date-label');
+
+  grid.innerHTML = `<div class="skeleton h-44 rounded-2xl"></div><div class="skeleton h-44 rounded-2xl"></div>`;
+  errEl.classList.add('hidden');
+
+  try {
+    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/strategic?department=${dept}`);
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load strategic data');
+
+    dateLabel.textContent = `as of ${d.report_date}`;
+
+    const compDelta = deltaChip(d.delta?.completion_pct, 'avg');
+    const rdeltaLabel = d.delta?.readiness !== undefined
+      ? deltaChip(parseFloat((d.delta.readiness * 100).toFixed(1)), 'avg') : '';
+
+    grid.innerHTML = `
+      <!-- Completion comparison -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5 shadow-sm kpi-card">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">task_alt</span>
+          <span class="font-semibold text-on-surface">Completion Rate</span>
+        </div>
+        <div class="flex items-end justify-between mb-3">
+          <div>
+            <div class="text-3xl font-display font-bold text-on-surface">${fmtPct(d.team?.avg_completion_rate_pct)}</div>
+            <div class="text-xs text-on-surface-variant mt-0.5">Your Team</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-display font-semibold text-on-surface-variant">${fmtPct(d.department_baseline?.avg_completion_rate_pct)}</div>
+            <div class="text-xs text-on-surface-variant mt-0.5">Dept Avg</div>
+          </div>
+        </div>
+        ${compDelta}
+        ${!d.kpi_payload_found ? '<p class="text-xs text-on-surface-variant mt-2 italic">No KPI payload for today — showing live data.</p>' : ''}
+      </div>
+
+      <!-- Readiness comparison -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5 shadow-sm kpi-card">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">psychology</span>
+          <span class="font-semibold text-on-surface">Readiness Score</span>
+        </div>
+        <div class="flex items-end justify-between mb-3">
+          <div>
+            <div class="text-3xl font-display font-bold text-on-surface">${fmtScore(d.team?.avg_readiness_score)}<span class="text-lg text-on-surface-variant">/100</span></div>
+            <div class="text-xs text-on-surface-variant mt-0.5">Your Team</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-display font-semibold text-on-surface-variant">${fmtScore(d.department_baseline?.avg_readiness_score)}<span class="text-sm">/100</span></div>
+            <div class="text-xs text-on-surface-variant mt-0.5">Dept Avg</div>
+          </div>
+        </div>
+        ${rdeltaLabel}
+        ${!d.kpi_payload_found ? '<p class="text-xs text-on-surface-variant mt-2 italic">No KPI payload for today — showing live data.</p>' : ''}
+      </div>
+    `;
+
+  } catch (e) {
+    grid.innerHTML = '';
+    errEl.textContent = e.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+// ── Orchestrator ──────────────────────────────────────────────────────────────
+async function loadAll() {
+  const managerId = getManagerId();
+  const dept = getDepartment();
+  await Promise.all([
+    loadTeamKpis(managerId, dept),
+    loadReports(managerId, dept),
+    loadStrategic(managerId, dept),
+  ]);
+}
+
+// Auto-load on page ready
+document.addEventListener('DOMContentLoaded', loadAll);
+</script>
+</body>
+</html>

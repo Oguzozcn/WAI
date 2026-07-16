@@ -181,7 +181,7 @@ class DepartmentScopedStore:
 
     def write_user_progress(self, user_id: str, data: dict) -> None:
         """Write a user's progress to the department-scoped directory."""
-        data["last_updated"] = datetime.utcnow().isoformat()
+        data["last_updated"] = datetime.now(timezone.utc).isoformat()
         file_path = self.user_progress_path / f"{user_id}.json"
         file_path.write_text(json.dumps(data, indent=2))
 
@@ -270,14 +270,14 @@ class DepartmentScopedStore:
         Subsequent employees who fail the same token receive this cached snippet instantly.
         """
         file_path = self.gap_cache_path / f"{token_id}.json"
-        data["cached_at"] = datetime.utcnow().isoformat()
+        data["cached_at"] = datetime.now(timezone.utc).isoformat()
         file_path.write_text(json.dumps(data, indent=2))
 
     # ── Learning Path Persistence ──
 
     def write_learning_path(self, path_id: str, data: dict) -> None:
         """Persist a generated learning path to the department-scoped directory."""
-        data["last_updated"] = datetime.utcnow().isoformat()
+        data["last_updated"] = datetime.now(timezone.utc).isoformat()
         file_path = self.learning_paths_path / f"{path_id}.json"
         file_path.write_text(json.dumps(data, indent=2))
 
@@ -331,7 +331,7 @@ class DepartmentScopedStore:
 
     def write_standard_path(self, path_id: str, data: dict) -> None:
         """Persist a generated standard learning path to catalog/standard_paths/."""
-        data["last_updated"] = datetime.utcnow().isoformat()
+        data["last_updated"] = datetime.now(timezone.utc).isoformat()
         data["path_type"] = "official"
         file_path = self.catalog_standard_paths_path / f"{path_id}.json"
         file_path.write_text(json.dumps(data, indent=2))
@@ -371,7 +371,7 @@ class DepartmentScopedStore:
         """Persist an unofficial user-created learning path."""
         user_dir = self.catalog_unofficial_paths_path / user_id
         user_dir.mkdir(parents=True, exist_ok=True)
-        data["last_updated"] = datetime.utcnow().isoformat()
+        data["last_updated"] = datetime.now(timezone.utc).isoformat()
         data["path_type"] = "unofficial"
         data["created_by"] = user_id
         file_path = user_dir / f"{path_id}.json"
@@ -415,7 +415,7 @@ class DepartmentScopedStore:
         """Persist a knowledge gap learning path for a specific user."""
         user_dir = self.catalog_gap_paths_path / user_id
         user_dir.mkdir(parents=True, exist_ok=True)
-        data["last_updated"] = datetime.utcnow().isoformat()
+        data["last_updated"] = datetime.now(timezone.utc).isoformat()
         data["path_type"] = "gap"
         data["assigned_to"] = user_id
         file_path = user_dir / f"{path_id}.json"

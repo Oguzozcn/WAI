@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from src.services.quiz_service import (
@@ -183,7 +184,7 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
 
     mastery_vectors = progress.get("mastery_vectors", {})
     luck_failures = progress.get("luck_failures", {})
-    now_iso = __import__("datetime").datetime.utcnow().isoformat()
+    now_iso = datetime.now(timezone.utc).isoformat()
 
     for user_ans in body.answers:
         q_id = user_ans.get("question_id")

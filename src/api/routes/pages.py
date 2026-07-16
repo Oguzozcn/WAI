@@ -56,3 +56,7 @@ async def page_learning_materials():
 @router.get("/learning-paths-catalog", response_class=HTMLResponse)
 async def page_learning_paths_catalog():
     return _serve_page("learning-paths-catalog.html")
+
+@router.get("/manager-dashboard", response_class=HTMLResponse)
+async def page_manager_dashboard():
+    return _serve_page("manager-dashboard.html")

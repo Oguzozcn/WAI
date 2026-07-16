@@ -9,7 +9,7 @@ Using dataclasses + dict conversion for ADK compatibility (no Pydantic dependenc
 
 from dataclasses import dataclass, field, asdict
 from typing import Optional, List, Dict
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 
 # ── Birdbrain / HLR Mastery Models (Phase 7) ──
@@ -40,7 +40,7 @@ class MasteryVector:
 
     def __post_init__(self):
         if not self.last_seen:
-            self.last_seen = datetime.utcnow().isoformat()
+            self.last_seen = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -95,7 +95,7 @@ class LearningPath:
 
     def __post_init__(self):
         if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
+            self.created_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -143,7 +143,7 @@ class Quiz:
 
     def __post_init__(self):
         if not self.created_at:
-            self.created_at = datetime.utcnow().isoformat()
+            self.created_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -160,7 +160,7 @@ class QuizAttempt:
 
     def __post_init__(self):
         if not self.attempted_at:
-            self.attempted_at = datetime.utcnow().isoformat()
+            self.attempted_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -198,6 +198,10 @@ class UserProgress:
     is_at_risk: bool = False
     blocked_by: str = ""  # Topic causing the block
 
+    # Phase 8: Manager-employee relationship
+    manager_id: str = ""   # ID of the direct manager; empty for top-level users
+    job_level: str = "individual_contributor"  # "manager" | "individual_contributor"
+
     # Phase 7: Birdbrain mastery vectors — {concept_token_id: MasteryVector dict}
     mastery_vectors: dict = field(default_factory=dict)
 
@@ -208,7 +212,7 @@ class UserProgress:
 
     def __post_init__(self):
         if not self.enrolled_at:
-            self.enrolled_at = datetime.utcnow().isoformat()
+            self.enrolled_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -302,7 +306,7 @@ class KPIPayload:
 
     def __post_init__(self):
         if not self.generated_at_utc:
-            self.generated_at_utc = datetime.utcnow().isoformat() + "Z"
+            self.generated_at_utc = datetime.now(timezone.utc).isoformat() + "Z"
         if not self.report_date:
             self.report_date = date.today().isoformat()
 
@@ -345,7 +349,7 @@ class ConflictAlert:
 
     def __post_init__(self):
         if not self.flagged_at:
-            self.flagged_at = datetime.utcnow().isoformat()
+            self.flagged_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
         return asdict(self)
