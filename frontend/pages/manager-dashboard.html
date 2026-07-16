@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Manager Dashboard — WisdomAI</title>
 <meta name="description" content="Manager view: team KPIs, individual progress, and strategic benchmarks for your direct reports.">
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">try{
@@ -58,7 +58,25 @@
         },
         fontFamily: {
           "display": ["Hanken Grotesk"],
-          "body": ["Inter"]
+          "body": ["Inter"],
+          "display-lg": ["Hanken Grotesk"],
+          "body-md": ["Inter"],
+          "body-lg": ["Inter"],
+          "label-md": ["JetBrains Mono"],
+          "headline-lg-mobile": ["Hanken Grotesk"],
+          "stats-number": ["Hanken Grotesk"],
+          "headline-md": ["Hanken Grotesk"],
+          "headline-lg": ["Hanken Grotesk"]
+        },
+        fontSize: {
+          "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+          "stats-number": ["24px", { "lineHeight": "24px", "fontWeight": "800" }],
+          "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+          "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+          "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+          "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+          "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+          "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
         }
       }
     }
@@ -120,27 +138,44 @@
 <body class="min-h-screen flex">
 
 <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
-<aside class="hidden lg:flex flex-col w-60 bg-white border-r border-outline-variant px-3 py-6 gap-1 shrink-0">
-  <div class="flex items-center gap-2 px-2 mb-6">
-    <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings:'FILL' 1">school</span>
-    <span class="font-display font-bold text-lg text-on-surface">WisdomAI</span>
+<aside class="hidden lg:flex flex-col h-screen sticky top-0 w-64 border-r border-outline-variant bg-surface-container-low px-4 py-6 shrink-0 z-40">
+<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/learning-path">
+<span class="material-symbols-outlined">route</span>
+<span class="font-label-md text-label-md">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-label-md text-label-md">Knowledge Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/manager-dashboard">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-md text-label-md">Team Dashboards</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/learning-paths-catalog">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Catalog</span>
+</a>
+<a id="support-link" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a></nav>
+<div class="mt-auto pt-6 border-t border-outline-variant">
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-4 py-3">
+  <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-sm">M</div>
+  <div>
+    <div class="font-label-md text-label-md text-on-surface" id="sidebar-name">Manager</div>
+    <div class="text-[10px] text-on-surface-variant capitalize font-bold tracking-wider" id="sidebar-dept">—</div>
   </div>
-
-  <a href="/" class="nav-link"><span class="material-symbols-outlined">dashboard</span>My Dashboard</a>
-  <a href="/learning-path" class="nav-link"><span class="material-symbols-outlined">route</span>Learning Path</a>
-  <a href="/knowledge-vault" class="nav-link"><span class="material-symbols-outlined">library_books</span>Knowledge Vault</a>
-  <a href="/manager-dashboard" class="nav-link active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">groups</span>Team Dashboard</a>
-  <a href="/learning-paths-catalog" class="nav-link"><span class="material-symbols-outlined">menu_book</span>Catalog</a>
-
-  <div class="mt-auto border-t border-outline-variant pt-4 px-2">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-sm">M</div>
-      <div>
-        <div class="text-sm font-semibold text-on-surface" id="sidebar-name">Manager</div>
-        <div class="text-xs text-on-surface-variant capitalize" id="sidebar-dept">—</div>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+</div>
 </aside>
 
 <!-- ── Main ─────────────────────────────────────────────────────────────── -->
