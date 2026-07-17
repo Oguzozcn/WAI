@@ -10,8 +10,8 @@ from src.services.curriculum_service import (
     recursive_character_splitter,
     trigger_curriculum_generation,
 )
-from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT
+from src.core.database import DepartmentScopedStore
+from src.core.config import DEFAULT_DEPARTMENT
 
 router = APIRouter(prefix="/api/kb", tags=["knowledge_base"])
 

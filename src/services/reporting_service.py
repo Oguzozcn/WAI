@@ -14,12 +14,12 @@ Tier 3 (AGGREGATE) — Used by Corporate Report Agent:
 import json
 from datetime import datetime, date
 
-from WAI_agent.shared.persistence import DepartmentScopedStore, KPIStoreReader
-from WAI_agent.shared.models import (
+from src.core.database import DepartmentScopedStore, KPIStoreReader
+from src.core.models import (
     KPIPayload, WorkforceMetrics, LearningMetrics,
     AssessmentMetrics, KnowledgeBaseMetrics, RiskIndicators,
 )
-from WAI_agent.shared.constants import (
+from src.core.config import (
     DEFAULT_DEPARTMENT, SCHEMA_VERSION, AT_RISK_READINESS_THRESHOLD,
     AT_RISK_PERCENTAGE_THRESHOLD, PASS_THRESHOLD,
 )

@@ -9,12 +9,12 @@ import json
 import uuid
 from datetime import datetime
 
-from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.constants import (
+from src.core.database import DepartmentScopedStore
+from src.core.config import (
     DEFAULT_DEPARTMENT, PASS_THRESHOLD,
     MAX_QUIZ_QUESTIONS, MAX_ASSESSMENT_QUESTIONS,
 )
-from WAI_agent.shared.luck_elimination import LuckEliminationEngine
+from src.core.luck_elimination import LuckEliminationEngine
 import math
 
 class EnterprisePsychometricEngine:

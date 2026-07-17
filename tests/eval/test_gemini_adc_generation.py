@@ -7,7 +7,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.services.curriculum_service import generate_remedial_course
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT
+from src.core.config import DEFAULT_DEPARTMENT
 
 def test_gemini_adc_remedial_generation():
     """

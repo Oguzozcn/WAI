@@ -8,7 +8,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.services.routing_service import AdaptiveMetacognitiveRouter
 from src.services.quiz_service import EnterprisePsychometricEngine
-from WAI_agent.shared.data_compliance_gate import DataComplianceGate
+from src.core.data_compliance_gate import DataComplianceGate
 
 def check_metacognitive_router():
     print("--- Checking AdaptiveMetacognitiveRouter ---")

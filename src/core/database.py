@@ -8,16 +8,18 @@ Future migration path:
   - Swap this module's backend from local JSON → BigQuery/GCS
   - DepartmentScopedStore interface stays identical
   - Only internal file I/O changes to API calls
+
+Migrated from WAI_agent/shared/persistence.py → src/core/database.py (ADK 2.0)
 """
 
 import json
 import os
 import threading
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Optional
 
-from .constants import SCHEMA_VERSION
+from src.core.config import SCHEMA_VERSION
 
 # Global lock for thread safety during read-modify-write operations
 _store_lock = threading.Lock()
@@ -51,42 +53,37 @@ _RISK_REQUIRED = {"at_risk_employee_count", "avg_readiness_score", "employees_be
 def validate_kpi_schema(payload: dict) -> None:
     """
     Validates a KPI payload against schema v1.0.
-    
+
     Enforces:
     - All required top-level fields present
     - No additional fields at any level (structural PII prevention)
     - Schema version matches
     - Sub-object field completeness
-    
+
     Raises SchemaValidationError on any violation.
     """
-    # Check schema version
     if payload.get("schema_version") != SCHEMA_VERSION:
         raise SchemaValidationError(
             f"Schema version mismatch: expected '{SCHEMA_VERSION}', "
             f"got '{payload.get('schema_version')}'"
         )
 
-    # Check top-level required fields
     missing = _KPI_REQUIRED_FIELDS - set(payload.keys())
     if missing:
         raise SchemaValidationError(f"Missing required fields: {missing}")
 
-    # Check no additional top-level fields (PII prevention)
     extra = set(payload.keys()) - _KPI_REQUIRED_FIELDS
     if extra:
         raise SchemaValidationError(
             f"Additional fields not permitted (PII risk): {extra}"
         )
 
-    # Validate sub-objects
     _validate_sub_object(payload, "workforce_metrics", _WORKFORCE_REQUIRED)
     _validate_sub_object(payload, "learning_metrics", _LEARNING_REQUIRED)
     _validate_sub_object(payload, "assessment_metrics", _ASSESSMENT_REQUIRED)
     _validate_sub_object(payload, "knowledge_base_metrics", _KB_REQUIRED)
     _validate_sub_object(payload, "risk_indicators", _RISK_REQUIRED)
 
-    # Validate top_gap_areas is a list of strings (no PII)
     gaps = payload.get("top_gap_areas", [])
     if not isinstance(gaps, list):
         raise SchemaValidationError("top_gap_areas must be a list")
@@ -114,10 +111,10 @@ def _validate_sub_object(payload: dict, key: str, required_fields: set) -> None:
 class DepartmentScopedStore:
     """
     Namespace-isolated persistence store.
-    
+
     Every file operation is scoped to the department_id passed at construction.
     The store physically cannot construct paths to another department's data.
-    
+
     Directory layout:
         data/user_progress/{department_id}/{user_id}.json
         data/knowledge_base/{department_id}/...
@@ -129,7 +126,7 @@ class DepartmentScopedStore:
         """
         Args:
             department_id: The department this store is scoped to.
-            base_path: Root data directory. Defaults to WAI_agent/data/.
+            base_path: Root data directory. Defaults to data/ at project root.
         """
         self.department_id = department_id
 
@@ -220,15 +217,7 @@ class DepartmentScopedStore:
     # ── Raw Document Storage ──
 
     def write_raw_document(self, filename: str, content: str) -> str:
-        """Save an uploaded raw document (.txt or .md) to the raw/ subdirectory.
-
-        Args:
-            filename: Original filename of the uploaded document.
-            content: The text content of the document.
-
-        Returns:
-            The absolute path of the saved file.
-        """
+        """Save an uploaded raw document (.txt or .md) to the raw/ subdirectory."""
         safe_name = filename.replace("/", "_").replace("\\", "_")
         file_path = self.raw_documents_path / safe_name
         file_path.write_text(content, encoding="utf-8")
@@ -251,24 +240,14 @@ class DepartmentScopedStore:
     # ── Gap Cache (Phase 7 — Atomic Snippet Cache, Tier A scoped) ──
 
     def read_gap_cache(self, token_id: str) -> Optional[dict]:
-        """Read a cached atomic remediation snippet for a specific ConceptToken.
-
-        Cache is strictly scoped to this department's namespace:
-            data/knowledge_base/{department_id}/gap_cache/tokens/{token_id}.json
-
-        Returns None if no cached snippet exists for this token.
-        """
+        """Read a cached atomic remediation snippet for a specific ConceptToken."""
         file_path = self.gap_cache_path / f"{token_id}.json"
         if not file_path.exists():
             return None
         return json.loads(file_path.read_text())
 
     def write_gap_cache(self, token_id: str, data: dict) -> None:
-        """Persist an atomic remediation snippet for a ConceptToken.
-
-        Cache is strictly scoped to this department's namespace.
-        Subsequent employees who fail the same token receive this cached snippet instantly.
-        """
+        """Persist an atomic remediation snippet for a ConceptToken."""
         file_path = self.gap_cache_path / f"{token_id}.json"
         data["cached_at"] = datetime.now(timezone.utc).isoformat()
         file_path.write_text(json.dumps(data, indent=2))
@@ -293,22 +272,13 @@ class DepartmentScopedStore:
         paths = list(self.learning_paths_path.glob("*.json"))
         if not paths:
             return None
-        # Sort by modification time, newest first
         paths.sort(key=lambda p: p.stat().st_mtime, reverse=True)
         return json.loads(paths[0].read_text())
 
     # ── Catalog: Input Files ──
 
     def write_catalog_input(self, filename: str, content: str) -> str:
-        """Save an uploaded raw document to catalog/inputs/.
-
-        Args:
-            filename: Original filename of the uploaded document.
-            content: The text content of the document.
-
-        Returns:
-            The absolute path of the saved file.
-        """
+        """Save an uploaded raw document to catalog/inputs/."""
         safe_name = filename.replace("/", "_").replace("\\", "_")
         file_path = self.catalog_inputs_path / safe_name
         file_path.write_text(content, encoding="utf-8")
@@ -378,12 +348,7 @@ class DepartmentScopedStore:
         file_path.write_text(json.dumps(data, indent=2))
 
     def list_unofficial_paths(self, user_id: str | None = None) -> list[dict]:
-        """List unofficial learning paths.
-
-        Args:
-            user_id: If provided, list only paths for this user.
-                     If None, list all unofficial paths across all users.
-        """
+        """List unofficial learning paths."""
         results = []
         if user_id:
             user_dir = self.catalog_unofficial_paths_path / user_id
@@ -422,12 +387,7 @@ class DepartmentScopedStore:
         file_path.write_text(json.dumps(data, indent=2))
 
     def list_gap_paths(self, user_id: str | None = None) -> list[dict]:
-        """List gap learning paths.
-
-        Args:
-            user_id: If provided, list only gap paths for this user.
-                     If None, list all gap paths across all users.
-        """
+        """List gap learning paths."""
         results = []
         if user_id:
             user_dir = self.catalog_gap_paths_path / user_id
@@ -457,14 +417,11 @@ class DepartmentScopedStore:
     @staticmethod
     def _extract_path_title(data: dict) -> str:
         """Extract a human-readable title from a learning path JSON."""
-        # Try explicit title first
         if data.get("title"):
             return data["title"]
-        # Fall back to first course title
         courses = data.get("courses", [])
         if courses and courses[0].get("title"):
             return courses[0]["title"]
-        # Fall back to source document name
         if data.get("source_document"):
             name = data["source_document"]
             return name.replace("_", " ").replace(".md", "").replace(".txt", "").title()
@@ -493,16 +450,14 @@ class DepartmentScopedStore:
     def write_kpi_payload(self, report_date: str, payload: dict) -> str:
         """
         Validate and write a KPI payload to the central store.
-        
+
         This is the ONE-WAY PUSH across the department boundary.
         The payload is validated against schema v1.0 before writing.
-        
+
         Returns the path of the written file.
         """
-        # Enforce schema — rejects payloads with extra fields (PII prevention)
         validate_kpi_schema(payload)
 
-        # Ensure department_id matches this store's scope
         if payload.get("department_id") != self.department_id:
             raise IsolationViolationError(
                 f"KPI payload department_id '{payload.get('department_id')}' "
@@ -518,7 +473,7 @@ class DepartmentScopedStore:
 class KPIStoreReader:
     """
     Read-only access to the central KPI store (Tier 3).
-    
+
     This is the ONLY data access class the corporate_report_agent uses.
     It has NO methods to access user_progress, knowledge_base, or conflicts.
     It CANNOT write to the KPI store.
@@ -537,32 +492,19 @@ class KPIStoreReader:
         report_date: str,
         departments: list[str] | None = None
     ) -> list[dict]:
-        """
-        Read KPI payloads from the central store for a given date.
-        
-        Args:
-            report_date: ISO date string (YYYY-MM-DD)
-            departments: Optional list of department IDs to filter.
-                         If None, reads all available departments.
-        
-        Returns:
-            List of validated KPI payload dicts.
-        """
+        """Read KPI payloads from the central store for a given date."""
         payloads = []
 
         for file_path in self.kpi_store_path.glob(f"*_daily_{report_date}.json"):
             payload = json.loads(file_path.read_text())
 
-            # Filter by department if specified
             if departments and payload.get("department_id") not in departments:
                 continue
 
-            # Validate schema before returning (defense in depth)
             try:
                 validate_kpi_schema(payload)
                 payloads.append(payload)
             except SchemaValidationError as e:
-                # Log but skip malformed payloads
                 print(f"WARNING: Skipping malformed KPI payload {file_path}: {e}")
 
         return payloads
@@ -571,7 +513,6 @@ class KPIStoreReader:
         """List all dates that have KPI payloads available."""
         dates = set()
         for file_path in self.kpi_store_path.glob("*_daily_*.json"):
-            # Extract date from filename: {dept}_daily_{date}.json
             parts = file_path.stem.split("_daily_")
             if len(parts) == 2:
                 dates.add(parts[1])

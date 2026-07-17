@@ -8,9 +8,9 @@ and department-level reporting.
 import json
 from datetime import datetime
 
-from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT, PASS_THRESHOLD, AT_RISK_READINESS_THRESHOLD
-from WAI_agent.shared.data_compliance_gate import DataComplianceGate
+from src.core.database import DepartmentScopedStore
+from src.core.config import DEFAULT_DEPARTMENT, PASS_THRESHOLD, AT_RISK_READINESS_THRESHOLD
+from src.core.data_compliance_gate import DataComplianceGate
 
 
 def get_user_progress(

@@ -1,7 +1,8 @@
 """
-TEAP Lifecycle Hooks
-====================
+TEAP Agent Hooks — ADK 2.0
+============================
 Intercepts agent decisions to enforce corporate policies.
+Refactored from src/agents/hooks.py to import from src/core/ only.
 """
 
 from typing import Any
@@ -10,11 +11,14 @@ from typing import Any
 # from google.adk.hooks import PreToolCallDecideHook
 
 class PreToolCallDecideHook:
-    """Mock base class for PreToolCallDecideHook until SDK is fully installed."""
+    """Base class placeholder for PreToolCallDecideHook until SDK hook API is stable."""
     def __init__(self, **kwargs):
         pass
 
-from WAI_agent.shared.luck_elimination import evaluate_luck_and_decay, ACTION_FORCE_MANDATORY
+
+from src.core.luck_elimination import evaluate_luck_and_decay, ACTION_FORCE_MANDATORY
+from src.core.config import LUCK_FAILURE_THRESHOLD
+
 
 class LuckEliminationHook(PreToolCallDecideHook):
     """
@@ -22,24 +26,20 @@ class LuckEliminationHook(PreToolCallDecideHook):
     to check if the user has failed a concept too many times. If so, denies the tool call
     and forces the LLM to route them to the mandatory path.
     """
-    
+
     def on_pre_tool_call(self, tool_name: str, args: dict, context: Any) -> dict:
         # We only care about fast-track/routing tools
         if tool_name not in ("check_bypass_eligibility", "determine_user_entry_path"):
             return {"allow": True}
-        
+
         # In ADK, the context holds session state (e.g., user_progress)
         user_progress = getattr(context, "state", {}).get("user_progress", {})
-        
-        # Example logic to intercept based on error retention matrix
+
+        # Check error retention matrix via the luck elimination engine
         error_matrix = user_progress.get("error_retention_matrix", {})
-        
-        # Check if any concept exceeds the failure threshold (via the shared logic engine)
-        from WAI_agent.shared.constants import LUCK_FAILURE_THRESHOLD
-        
+
         for concept, failures in error_matrix.items():
             if failures >= LUCK_FAILURE_THRESHOLD:
-                # Deny the tool call and provide a reason to the agent
                 return {
                     "allow": False,
                     "reason": (
@@ -48,5 +48,5 @@ class LuckEliminationHook(PreToolCallDecideHook):
                         f"learning path."
                     )
                 }
-        
+
         return {"allow": True}

@@ -182,15 +182,19 @@ Start <span class="material-symbols-outlined">chevron_right</span>
 <!-- Tabs -->
 <div class="flex items-center gap-6 border-b border-outline-variant px-2 md:flex-1">
 <button id="tab-activities" class="pb-3 text-primary font-bold border-b-2 border-primary text-sm px-1">Activities</button>
-<button id="tab-paths" class="pb-3 text-on-surface-variant hover:text-on-surface font-medium text-sm px-1" onclick="window.location='/learning-path'">Paths</button>
+<button id="tab-paths" class="pb-3 text-on-surface-variant hover:text-on-surface font-medium text-sm px-1">Paths</button>
 </div>
 <!-- Course Cards Grid (dynamically rendered) -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboard-activities">
   <!-- Cards injected by JS -->
   <div class="col-span-2 flex items-center justify-center py-12 text-on-surface-variant text-sm">Loading your courses...</div>
 </div>
+<!-- Paths Panel (hidden by default, toggled inline) -->
+<div id="dashboard-paths" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- Populated by JS -->
+</div>
 <div class="pt-2 pb-8">
-<a class="text-primary font-bold text-sm hover:underline" href="/learning-path">View all activities</a>
+<button id="view-all-btn" class="text-primary font-bold text-sm hover:underline bg-transparent border-none cursor-pointer p-0">View all activities</button>
 </div>
 </div>
 <!-- Right Sidebar -->
@@ -285,16 +289,92 @@ if (profileAvatar) {
     profileAvatar.addEventListener('click', () => showToast('Profile — Feature coming soon!'));
 }
 
+// ─── Tab Switcher ─────────────────────────────────────────────────────────────
+let activeTab = 'activities';
+let isExpanded = false;
+
+function activateTab(tabName) {
+    activeTab = tabName;
+    const tabActivities = document.getElementById('tab-activities');
+    const tabPaths = document.getElementById('tab-paths');
+    const panelActivities = document.getElementById('dashboard-activities');
+    const panelPaths = document.getElementById('dashboard-paths');
+    const viewAllBtn = document.getElementById('view-all-btn');
+
+    if (tabName === 'activities') {
+        tabActivities.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+        tabActivities.classList.remove('text-on-surface-variant', 'font-medium');
+        tabPaths.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+        tabPaths.classList.add('text-on-surface-variant', 'font-medium');
+        panelActivities.classList.remove('hidden');
+        panelPaths.classList.add('hidden');
+    } else {
+        tabPaths.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+        tabPaths.classList.remove('text-on-surface-variant', 'font-medium');
+        tabActivities.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+        tabActivities.classList.add('text-on-surface-variant', 'font-medium');
+        panelPaths.classList.remove('hidden');
+        panelActivities.classList.add('hidden');
+    }
+    
+    if (viewAllBtn) {
+        viewAllBtn.textContent = isExpanded ? 'Show less' : (tabName === 'activities' ? 'View all activities' : 'View all paths');
+    }
+}
+document.getElementById('tab-activities').addEventListener('click', () => activateTab('activities'));
+document.getElementById('tab-paths').addEventListener('click', () => activateTab('paths'));
+
+
+// ─── Predefined Fallback Learning Path ────────────────────────────────────────
+const FALLBACK_PATH = {
+    path_id: 'default_path',
+    path_name: 'WisdomAI Core Curriculum',
+    description: 'A structured learning track covering core competencies for your role.',
+    courses: [
+        {
+            course_id: 'c_onboarding',
+            title: 'Company Onboarding & Culture',
+            description: 'Understand our mission, values, processes, and team structure.',
+            estimated_hours: 2,
+            lessons: [{ lesson_id: 'l_001', estimated_minutes: 30 }]
+        },
+        {
+            course_id: 'c_tools',
+            title: 'Core Tools & Systems',
+            description: 'Master the software stack and internal tools used across all departments.',
+            estimated_hours: 3,
+            lessons: [{ lesson_id: 'l_002', estimated_minutes: 45 }]
+        },
+        {
+            course_id: 'c_compliance',
+            title: 'Compliance & Data Privacy',
+            description: 'Essential regulatory training — GDPR, data handling, and security protocols.',
+            estimated_hours: 1.5,
+            lessons: [{ lesson_id: 'l_003', estimated_minutes: 20 }]
+        },
+        {
+            course_id: 'c_leadership',
+            title: 'Leadership & Communication',
+            description: 'Develop effective communication, stakeholder management, and leadership skills.',
+            estimated_hours: 4,
+            lessons: [{ lesson_id: 'l_004', estimated_minutes: 40 }]
+        }
+    ]
+};
+
 // ─── Main Data Loader ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const userId = 'emp_001';
-        const [path, progress] = await Promise.all([
-            fetch('/api/learning-path/latest?user_id=' + userId).then(r => r.json()).catch(() => WisdomAPI.getLearningPath(userId)),
-            WisdomAPI.getUserProgress(userId)
+        const [pathRaw, progress] = await Promise.all([
+            fetch('/api/learning-path/latest?user_id=' + userId)
+                .then(r => r.json())
+                .catch(() => WisdomAPI.getLearningPath(userId).catch(() => null)),
+            WisdomAPI.getUserProgress(userId).catch(() => ({}))
         ]);
 
-        if (!path || !path.courses) return;
+        // Always use fallback when API returns nothing valid
+        const path = (pathRaw && pathRaw.courses && pathRaw.courses.length > 0) ? pathRaw : FALLBACK_PATH;
 
         const completedSet = new Set(progress.completed_courses || []);
 
@@ -311,60 +391,132 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // 2. Update Hero Banner
-        if (activeCourse) {
+        // 2. Update Hero Banner — always show something, never leave placeholder text
+        const heroTarget = activeCourse || path.courses[0];
+        if (heroTarget) {
             const heroTitle = document.getElementById('hero-title');
             const heroSubtitle = document.getElementById('hero-subtitle');
             const heroStartBtn = document.getElementById('hero-start-btn');
             const heroDuration = document.getElementById('hero-duration');
 
-            if (heroTitle) heroTitle.textContent = activeCourse.title;
-            if (heroSubtitle) heroSubtitle.textContent = activeCourse.description || 'Continue your learning journey';
+            if (heroTitle) heroTitle.textContent = heroTarget.title;
+            if (heroSubtitle) heroSubtitle.textContent = heroTarget.description || 'Continue your learning journey';
 
-            const lessonUrl = activeLessonId
-                ? `/lesson?course=${activeCourse.course_id}&lesson=${activeLessonId}`
-                : `/lesson?course=${activeCourse.course_id}`;
+            const targetLessonId = heroTarget.lessons && heroTarget.lessons.length > 0
+                ? heroTarget.lessons[0].lesson_id : null;
+            const lessonUrl = targetLessonId
+                ? `/lesson?course=${heroTarget.course_id}&lesson=${targetLessonId}`
+                : `/lesson?course=${heroTarget.course_id}`;
             if (heroStartBtn) heroStartBtn.href = lessonUrl;
 
-            const mins = activeLessonId && activeCourse.lessons
-                ? (activeCourse.lessons[0].estimated_minutes || 15) + ' min'
-                : (activeCourse.estimated_hours ? activeCourse.estimated_hours + 'h' : '—');
+            const mins = targetLessonId && heroTarget.lessons
+                ? (heroTarget.lessons[0].estimated_minutes || 15) + ' min'
+                : (heroTarget.estimated_hours ? heroTarget.estimated_hours + 'h' : '—');
             if (heroDuration) heroDuration.textContent = mins;
         }
 
-        // 3. Render course cards dynamically (up to 4)
+        // 3. Render Activities — show individual LESSON cards (lesson = what you actually do)
         const grid = document.getElementById('dashboard-activities');
         if (grid) {
             grid.innerHTML = '';
-            const visible = path.courses.slice(0, 4);
+            const lessonCards = [];
 
-            visible.forEach(course => {
-                const isCompleted = completedSet.has(course.course_id);
+            // Collect ALL lessons from all courses
+            for (const course of path.courses) {
+                const courseCompleted = completedSet.has(course.course_id);
                 const isRemedial = course.is_remedial === true;
-                const lessonUrl = (course.lessons && course.lessons.length > 0)
-                    ? `/lesson?course=${course.course_id}&lesson=${course.lessons[0].lesson_id}`
+                if (course.lessons && course.lessons.length > 0) {
+                    for (const lesson of course.lessons) {
+                        lessonCards.push({ lesson, course, courseCompleted, isRemedial });
+                    }
+                } else {
+                    // Course has no lessons — show course itself as a card
+                    lessonCards.push({ lesson: null, course, courseCompleted, isRemedial });
+                }
+            }
+
+            lessonCards.forEach(({ lesson, course, courseCompleted, isRemedial }, idx) => {
+                const isCompleted = courseCompleted;
+                const lessonUrl = lesson
+                    ? `/lesson?course=${course.course_id}&lesson=${lesson.lesson_id}`
                     : `/lesson?course=${course.course_id}`;
+
+                const cardTitle = lesson ? lesson.title : course.title;
+                const cardDesc = lesson
+                    ? (lesson.content ? lesson.content.slice(0, 120) + (lesson.content.length > 120 ? '…' : '') : course.description || '')
+                    : course.description || 'Part of your personalized WisdomAI learning path.';
+                const duration = lesson
+                    ? (lesson.estimated_minutes || 15) + ' min'
+                    : course.estimated_hours ? course.estimated_hours + 'h' : '';
 
                 const badgeHtml = isRemedial
                     ? `<span class="text-amber-600 text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">auto_fix_high</span> TARGETED REVIEW</span>`
-                    : `<span class="text-primary text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">menu_book</span> COURSE</span>`;
+                    : `<span class="text-primary text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">menu_book</span> ${course.title}</span>`;
 
-                const completedPct = isCompleted ? 100 : 0;
                 const footerHtml = isCompleted
                     ? `<div class="mt-auto"><div class="w-full bg-surface-container-low rounded-full h-1.5 mb-2"><div class="bg-primary h-1.5 rounded-full" style="width:100%"></div></div><div class="flex items-center justify-between"><span class="text-xs text-primary font-bold">Completed ✓</span></div></div>`
-                    : `<div class="flex justify-end mt-auto"><a href="${lessonUrl}" class="w-10 h-10 rounded-full bg-surface-container-low hover:bg-surface-container-high flex items-center justify-center text-primary transition-colors no-underline"><span class="material-symbols-outlined">arrow_forward</span></a></div>`;
+                    : `<div class="flex items-center justify-between mt-auto">
+                        ${duration ? `<span class="text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>${duration}</span>` : '<span></span>'}
+                        <span class="w-10 h-10 rounded-full bg-surface-container-low group-hover:bg-surface-container-high flex items-center justify-center text-primary transition-colors"><span class="material-symbols-outlined">arrow_forward</span></span>
+                       </div>`;
+
+                const extraClass = idx >= 4 ? 'dashboard-extra-card' : '';
+                const displayStyle = (idx >= 4 && !isExpanded) ? 'display: none;' : '';
 
                 grid.innerHTML += `
-                <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-md transition-shadow">
+                <a href="${lessonUrl}" class="group bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-md hover:border-primary/40 transition-all no-underline cursor-pointer ${extraClass}" style="${displayStyle}">
+                    <div class="flex items-center gap-2 mb-4">${badgeHtml}</div>
+                    <h3 class="font-headline-md text-xl text-on-surface mb-3 flex-1">${cardTitle}</h3>
+                    <p class="text-sm text-on-surface-variant mb-6 line-clamp-3">${cardDesc}</p>
+                    ${footerHtml}
+                </a>`;
+            });
+        }
+
+        // 4. Render Paths panel — same card style as Activities, badge = LEARNING PATH
+        const pathsPanel = document.getElementById('dashboard-paths');
+        if (pathsPanel) {
+            pathsPanel.innerHTML = '';
+            path.courses.forEach((course, idx) => {
+                const isCompleted = completedSet.has(course.course_id);
+                const isRemedial = course.is_remedial === true;
+                // Paths tab — clicking goes to the full learning path page
+                const pathUrl = `/learning-path`;
+
+                const badgeHtml = isRemedial
+                    ? `<span class="text-amber-600 text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">auto_fix_high</span> TARGETED REVIEW</span>`
+                    : `<span class="text-primary text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider"><span class="material-symbols-outlined text-[14px]">route</span> LEARNING PATH</span>`;
+
+                const footerHtml = isCompleted
+                    ? `<div class="mt-auto"><div class="w-full bg-surface-container-low rounded-full h-1.5 mb-2"><div class="bg-primary h-1.5 rounded-full" style="width:100%"></div></div><div class="flex items-center justify-between"><span class="text-xs text-primary font-bold">Completed ✓</span></div></div>`
+                    : `<div class="flex justify-end mt-auto"><span class="w-10 h-10 rounded-full bg-surface-container-low group-hover:bg-surface-container-high flex items-center justify-center text-primary transition-colors"><span class="material-symbols-outlined">arrow_forward</span></span></div>`;
+
+                const extraClass = idx >= 4 ? 'dashboard-extra-card' : '';
+                const displayStyle = (idx >= 4 && !isExpanded) ? 'display: none;' : '';
+
+                pathsPanel.innerHTML += `
+                <a href="${pathUrl}" class="group bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-md hover:border-primary/40 transition-all no-underline cursor-pointer ${extraClass}" style="${displayStyle}">
                     <div class="flex items-center gap-2 mb-4">${badgeHtml}</div>
                     <h3 class="font-headline-md text-xl text-on-surface mb-3 flex-1">${course.title}</h3>
                     <p class="text-sm text-on-surface-variant mb-6 line-clamp-3">${course.description || 'Part of your personalized WisdomAI learning path.'}</p>
                     ${footerHtml}
-                </div>`;
+                </a>`;
             });
         }
 
-        // 4. Update sidebar progress stats
+        // Toggle functionality
+        const viewAllBtn = document.getElementById('view-all-btn');
+        if (viewAllBtn) {
+            viewAllBtn.addEventListener('click', () => {
+                isExpanded = !isExpanded;
+                viewAllBtn.textContent = isExpanded ? 'Show less' : (activeTab === 'activities' ? 'View all activities' : 'View all paths');
+                document.querySelectorAll('.dashboard-extra-card').forEach(el => {
+                    el.style.display = isExpanded ? 'flex' : 'none';
+                });
+            });
+        }
+
+        // 5. Update sidebar progress stats
         document.getElementById('dash-course-count').textContent = path.courses.length;
         let lessonCount = 0;
         path.courses.forEach(c => {

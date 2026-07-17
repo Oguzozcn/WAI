@@ -5,6 +5,8 @@ Pydantic-style dataclass models for the entire platform.
 These define the data structures exchanged between tools, agents, and persistence.
 
 Using dataclasses + dict conversion for ADK compatibility (no Pydantic dependency).
+
+Migrated from WAI_agent/shared/models.py → src/core/models.py (ADK 2.0)
 """
 
 from dataclasses import dataclass, field, asdict
@@ -285,11 +287,11 @@ class RiskIndicators:
 class KPIPayload:
     """
     Tier 2 KPI Payload — Schema v1.0
-    
+
     This is the ONLY data structure that crosses the department boundary.
     additionalProperties equivalent: we use strict field definitions and
     to_dict() to ensure no extra fields leak through.
-    
+
     CRITICAL: No PII. No employee names/emails. No raw quiz answers.
     """
     schema_version: str = "1.0"

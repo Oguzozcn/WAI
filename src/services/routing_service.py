@@ -5,14 +5,14 @@ ADK function tools for adaptive path routing.
 Determines entry paths, handles assessment failures, and manages bypass eligibility.
 """
 
-from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.state_machine import (
+from src.core.database import DepartmentScopedStore
+from src.core.state_machine import (
     determine_entry_path,
     handle_assessment_result,
     get_mandatory_courses,
     get_state_description,
 )
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT, ENTRY_PATH_VETERAN, ENTRY_PATH_INTERMEDIATE, ENTRY_PATH_STANDARD
+from src.core.config import DEFAULT_DEPARTMENT, ENTRY_PATH_VETERAN, ENTRY_PATH_INTERMEDIATE, ENTRY_PATH_STANDARD
 
 class AdaptiveMetacognitiveRouter:
     """

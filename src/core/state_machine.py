@@ -3,17 +3,10 @@ TEAP Adaptive Learning State Machine
 ======================================
 Manages state transitions for the learning journey.
 
-Three entry paths:
-  - Veteran: Fast-track → direct validation assessment
-  - Intermediate: Choice of gap rerun OR validation test
-  - Standard: 10-course track → short quizzes → validation assessment
-
-Two failure cases:
-  - Case 1 (Bypass Fail): Score <80% on direct assessment → mandatory path, bypass locked
-  - Case 2 (Standard Fail): Can retake iteratively, gaps targeted via spaced repetition
+Migrated from WAI_agent/shared/state_machine.py → src/core/state_machine.py (ADK 2.0)
 """
 
-from .constants import (
+from src.core.config import (
     PASS_THRESHOLD,
     STATE_ENROLLED, STATE_FAST_TRACK, STATE_INTERMEDIATE_CHOICE,
     STATE_STANDARD_PATH, STATE_COURSE_IN_PROGRESS, STATE_SHORT_QUIZ,
@@ -35,7 +28,7 @@ _VALID_TRANSITIONS: dict[str, list[str]] = {
     STATE_FAST_TRACK: [STATE_VALIDATION_ASSESSMENT],
     STATE_INTERMEDIATE_CHOICE: [STATE_GAP_REVIEW, STATE_VALIDATION_ASSESSMENT],
     STATE_STANDARD_PATH: [STATE_COURSE_IN_PROGRESS],
-    STATE_COURSE_IN_PROGRESS: [STATE_SHORT_QUIZ, STATE_COURSE_IN_PROGRESS],  # Next course
+    STATE_COURSE_IN_PROGRESS: [STATE_SHORT_QUIZ, STATE_COURSE_IN_PROGRESS],
     STATE_SHORT_QUIZ: [STATE_COURSE_IN_PROGRESS, STATE_VALIDATION_ASSESSMENT, STATE_METACOGNITIVE_REFLECTION],
     STATE_VALIDATION_ASSESSMENT: [STATE_PASSED, STATE_FAILED],
     STATE_PASSED: [STATE_COMPLETED],
@@ -50,15 +43,7 @@ _VALID_TRANSITIONS: dict[str, list[str]] = {
 
 
 def determine_entry_path(experience_level: str) -> str:
-    """
-    Determine which entry path a user should follow based on their experience.
-    
-    Args:
-        experience_level: One of "veteran", "intermediate", "standard"
-    
-    Returns:
-        The initial state after enrollment.
-    """
+    """Determine which entry path a user should follow based on their experience."""
     path_map = {
         ENTRY_PATH_VETERAN: STATE_FAST_TRACK,
         ENTRY_PATH_INTERMEDIATE: STATE_INTERMEDIATE_CHOICE,
@@ -75,11 +60,7 @@ def determine_entry_path(experience_level: str) -> str:
 
 
 def validate_transition(current_state: str, target_state: str) -> bool:
-    """
-    Check if a state transition is valid.
-    
-    Returns True if the transition is allowed, raises InvalidTransitionError otherwise.
-    """
+    """Check if a state transition is valid."""
     valid_targets = _VALID_TRANSITIONS.get(current_state, [])
 
     if target_state not in valid_targets:
@@ -96,21 +77,7 @@ def handle_assessment_result(
     was_bypass_attempt: bool,
     bypass_already_locked: bool,
 ) -> dict:
-    """
-    Determine the next state after a validation assessment.
-    
-    Args:
-        score: Assessment score as a decimal (0.0 - 1.0)
-        was_bypass_attempt: True if the user skipped the learning path
-        bypass_already_locked: True if the user's bypass was previously locked
-    
-    Returns:
-        dict with:
-          - "passed": bool
-          - "next_state": str
-          - "lock_bypass": bool (whether to lock bypass for this user)
-          - "reason": str (explanation for the transition)
-    """
+    """Determine the next state after a validation assessment."""
     passed = score >= PASS_THRESHOLD
 
     if passed:
@@ -123,7 +90,6 @@ def handle_assessment_result(
 
     # FAILED — determine Case 1 or Case 2
     if was_bypass_attempt and not bypass_already_locked:
-        # Case 1: Bypass Failure → Lock bypass, mandatory learning path
         return {
             "passed": False,
             "next_state": STATE_BYPASS_LOCKED,
@@ -135,7 +101,6 @@ def handle_assessment_result(
             ),
         }
     else:
-        # Case 2: Standard Failure → Gap review, iterative retakes allowed
         return {
             "passed": False,
             "next_state": STATE_GAP_REVIEW,
@@ -152,17 +117,7 @@ def get_mandatory_courses(
     all_course_ids: list[str],
     completed_course_ids: list[str],
 ) -> list[str]:
-    """
-    After a bypass lockout (Case 1), determine which courses are mandatory.
-    Removes already-completed courses from the full path.
-    
-    Args:
-        all_course_ids: All course IDs in the learning path
-        completed_course_ids: Course IDs the user has already completed
-    
-    Returns:
-        List of course IDs that must be completed before reassessment.
-    """
+    """After a bypass lockout (Case 1), determine which courses are mandatory."""
     completed_set = set(completed_course_ids)
     return [cid for cid in all_course_ids if cid not in completed_set]
 

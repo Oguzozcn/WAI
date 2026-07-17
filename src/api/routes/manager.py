@@ -7,8 +7,8 @@ Provides three KPI bucket endpoints for the manager view:
 """
 
 from fastapi import APIRouter, HTTPException
-from WAI_agent.shared.persistence import DepartmentScopedStore, KPIStoreReader
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT, AT_RISK_READINESS_THRESHOLD, PASS_THRESHOLD
+from src.core.database import DepartmentScopedStore, KPIStoreReader
+from src.core.config import DEFAULT_DEPARTMENT, AT_RISK_READINESS_THRESHOLD, PASS_THRESHOLD
 
 router = APIRouter(prefix="/api/manager", tags=["manager"])
 

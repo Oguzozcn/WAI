@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from src.services.user_service import get_user_progress, update_progress
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT
+from src.core.config import DEFAULT_DEPARTMENT
 
 router = APIRouter(prefix="/api/user", tags=["progress"])
 

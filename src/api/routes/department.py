@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from src.services.user_service import get_department_readiness, flag_at_risk_users
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT
+from src.core.config import DEFAULT_DEPARTMENT
 
 router = APIRouter(prefix="/api/department", tags=["department"])
 

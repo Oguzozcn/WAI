@@ -11,8 +11,8 @@ import os
 from datetime import datetime, timezone
 from typing import Any
 
-from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.constants import MAX_COURSES, DEFAULT_DEPARTMENT, DEFAULT_TIMEFRAME_WEEKS
+from src.core.database import DepartmentScopedStore
+from src.core.config import MAX_COURSES, DEFAULT_DEPARTMENT, DEFAULT_TIMEFRAME_WEEKS
 
 
 def generate_learning_path(
@@ -549,7 +549,7 @@ def trigger_curriculum_generation(
     store.write_knowledge_document(course["course_id"], course_doc)
 
     # Step 4: Build or Append to learning path
-    from WAI_agent.shared.persistence import _store_lock
+    from src.core.database import _store_lock
     
     with _store_lock:
         existing_path = None

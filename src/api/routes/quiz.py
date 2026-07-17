@@ -7,8 +7,8 @@ from src.services.quiz_service import (
     generate_reflection_prompt,
 )
 from src.services.curriculum_service import generate_remedial_course
-from WAI_agent.shared.persistence import DepartmentScopedStore
-from WAI_agent.shared.constants import DEFAULT_DEPARTMENT, MAX_QUIZ_ATTEMPTS, PASS_THRESHOLD
+from src.core.database import DepartmentScopedStore
+from src.core.config import DEFAULT_DEPARTMENT, MAX_QUIZ_ATTEMPTS, PASS_THRESHOLD
 
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
 

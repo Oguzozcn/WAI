@@ -2,6 +2,8 @@
 TEAP Platform Constants
 ========================
 Central configuration for thresholds, limits, and platform-wide settings.
+
+Migrated from WAI_agent/shared/constants.py → src/core/config.py (ADK 2.0)
 """
 
 # ── Assessment Thresholds ──
