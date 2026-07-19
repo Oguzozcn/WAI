@@ -1,0 +1,102 @@
+{
+  "user_id": "emp_001",
+  "department": "operations",
+  "display_name": "Alex Chen",
+  "entry_path": "veteran",
+  "current_state": "enrolled",
+  "learning_path_id": "",
+  "enrolled_path_ids": [
+    "lp_013c7e1e",
+    "lp_ff5b91ff"
+  ],
+  "completed_courses": [],
+  "current_course_id": "course_fae3a35f",
+  "quiz_attempts": [
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.3333333333333333,
+      "total_questions": 3,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-19T11:19:06.603619"
+    },
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.3333333333333333,
+      "total_questions": 3,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-19T11:19:09.184893"
+    },
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.3333333333333333,
+      "total_questions": 3,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-19T11:19:23.504276"
+    }
+  ],
+  "assessment_scores": [
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.3333333333333333,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.3333333333333333,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.3333333333333333,
+      "type": "quiz"
+    }
+  ],
+  "best_assessment_score": 0.3333333333333333,
+  "error_retention_matrix": {
+    "Google Models": 3,
+    "Generative AI": 3,
+    "Vertex AI Studio": 3,
+    "Cloud Development": 3
+  },
+  "luck_failures": {
+    "Google Models": 3,
+    "Vertex AI Studio": 3
+  },
+  "bypass_locked": false,
+  "bypass_attempts": 0,
+  "readiness_score": 0.0,
+  "is_at_risk": true,
+  "blocked_by": "",
+  "manager_id": "manager",
+  "job_level": "individual_contributor",
+  "mastery_vectors": {
+    "Foundation Models": {
+      "concept_id": "Foundation Models",
+      "ability_score": 0.9500000000000001,
+      "last_seen": "2026-07-19T11:19:23.505088+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 3,
+      "correct_count": 3
+    },
+    "Google Models": {
+      "concept_id": "Google Models",
+      "ability_score": 0.0,
+      "last_seen": "2026-07-19T11:19:23.505088+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 3,
+      "correct_count": 0
+    },
+    "Vertex AI Studio": {
+      "concept_id": "Vertex AI Studio",
+      "ability_score": 0.0,
+      "last_seen": "2026-07-19T11:19:23.505088+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 3,
+      "correct_count": 0
+    }
+  },
+  "enrolled_at": "2026-06-25T09:00:00Z",
+  "last_activity_at": "2026-07-19T11:18:50.976809",
+  "last_updated": "2026-07-19T11:19:23.505103+00:00",
+  "psychometric_ability": -1.5300041684774404
+}

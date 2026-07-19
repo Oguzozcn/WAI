@@ -1,0 +1,203 @@
+{
+  "path_id": "lp_ff5b91ff",
+  "department": "operations",
+  "role": "auto_generated",
+  "timeframe_weeks": 1,
+  "total_courses": 1,
+  "total_estimated_hours": 3.1,
+  "hours_per_week": 3.1,
+  "days_per_course": 2,
+  "source_document": "NoteGPT_Transcript_Introduction to Vertex AI Studio.txt",
+  "courses": [
+    {
+      "course_id": "course_fae3a35f",
+      "title": "Notegpt Transcript Introduction To Vertex Ai Studio",
+      "description": "Auto-generated curriculum from 'NoteGPT_Transcript_Introduction to Vertex AI Studio.txt'",
+      "topics": [
+        "Output Structuring",
+        "Generative AI (GenAI)",
+        "Generative AI Workflow",
+        "Responsible AI Safety Checks",
+        "Gemini Multimodal Model",
+        "Zero-Shot, One-Shot, and Few-Shot Prompting",
+        "Knowledge Distillation",
+        "Prompt Anatomy",
+        "Adapter and Reinforcement Tuning",
+        "Prompt Design Best Practices"
+      ],
+      "estimated_hours": 3.1,
+      "order": 1,
+      "lessons": [
+        {
+          "lesson_id": "lesson_01",
+          "title": "[Music] welcome to the vertex AI Studio course vertex AI stu...",
+          "content": "Vertex AI Studio is Google Cloud's primary development interface designed for testing, tuning, augmenting, and deploying generative AI models. Generative AI allows users to create multimodal content, including text, images, audio, and video, by training systems on massive existing datasets. This intensive training process outputs foundational models like Gemini, PaLM, Codi, and Imagine, which can be deployed out-of-the-box or custom-tuned for specific domain needs.",
+          "key_concepts": [
+            "Vertex AI Studio",
+            "Generative AI (GenAI)",
+            "Foundation Models",
+            "Training Process",
+            "Multimodal Content"
+          ],
+          "estimated_minutes": 12,
+          "order": 1,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_039e4c68"
+        },
+        {
+          "lesson_id": "lesson_02",
+          "title": "machine learning platform offered by Google Cloud it support...",
+          "content": "Vertex AI is an end-to-end machine learning platform offering both predictive AI for forecasting and generative AI for content creation. The generative AI workflow operates through a structured pipeline: a user inputs a natural language prompt, which passes through configurable safety checks, feeds into a chosen foundation model, undergoes optional tuning, gets validated through grounding checks to prevent hallucinations, and outputs a final response. This low-code environment supports specialized language, vision, and speech processing.",
+          "key_concepts": [
+            "Predictive vs. Generative AI",
+            "Generative AI Workflow",
+            "Responsible AI Safety Checks",
+            "Results Grounding",
+            "Low-Code/No-Code Interface"
+          ],
+          "estimated_minutes": 12,
+          "order": 2,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_4339524c"
+        },
+        {
+          "lesson_id": "lesson_03",
+          "title": "ask it to give you a recipe for those cookies Gemini a Googl...",
+          "content": "Gemini is Google's advanced multimodal model on Vertex AI that processes inputs from text, images, and video to generate high-quality text outputs for analytical and creative business use cases. Developers can interact with Gemini via the Google Cloud console user interface, integrated notebooks like Colab, or command-line API tools. Every interaction depends on a prompt, which is composed of user requests, contextual guidelines, and formatting examples.",
+          "key_concepts": [
+            "Gemini Multimodal Model",
+            "Prompt Anatomy",
+            "Console UI, Notebooks, and APIs",
+            "Data Conversion (HTML and JSON)",
+            "Context and Examples"
+          ],
+          "estimated_minutes": 13,
+          "order": 3,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_a603fc99"
+        },
+        {
+          "lesson_id": "lesson_04",
+          "title": "completion input for instance what should I do when my compu...",
+          "content": "Designing a prompt is an experimental process that involves structuring inputs, adding instructions, and providing example pairs to guide how a model behaves. Within Vertex AI Studio's multimodal interface, users can test prompts by uploading media, such as airport flight boards, and adjusting configuration settings. These configuration options include selecting different models, shifting the temperature to control randomness, and adjusting safety blocks for harmful content.",
+          "key_concepts": [
+            "Prompt Design",
+            "Contextual Information",
+            "Gemini Pro Vision",
+            "Temperature Parameter",
+            "Safety Settings"
+          ],
+          "estimated_minutes": 12,
+          "order": 4,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_2d2ea43b"
+        },
+        {
+          "lesson_id": "lesson_05",
+          "title": "on your use case and click save in the next lesson you'll le...",
+          "content": "Once you configure and submit a prompt in Vertex AI Studio, you can dynamically modify its wording to refine the structure of the model's output, such as formatting data into columns. When you are ready to productionalize your work, the platform lets you export the configuration as API code, curl commands, or Python SDK code for notebooks. The platform also features language tools to help you design conversational systems, set up direct instruction-based prompts, and tune models.",
+          "key_concepts": [
+            "Output Structuring",
+            "Production Code Generation (cURL/Python)",
+            "Language Capabilities",
+            "Free-form Prompts",
+            "Vertex AI Studio Interface"
+          ],
+          "estimated_minutes": 12,
+          "order": 5,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_a89e6624"
+        },
+        {
+          "lesson_id": "lesson_06",
+          "title": "methods that you can use to shape the model's response in a...",
+          "content": "There are three primary methods used to structure how models respond to prompts: zero-shot, one-shot, and few-shot prompting, which vary based on the number of task examples provided. Vertex AI Studio's structured mode makes few-shot prompting easier by separating context instructions from input-output examples. Best practices for prompt design include keeping inputs specific and concise, focusing on one task at a time, converting open generative tasks into classification options, and iterating based on results.",
+          "key_concepts": [
+            "Zero-Shot, One-Shot, and Few-Shot Prompting",
+            "Structured Mode",
+            "Prompt Design Best Practices",
+            "Task Classification",
+            "Context Instructions"
+          ],
+          "estimated_minutes": 12,
+          "order": 6,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_b033da4c"
+        },
+        {
+          "lesson_id": "lesson_07",
+          "title": "list so if you designed a prompt that you think is working p...",
+          "content": "Prompts that yield successful outcomes can be saved to the Prompt Gallery, a curated resource of sample prompts for various use cases. To further refine responses, users can adjust parameters like temperature, Top K, and Top P, which govern how the model chooses next tokens from its word probability distribution. Lower temperature settings narrow choices to highly probable words for predictable tasks like summarization, while higher temperatures broaden the range to include unusual words for creative tasks.",
+          "key_concepts": [
+            "Prompt Gallery",
+            "Word Probability Distribution",
+            "Temperature Settings",
+            "Top K Parameter",
+            "Response Randomness"
+          ],
+          "estimated_minutes": 12,
+          "order": 7,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_f411461a"
+        },
+        {
+          "lesson_id": "lesson_08",
+          "title": "value leads to another popular approach that dynamically set...",
+          "content": "Top P adjusts the shortlist of words dynamically by selecting from a subset whose cumulative probability meets a designated threshold. Beyond prompt design, developers can use more advanced model tuning techniques to customize generative AI behavior. While prompt design is highly accessible and requires no machine learning background, it does not change model parameters and can yield inconsistent results, prompting the need for technical tuning options.",
+          "key_concepts": [
+            "Top P Parameter",
+            "Model Tuning Spectrum",
+            "Prompt Design Limitations",
+            "Model Customization",
+            "Cumulative Probability"
+          ],
+          "estimated_minutes": 12,
+          "order": 8,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_ad692fa9"
+        },
+        {
+          "lesson_id": "lesson_09",
+          "title": "required as the name large suggests llms have a vast number...",
+          "content": "Instead of executing a computationally heavy full fine-tuning, developers can utilize parameter-efficient tuning methods like supervised adapter tuning and unsupervised reinforcement learning, which require as few as 100 training examples. Vertex AI also features distillation technology, a method that transfers reasoning capabilities from a large teacher model to a smaller, cost-effective student model using labeled examples and rationales. You can launch these supervised or unsupervised tuning tasks directly in the Vertex AI Studio UI.",
+          "key_concepts": [
+            "Parameter-Efficient Tuning",
+            "Adapter and Reinforcement Tuning",
+            "Knowledge Distillation",
+            "Teacher-Student Models",
+            "Tuning Job Configuration"
+          ],
+          "estimated_minutes": 12,
+          "order": 9,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_e427fc69"
+        },
+        {
+          "lesson_id": "lesson_10",
+          "title": "to be uploaded or existing on cloud storage your training da...",
+          "content": "To start a tuning job, developers must upload a supervised dataset in a JSON file containing input prompt and output response pairs to Google Cloud Storage. Once training is complete, the tuned model is saved to the Vertex AI Model Registry for endpoint deployment and testing. This course prepares you to execute these tasks in a hands-on lab setting and introduces further education options for advanced natural language processing concepts.",
+          "key_concepts": [
+            "Supervised JSON Datasets",
+            "Vertex AI Model Registry",
+            "Model Deployment",
+            "Hands-On Lab Practice",
+            "Google Cloud Storage"
+          ],
+          "estimated_minutes": 13,
+          "order": 10,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_d99ce0df"
+        }
+      ],
+      "has_final_assessment": true,
+      "final_assessment_id": "quiz_466cdf5f"
+    }
+  ],
+  "created_at": "2026-07-19T11:17:16.611385+00:00",
+  "last_updated": "2026-07-19T11:18:44.403508+00:00",
+  "source_input_files": [
+    "NoteGPT_Transcript_Introduction to Vertex AI Studio.txt"
+  ],
+  "path_type": "official",
+  "created_by": "manager"
+}

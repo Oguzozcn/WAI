@@ -1,0 +1,188 @@
+{
+  "title": "Notegpt Transcript Introduction To Vertex Ai Studio",
+  "description": "Auto-generated curriculum from 'NoteGPT_Transcript_Introduction to Vertex AI Studio.txt'",
+  "topics": [
+    "Vertex AI Studio",
+    "Top P Parameter",
+    "Zero-shot, One-shot, and Few-shot Prompting",
+    "Limitations of Prompt Design",
+    "Production Code Generation",
+    "Amazon Rainforest Q&A Prototype",
+    "UI, SDK, and API Access Methods",
+    "Prompt Gallery",
+    "Gemini Pro Vision Model",
+    "Predictive vs. Generative AI"
+  ],
+  "content": "[Music] welcome to the vertex AI Studio course vertex AI studio is a primary tool for a cloud developer to access Google's Cutting Edge generative AI or Genai models it facilitates the testing tuning augmenting and deployment of these models enabling the creation of gen powered applications this course teaches you the knowhow of vertex AI Studio it starts from explaining the Gen workflow to introducing the major features of vertex AI Studio including Gemini multimodal prompt design and model tuning to\n\nenhance your learning experience a Hands-On Lab at the end of the course provides an opportunity to practice the skills you have acquired generative AI is transforming how we interact with technology so what is generative AI simply put it is a type of artificial intelligence that generates content for you what kind of content well the generated content can be multimodal including text images audio and video when given a prompt or a request gen aai can help you achieve various tasks such as document summarization\n\ninformation extraction code generation marketing campaign creation virtual assistance and call center bot and these are just a few examples how how does AI generate new content it learns from a massive amount of existing content this includes text image and video the process of learning from existing content is called training which results in the creation of foundation models a foundation model is usually a large model in terms of the significant number of parameters massive size of training data and high\n\nrequirements of computational power an llm or large language model like Palm which stands for pathways language model is a typical example of a foundation model other Foundation models trained by Google include Gemini for multimodal processing Codi for code generation and imagine for image processing note the list may change as Foundation models Advance also note that Gemini May replace some of these models as it is capable of processing data in multiple m",
+  "estimated_hours": 3.1,
+  "key_facts": [
+    {
+      "concept": "Vertex AI Studio",
+      "definition": ""
+    },
+    {
+      "concept": "Top P Parameter",
+      "definition": ""
+    },
+    {
+      "concept": "Zero-shot, One-shot, and Few-shot Prompting",
+      "definition": ""
+    },
+    {
+      "concept": "Limitations of Prompt Design",
+      "definition": ""
+    },
+    {
+      "concept": "Production Code Generation",
+      "definition": ""
+    }
+  ],
+  "source_dtp": "raw/NoteGPT_Transcript_Introduction to Vertex AI Studio.txt",
+  "version": "1.0",
+  "lessons": [
+    {
+      "lesson_id": "lesson_01",
+      "title": "[Music] welcome to the vertex AI Studio course vertex AI stu...",
+      "content": "This section introduces Vertex AI Studio as Google Cloud's primary tool for cloud developers to access, test, tune, augment, and deploy generative AI models. It explains that generative AI produces multimodal content, such as text, images, audio, and video, by learning from massive datasets. This training process creates foundation models like Gemini, Palm, Codi, and Imagine, which can be used to solve general problems or be tuned with specific domain data.",
+      "key_concepts": [
+        "Vertex AI Studio",
+        "Generative AI Content Modalities",
+        "Foundation Models",
+        "Model Training and Tuning"
+      ],
+      "estimated_minutes": 12,
+      "order": 1,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_02",
+      "title": "machine learning platform offered by Google Cloud it support...",
+      "content": "This section explains Google Cloud's Vertex AI platform and its dual capabilities: predictive AI for forecasting and generative AI for producing content. It details the step-by-step Vertex AI Studio workflow, which involves prompt input, responsible AI safety checks, foundation model processing, optional model tuning, grounding, and final response delivery. Vertex AI Studio offers a low-code or no-code environment that enables rapid prototyping, custom tuning, and deployment across language, vision, and speech modalities.",
+      "key_concepts": [
+        "Predictive vs. Generative AI",
+        "Vertex AI Studio Workflow",
+        "Responsible AI and Safety Checks",
+        "Grounding and Citation Checks",
+        "Multimodal Capabilities"
+      ],
+      "estimated_minutes": 12,
+      "order": 2,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_03",
+      "title": "ask it to give you a recipe for those cookies Gemini a Googl...",
+      "content": "This section explains that Gemini, a Google-trained multimodal model on Vertex AI Studio, can process text, images, and video inputs to generate textual outputs. It lists business applications for Gemini, including description, information extraction, analysis, Q&A generation, and data conversion. Developers can interface with Gemini using the Cloud Console UI, SDK notebooks, or APIs, all of which require a natural language prompt structured with inputs, context, and examples.",
+      "key_concepts": [
+        "Gemini Multimodal Business Use Cases",
+        "UI, SDK, and API Access Methods",
+        "Definition of a Prompt",
+        "Anatomy of a Prompt"
+      ],
+      "estimated_minutes": 13,
+      "order": 3,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_04",
+      "title": "completion input for instance what should I do when my compu...",
+      "content": "This section explains how context and examples are used in prompt design to guide model behavior and format responses. It describes how to navigate the Gemini multimodal interface in Vertex AI Studio to upload media and write prompts. Additionally, it highlights key configuration panel settings including selecting the Gemini Pro Vision model, adjusting temperature for response randomness, and setting safety thresholds to block harmful content.",
+      "key_concepts": [
+        "Context and Response Formatting",
+        "Gemini Pro Vision Model",
+        "Temperature Parameter",
+        "Safety Configuration Settings"
+      ],
+      "estimated_minutes": 12,
+      "order": 4,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_05",
+      "title": "on your use case and click save in the next lesson you'll le...",
+      "content": "This section explains how to retrieve autogenerated curl, python, or notebook SDK code to productionize application prompts designed in the Vertex AI Studio UI. It then shifts to language capabilities, describing how to use language models for task-based prompt design, structured conversations, and model tuning. It illustrates free-form prompts as a method of instructing a model directly to achieve a desired outcome.",
+      "key_concepts": [
+        "Production Code Generation",
+        "Vertex AI Studio Language Capabilities",
+        "Prompt Design and Model Tuning",
+        "Free-form Instructions"
+      ],
+      "estimated_minutes": 12,
+      "order": 5,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_06",
+      "title": "methods that you can use to shape the model's response in a...",
+      "content": "This section details prompting techniques used to shape model outputs, including zero-shot, one-shot, and few-shot methods. It demonstrates how structured prompts combine context passages and input-output examples to prototype functioning question-and-answering systems. It also shares best practices for prompt design, such as keeping prompts concise and specific, converting generative tasks into classification, and experimenting with formats.",
+      "key_concepts": [
+        "Zero-shot, One-shot, and Few-shot Prompting",
+        "Structured Prompt Components",
+        "Amazon Rainforest Q&A Prototype",
+        "Prompt Design Best Practices"
+      ],
+      "estimated_minutes": 12,
+      "order": 6,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_07",
+      "title": "list so if you designed a prompt that you think is working p...",
+      "content": "This section discusses saving successful prompts to the Prompt Gallery and exploring key model parameters to control output randomness. When given a prompt, the model outputs token probabilities, and parameters like temperature, top K, and top P dictate how the next word is selected. Low temperature values result in typical and expected answers suited for Q&A, while high temperature values produce more creative and unexpected results.",
+      "key_concepts": [
+        "Prompt Gallery",
+        "Randomness vs. Predictability",
+        "Temperature Tuning",
+        "Top K Word Selection"
+      ],
+      "estimated_minutes": 12,
+      "order": 7,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_08",
+      "title": "value leads to another popular approach that dynamically set...",
+      "content": "This section explains how the Top P parameter dynamically limits word selection based on cumulative probability thresholds. It also introduces model tuning as a more technical customization method compared to natural language prompt design. While prompt design is accessible and enables rapid experimentation, it does not alter model parameters, suffers from consistency issues, and has context window limitations, making data-driven model tuning a powerful alternative.",
+      "key_concepts": [
+        "Top P Parameter",
+        "Model Customization Spectrum",
+        "Limitations of Prompt Design",
+        "Model Tuning with Custom Data"
+      ],
+      "estimated_minutes": 12,
+      "order": 8,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_09",
+      "title": "required as the name large suggests llms have a vast number...",
+      "content": "This section explains parameter-efficient tuning techniques, such as adapter tuning (supervised) and reinforcement tuning (unsupervised with human feedback), which modify only a subset of model parameters. It also introduces distillation, a Google-exclusive method on Vertex AI that uses a larger teacher model to train a smaller, more efficient student model using labeled examples and explanatory rationals. Finally, it outlines the steps to configure and launch a tuning job from Vertex AI Studio.",
+      "key_concepts": [
+        "Parameter-Efficient Tuning",
+        "Adapter and Reinforcement Tuning",
+        "Distillation (Teacher and Student Models)",
+        "Labeled Examples and Rationals",
+        "Launching a Tuning Job"
+      ],
+      "estimated_minutes": 12,
+      "order": 9,
+      "has_quiz": true
+    },
+    {
+      "lesson_id": "lesson_10",
+      "title": "to be uploaded or existing on cloud storage your training da...",
+      "content": "This section outlines the process of preparing a supervised training dataset in a JSON format containing prompt-response pairs, uploading it to cloud storage, and monitoring the tuning job before deploying the model from the model registry. It provides a comprehensive recap of Vertex AI Studio's multimodal, language, vision, and speech capabilities. Finally, it introduces upcoming hands-on labs and recommends a separate course on natural language processing on Google Cloud for deeper technical study.",
+      "key_concepts": [
+        "JSON Training Dataset Structure",
+        "Vertex AI Model Registry",
+        "Vertex AI Studio Course Recap",
+        "Hands-On Lab Activities",
+        "Natural Language Processing Course"
+      ],
+      "estimated_minutes": 13,
+      "order": 10,
+      "has_quiz": true
+    }
+  ],
+  "has_final_assessment": true
+}

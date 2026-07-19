@@ -1,0 +1,21 @@
+{
+  "user_id": "emp_003",
+  "department": "operations",
+  "display_name": "James Wilson",
+  "entry_path": "standard",
+  "current_state": "enrolled",
+  "learning_path_id": "",
+  "completed_courses": [],
+  "current_course_id": "",
+  "quiz_attempts": [],
+  "assessment_scores": [],
+  "best_assessment_score": 0.0,
+  "error_retention_matrix": {},
+  "bypass_locked": false,
+  "bypass_attempts": 0,
+  "readiness_score": 0.0,
+  "is_at_risk": true,
+  "enrolled_at": "2026-06-25T09:00:00Z",
+  "manager_id": "",
+  "job_level": "individual_contributor"
+}

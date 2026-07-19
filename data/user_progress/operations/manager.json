@@ -1,0 +1,30 @@
+{
+  "user_id": "manager",
+  "department": "operations",
+  "display_name": "",
+  "entry_path": "",
+  "current_state": "enrolled",
+  "learning_path_id": "",
+  "enrolled_path_ids": [
+    "lp_013c7e1e",
+    "lp_ff5b91ff"
+  ],
+  "completed_courses": [],
+  "current_course_id": "",
+  "quiz_attempts": [],
+  "assessment_scores": [],
+  "error_retention_matrix": {},
+  "luck_failures": {},
+  "bypass_locked": false,
+  "bypass_attempts": 0,
+  "readiness_score": 0.0,
+  "is_at_risk": true,
+  "blocked_by": "",
+  "manager_id": "",
+  "job_level": "manager",
+  "mastery_vectors": {},
+  "enrolled_at": "2026-06-25T09:00:00Z",
+  "last_activity_at": "2026-07-19T11:17:56.716471",
+  "last_updated": "2026-07-19T13:56:28.864244+00:00",
+  "psychometric_ability": 0.0
+}

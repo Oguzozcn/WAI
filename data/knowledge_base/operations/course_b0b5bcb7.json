@@ -1,0 +1,105 @@
+{
+  "title": "Verify Quiz Pregenerate Test",
+  "description": "Auto-generated curriculum from 'verify_quiz_pregenerate_test.txt'",
+  "topics": [
+    "Core concepts",
+    "Async testing",
+    "Background job progress",
+    "Job states (pending, processing, done, error)",
+    "Polling mechanisms",
+    "Polling clients",
+    "Job polling",
+    "Job attributes (job_id, status, stage)",
+    "Interval polling",
+    "Asynchronous processes"
+  ],
+  "content": "Introduction to Async Testing\n\nAsync testing verifies that background jobs report progress correctly and\nproduce a usable result once complete. A good async job design writes\nprogress checkpoints so a polling client can show a meaningful status\nmessage instead of a generic spinner.\n\nKey Concepts of Job Polling\n\nA job has a job_id, a status (pending, processing, done, error), and a\nstage describing the current step. Clients poll a status endpoint on an\ninterval until the job reaches a terminal status. This pattern avoids\nblocking the HTTP request for long-running work like calling an LLM\nmultiple times to generate quiz questions.\n",
+  "estimated_hours": 1.2,
+  "key_facts": [
+    {
+      "concept": "Core concepts",
+      "definition": ""
+    },
+    {
+      "concept": "Async testing",
+      "definition": ""
+    },
+    {
+      "concept": "Background job progress",
+      "definition": ""
+    },
+    {
+      "concept": "Job states (pending, processing, done, error)",
+      "definition": ""
+    },
+    {
+      "concept": "Polling mechanisms",
+      "definition": ""
+    }
+  ],
+  "source_dtp": "raw/verify_quiz_pregenerate_test.txt",
+  "version": "1.0",
+  "lessons": [
+    {
+      "lesson_id": "lesson_01",
+      "title": "Introduction to Async Testing",
+      "content": "This section serves as an entry point to the course, introducing learners to the fundamental concept of asynchronous testing. It establishes the groundwork for understanding how to evaluate and verify background operations.",
+      "key_concepts": [
+        "Async testing",
+        "Testing introduction",
+        "Asynchronous processes"
+      ],
+      "estimated_minutes": 10,
+      "order": 1,
+      "has_quiz": true,
+      "short_quiz_id": "quiz_efa56bb8"
+    },
+    {
+      "lesson_id": "lesson_02",
+      "title": "Async testing verifies that background jobs report progress...",
+      "content": "Asynchronous testing ensures that background processes successfully communicate their status and deliver a viable end product. By designing jobs to log progress checkpoints, client systems can retrieve and display detailed status updates instead of keeping users waiting with a generic loading graphic.",
+      "key_concepts": [
+        "Background job progress",
+        "Progress checkpoints",
+        "Polling clients",
+        "Status messages",
+        "Usable results"
+      ],
+      "estimated_minutes": 10,
+      "order": 2,
+      "has_quiz": true,
+      "short_quiz_id": "quiz_a84ce786"
+    },
+    {
+      "lesson_id": "lesson_03",
+      "title": "Key Concepts of Job Polling",
+      "content": "This section focuses on the primary concepts surrounding job polling. It acts as an overview of how systems repeatedly check the progress of asynchronous tasks.",
+      "key_concepts": [
+        "Job polling",
+        "Core concepts",
+        "Polling mechanisms"
+      ],
+      "estimated_minutes": 10,
+      "order": 3,
+      "has_quiz": true,
+      "short_quiz_id": "quiz_92fd38e1"
+    },
+    {
+      "lesson_id": "lesson_04",
+      "title": "A job has a job_id, a status (pending, processing, done, err...",
+      "content": "Asynchronous jobs are tracked using a unique identifier, an explicit stage indicator, and a state flow that moves from pending and processing to terminal states like done or error. Clients query a dedicated status endpoint at regular intervals to check this state, which prevents long-running operations\u2014such as calling an LLM to generate quiz questions\u2014from locking up HTTP connections.",
+      "key_concepts": [
+        "Job attributes (job_id, status, stage)",
+        "Job states (pending, processing, done, error)",
+        "Interval polling",
+        "Terminal status",
+        "Non-blocking HTTP requests"
+      ],
+      "estimated_minutes": 10,
+      "order": 4,
+      "has_quiz": true,
+      "short_quiz_id": "quiz_a6329818"
+    }
+  ],
+  "has_final_assessment": true
+}
