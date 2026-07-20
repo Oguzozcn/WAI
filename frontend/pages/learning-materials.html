@@ -20,6 +20,21 @@
         .folder-card:hover .folder-icon {
             transform: scale(1.1) rotate(-5deg);
         }
+
+        /* Indeterminate progress bar — generation has no real stage-by-stage
+           progress to report (single request/response), so a sliding stripe
+           reads as "working" instead of a bar frozen at a fixed width. */
+        @keyframes wai-indeterminate {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+        .wai-indeterminate {
+            position: absolute;
+            top: 0;
+            left: -40%;
+            width: 40%;
+            animation: wai-indeterminate 1.1s ease-in-out infinite;
+        }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
@@ -115,71 +130,27 @@
 </head>
 
 <body class="bg-background text-on-surface font-body-md antialiased h-screen overflow-hidden flex">
-    <!-- SideNavBar -->
-    <aside
-        class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
-        <div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span
-                class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
-        <nav class="flex-1 space-y-1">
-            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                href="/">
-                <span class="material-symbols-outlined">dashboard</span>
-                <span class="font-label-md text-label-md">Dashboard</span>
-            </a>
-            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                href="/learning-path">
-                <span class="material-symbols-outlined">route</span>
-                <span class="font-label-md text-label-md">Learning Path</span>
-            </a>
-            <a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200"
-                href="/knowledge-vault">
-                <span class="material-symbols-outlined">folder</span>
-                <span class="font-label-md text-label-md">Knowledge Vault</span>
-            </a>
-            <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                href="#">
-                <span class="material-symbols-outlined">help</span>
-                <span class="font-label-md text-label-md">Support</span>
-            </a>
-        </nav>
-        <div class="mt-auto pt-6 border-t border-outline-variant">
-            <div class="space-y-1"><a
-                    class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                    href="#">
-                    <span class="material-symbols-outlined">settings</span>
-                    <span class="font-label-md text-label-md">Settings</span>
-                </a></div>
-        </div>
-    </aside>
+    <script src="/js/auth.js"></script>
+    <!-- SideNavBar (shared component) -->
+    <div id="sidebar-mount"></div>
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col h-full overflow-hidden relative">
         <!-- TopNavBar -->
         <header
-            class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
+            class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
             <div class="flex items-center gap-4">
-                <button class="md:hidden p-2">
+                <button id="mobile-menu-btn" class="md:hidden p-2">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
                 <div class="relative hidden sm:block">
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
                     <input
-                        class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10"
-                        placeholder="Search..." type="text">
+                        class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-56 md:w-64 lg:w-80 focus:ring-2 focus:ring-primary text-sm h-10"
+                        id="global-search-input" placeholder="Search courses, paths..." type="text">
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div class="hidden lg:flex items-center gap-4 mr-4">
-                    <div class="flex flex-col items-center">
-                        <div
-                            class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
-                            <span class="material-symbols-outlined text-primary text-sm"
-                                style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
-                            <span class="font-stats-number text-sm text-on-surface">2.4k</span>
-                        </div>
-                    </div>
-                </div>
                 <div class="flex items-center gap-3">
                     <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover"
                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
@@ -187,7 +158,7 @@
             </div>
         </header>
         <!-- Canvas -->
-        <main class="flex-1 overflow-y-auto bg-surface-container-low md:ml-64">
+        <main class="flex-1 overflow-y-auto bg-surface-container-low sidebar-offset">
             <div class="max-w-[1200px] mx-auto px-margin-desktop py-8 pb-24">
                 <!-- Breadcrumbs -->
                 <nav aria-label="Breadcrumb" class="flex text-label-md text-on-surface-variant mb-6 items-center gap-2">
@@ -284,17 +255,45 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Your Drafts Section (generated, not yet published to the team) -->
+                <section id="drafts-section" class="mt-8 hidden">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-primary">drafts</span>
+                        <h3 class="font-headline-md text-headline-md text-on-surface">Your Drafts</h3>
+                        <span id="drafts-count"
+                            class="bg-primary-container text-on-primary text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+                    </div>
+                    <p class="font-body-md text-sm text-on-surface-variant mb-4">Generated learning paths only you can
+                        see — publish them so your team can enroll.</p>
+                    <div id="drafts-list" class="space-y-3"></div>
+                </section>
+
+                <!-- Pending Reviews Section -->
+                <section id="pending-reviews-section" class="mt-8 hidden">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-error">flag</span>
+                        <h3 class="font-headline-md text-headline-md text-on-surface">Pending Reviews</h3>
+                        <span id="pending-reviews-count"
+                            class="bg-error-container text-on-error-container text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+                    </div>
+                    <div id="pending-reviews-list" class="space-y-3"></div>
+                </section>
             </div>
         </main>
     </div>
 
     <script>
+            const wisdomSession = window.WisdomAuth.requireRole('manager');
+
             // ── Load Learning Materials from API ──
-            (async function loadMaterials() {
+            async function loadMaterials() {
                 try {
                     const res = await fetch('/api/kb/catalog/inputs');
                     const data = await res.json();
                     const files = data.inputs || [];
+                    // Sort by date added, most recent first (activity-log order)
+                    files.sort((a, b) => new Date(b.date_added) - new Date(a.date_added));
 
                     // Update stats
                     document.getElementById('stat-total').textContent = files.length;
@@ -345,17 +344,181 @@
                         <td class="py-4 px-6 text-on-surface-variant">${sizeStr}</td>
                         <td class="py-4 px-6 text-on-surface-variant">${dateStr}</td>
                         <td class="py-4 px-6 text-right">
-                            <button class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container">
-                                <span class="material-symbols-outlined">more_vert</span>
+                            <button class="delete-file-btn text-on-surface-variant hover:text-error p-1 rounded-full hover:bg-error-container" data-filename="${f.filename}" title="Delete document" aria-label="Delete document">
+                                <span class="material-symbols-outlined">delete</span>
                             </button>
                         </td>
                     </tr>`;
                     }).join('');
+
+                    tbody.querySelectorAll('.delete-file-btn').forEach((btn) => {
+                        btn.addEventListener('click', () => deleteDocument(btn.dataset.filename, btn));
+                    });
                 } catch (e) {
                     document.getElementById('files-table-body').innerHTML = `
                 <tr><td colspan="4" class="py-8 text-center text-error">Failed to load files.</td></tr>`;
                 }
-            })();
+            }
+            loadMaterials();
+
+            async function deleteDocument(filename, btn) {
+                if (!confirm(`Delete "${filename}" from the knowledge base? This cannot be undone.`)) return;
+                btn.disabled = true;
+                try {
+                    const resp = await fetch(`/api/kb/documents/${encodeURIComponent(filename)}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: wisdomSession ? wisdomSession.role : '' }),
+                    });
+                    if (!resp.ok) {
+                        const err = await resp.json().catch(() => ({}));
+                        throw new Error(err.detail || 'Delete failed');
+                    }
+                    showToast(`"${filename}" deleted.`);
+                    loadMaterials();
+                } catch (err) {
+                    btn.disabled = false;
+                    showToast(err.message || 'Failed to delete document.', 'error');
+                }
+            }
+
+        // ── Load Pending Reviews (KB Conflicts) ──
+        async function loadPendingReviews() {
+            const section = document.getElementById('pending-reviews-section');
+            const list = document.getElementById('pending-reviews-list');
+            const countEl = document.getElementById('pending-reviews-count');
+            try {
+                const res = await fetch('/api/kb/conflicts?status=pending');
+                const data = await res.json();
+                const conflicts = data.conflicts || [];
+
+                if (conflicts.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+
+                section.classList.remove('hidden');
+                countEl.textContent = conflicts.length;
+
+                list.innerHTML = conflicts.map(c => {
+                    const sev = (c.severity || 'medium').toLowerCase();
+                    const sevClass = sev === 'high'
+                        ? 'bg-error-container text-on-error-container'
+                        : 'bg-tertiary-fixed text-on-tertiary-fixed-variant';
+                    return `
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4" data-conflict-id="${c.conflict_id}">
+                        <div class="flex items-start justify-between gap-4 flex-wrap">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-semibold uppercase px-2 py-0.5 rounded-full ${sevClass}">${sev}</span>
+                                    <span class="font-medium text-on-surface truncate">${c.document_a || 'Unknown file'}</span>
+                                </div>
+                                <p class="font-body-md text-sm text-on-surface-variant">${c.value_a || 'Possible conflict detected.'}</p>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button class="approve-btn px-4 py-2 bg-primary text-on-primary font-label-md text-sm rounded-lg hover:bg-primary/90 transition-colors">Approve</button>
+                                <button class="reject-btn px-4 py-2 border border-outline-variant text-error font-label-md text-sm rounded-lg hover:bg-error-container transition-colors">Reject</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                list.querySelectorAll('[data-conflict-id]').forEach(row => {
+                    const id = row.getAttribute('data-conflict-id');
+                    row.querySelector('.approve-btn').addEventListener('click', () => resolveConflict(id, 'approved', row));
+                    row.querySelector('.reject-btn').addEventListener('click', () => resolveConflict(id, 'rejected', row));
+                });
+            } catch (e) {
+                section.classList.add('hidden');
+            }
+        }
+
+        async function resolveConflict(conflictId, resolution, row) {
+            try {
+                const res = await fetch(`/api/kb/conflicts/${conflictId}/resolve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resolution, resolved_by: wisdomSession.user_id }),
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Failed to resolve' }));
+                    throw new Error(err.detail || 'Failed to resolve');
+                }
+                showToast(resolution === 'approved' ? 'Conflict approved.' : 'Conflict rejected, document retracted.');
+                row.remove();
+                // Refresh so the count/empty-state stay accurate.
+                loadPendingReviews();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        loadPendingReviews();
+
+        // ── Load Your Drafts (unofficial paths generated by this manager, not yet published) ──
+        async function loadDrafts() {
+            const section = document.getElementById('drafts-section');
+            const list = document.getElementById('drafts-list');
+            const countEl = document.getElementById('drafts-count');
+            try {
+                const res = await fetch(`/api/kb/catalog/learning-paths?user_id=${encodeURIComponent(wisdomSession.user_id)}`);
+                const data = await res.json();
+                const drafts = (data.learning_paths || []).filter(p => p.path_type === 'unofficial');
+
+                if (drafts.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+
+                section.classList.remove('hidden');
+                countEl.textContent = drafts.length;
+
+                list.innerHTML = drafts.map(p => `
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap" data-path-id="${p.path_id}">
+                        <div class="min-w-0 flex-1">
+                            <p class="font-medium text-on-surface truncate">${p.title || p.path_id}</p>
+                            <p class="font-body-md text-sm text-on-surface-variant">${p.total_courses || 0} course${(p.total_courses || 0) !== 1 ? 's' : ''} • ${p.total_estimated_hours || 0}h estimated</p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <a href="/learning-path?path=${encodeURIComponent(p.path_id)}" class="px-4 py-2 border border-outline-variant text-on-surface font-label-md text-sm rounded-lg hover:bg-surface-container-low transition-colors no-underline">Preview</a>
+                            <button class="publish-btn px-4 py-2 bg-primary text-on-primary font-label-md text-sm rounded-lg hover:bg-primary/90 transition-colors">Publish to Team</button>
+                        </div>
+                    </div>`).join('');
+
+                list.querySelectorAll('[data-path-id]').forEach(row => {
+                    const pathId = row.getAttribute('data-path-id');
+                    row.querySelector('.publish-btn').addEventListener('click', () => publishDraft(pathId, row));
+                });
+            } catch (e) {
+                section.classList.add('hidden');
+            }
+        }
+
+        async function publishDraft(pathId, row) {
+            const btn = row.querySelector('.publish-btn');
+            btn.disabled = true;
+            btn.textContent = 'Publishing…';
+            try {
+                const res = await fetch(`/api/kb/learning-path/${encodeURIComponent(pathId)}/publish`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ manager_id: wisdomSession.user_id, role: wisdomSession.role }),
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Publish failed' }));
+                    throw new Error(err.detail || 'Publish failed');
+                }
+                showToast('Published — your team can now see it in Catalog.');
+                row.remove();
+                loadDrafts();
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'Publish to Team';
+                showToast(err.message, 'error');
+            }
+        }
+
+        loadDrafts();
 
         // ── Generate from Existing System ──
         const createBtn = document.getElementById('create-path-btn');
@@ -369,9 +532,14 @@
             <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Create Learning Path</h3>
             <p class="font-body-md text-on-surface-variant mb-6">Select an existing learning material to generate a curriculum from.</p>
             
-            <select id="file-select" class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl p-3 mb-8 focus:ring-2 focus:ring-primary outline-none">
+            <select id="file-select" class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl p-3 focus:ring-2 focus:ring-primary outline-none">
                 <option value="">Loading files...</option>
             </select>
+
+            <label class="flex items-center gap-2 mt-4 mb-8 cursor-pointer">
+                <input type="checkbox" id="append-toggle" class="w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary">
+                <span class="font-label-md text-on-surface text-sm">Append to existing Learning Path (instead of creating a new one)</span>
+            </label>
 
             <div class="flex justify-end gap-3">
                 <button id="cancel-selection-btn" class="px-5 py-2 font-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">Cancel</button>
@@ -392,12 +560,22 @@
             </div>
             <h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Analyzing Document</h3>
             <p class="font-body-md text-on-surface-variant mb-6">Splitting content into curriculum, generating lessons and quizzes...</p>
-            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
-                <div class="bg-primary h-full rounded-full animate-pulse" style="width: 70%"></div>
+            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden relative">
+                <div class="bg-primary h-full rounded-full wai-indeterminate"></div>
+            </div>
+            <div id="generate-bg-actions" class="mt-6">
+                <button id="generate-bg-btn" class="px-5 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+                    Continue in Background
+                </button>
             </div>
         </div>
     `;
         document.body.appendChild(overlay);
+
+        document.getElementById('generate-bg-btn').addEventListener('click', () => {
+            overlay.classList.add('hidden');
+            showToast('Generating in the background — we\'ll let you know when your draft is ready.');
+        });
 
         // Button triggers selection modal
         if (createBtn) {
@@ -414,6 +592,10 @@
 
                     if (data.inputs && data.inputs.length > 0) {
                         select.innerHTML = data.inputs.map(f => `<option value="${f.filename}">${f.filename}</option>`).join('');
+                        const preselect = new URLSearchParams(window.location.search).get('file');
+                        if (preselect && data.inputs.some(f => f.filename === preselect)) {
+                            select.value = preselect;
+                        }
                     } else {
                         select.innerHTML = '<option value="">No files available</option>';
                     }
@@ -435,9 +617,23 @@
             }
         });
 
+        function stageLabel(stage) {
+            if (!stage) return 'Preparing...';
+            if (stage === 'queued') return 'Queued...';
+            if (stage === 'parsing_document') return 'Reading document...';
+            if (stage === 'generating_lessons') return 'Splitting content into lessons...';
+            if (stage === 'generating_final_assessment') return 'Generating final assessment...';
+            const quizMatch = stage.match(/^generating_quiz_(\d+)_of_(\d+)$/);
+            if (quizMatch) return `Generating quiz ${quizMatch[1]} of ${quizMatch[2]}...`;
+            return 'Working...';
+        }
+
         async function generateFromInput(filename) {
             // Show loading overlay
             overlay.classList.remove('hidden');
+            resetOverlay();
+
+            const appendChecked = document.getElementById('append-toggle')?.checked || false;
 
             try {
                 const res = await fetch('/api/kb/generate-from-input', {
@@ -445,7 +641,12 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ filename: filename }),
+                    body: JSON.stringify({
+                        filename: filename,
+                        append_to_latest: appendChecked,
+                        manager_id: wisdomSession.user_id,
+                        role: wisdomSession.role,
+                    }),
                 });
 
                 if (!res.ok) {
@@ -453,60 +654,143 @@
                     throw new Error(err.detail || 'Generation failed');
                 }
 
-                const result = await res.json();
+                const queued = await res.json();
+                pollGenerateJob(queued.job_id);
+            } catch (err) {
+                showGenerateError(err.message);
+            }
+        }
 
-                // Update overlay to success state
-                overlay.querySelector('.animate-spin').textContent = 'check_circle';
-                overlay.querySelector('.animate-spin').classList.remove('animate-spin');
-                overlay.querySelector('.animate-spin')?.classList.add('text-tertiary');
-                overlay.querySelector('h3').textContent = 'Curriculum Generated!';
-                overlay.querySelector('p').textContent = `Created ${result.total_lessons} lessons • ${result.total_estimated_hours}h estimated`;
-                overlay.querySelector('.animate-pulse').style.width = '100%';
-                overlay.querySelector('.animate-pulse').classList.remove('animate-pulse');
-                overlay.querySelector('.animate-pulse')?.classList.add('bg-tertiary');
+        function pollGenerateJob(jobId) {
+            // Generation now includes pre-building every lesson's quiz plus the
+            // course's final assessment (each a separate Gemini call), so this
+            // runs as a background job the client polls — the user can dismiss
+            // the modal via "Continue in Background" without losing progress.
+            const poll = setInterval(async () => {
+                let job;
+                try {
+                    const res = await fetch(`/api/kb/generate-status/${jobId}`);
+                    if (!res.ok) throw new Error('Lost track of the generation job.');
+                    job = await res.json();
+                } catch (err) {
+                    clearInterval(poll);
+                    showGenerateError(err.message);
+                    return;
+                }
 
-                // Add navigation button
-                const btnContainer = document.createElement('div');
-                btnContainer.className = 'mt-6 flex gap-3 justify-center';
-                btnContainer.innerHTML = `
-                <a href="/learning-path" class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold squishy-button primary-squishy no-underline flex items-center gap-2">
+                if (job.status === 'processing' || job.status === 'pending') {
+                    if (!overlay.classList.contains('hidden')) {
+                        const p = overlay.querySelector('p');
+                        if (p) p.textContent = stageLabel(job.stage);
+                    }
+                    return;
+                }
+
+                clearInterval(poll);
+                if (job.status === 'error') {
+                    showGenerateError(job.message || 'Generation failed');
+                } else {
+                    showGenerateSuccess(job.result);
+                }
+            }, 1000);
+        }
+
+        function showGenerateSuccess(result) {
+            loadDrafts();
+
+            if (overlay.classList.contains('hidden')) {
+                showToast(`Draft ready — ${result.total_lessons} lessons generated.`);
+                return;
+            }
+
+            // Update overlay to success state — grab each element once,
+            // before mutating the classes we're about to query by.
+            const bgActions = overlay.querySelector('#generate-bg-actions');
+            if (bgActions) bgActions.classList.add('hidden');
+
+            const successIcon = overlay.querySelector('.material-symbols-outlined');
+            if (successIcon) {
+                successIcon.textContent = 'check_circle';
+                successIcon.classList.remove('animate-spin');
+                successIcon.classList.add('text-tertiary');
+            }
+            overlay.querySelector('h3').textContent = 'Draft Created!';
+            overlay.querySelector('p').textContent = `Created ${result.total_lessons} lessons • ${result.total_estimated_hours}h estimated. Saved as your private draft — publish it from "Your Drafts" below when ready.`;
+            const successBar = overlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (successBar) {
+                successBar.classList.remove('wai-indeterminate', 'bg-primary', 'bg-error');
+                successBar.style.position = '';
+                successBar.style.left = '';
+                successBar.style.width = '100%';
+                successBar.classList.add('bg-tertiary');
+            }
+
+            // Add navigation button
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'mt-6 flex gap-3 justify-center';
+            btnContainer.innerHTML = `
+                <a href="/learning-path?path=${encodeURIComponent(result.path_id || '')}" class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold squishy-button primary-squishy no-underline flex items-center gap-2">
                     <span class="material-symbols-outlined">route</span>
-                    View Learning Path
+                    Preview Draft
                 </a>
                 <button onclick="document.getElementById('upload-overlay').classList.add('hidden')" class="px-6 py-3 border-2 border-outline-variant rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all">
                     Close
                 </button>
             `;
-                overlay.querySelector('.bg-surface-container-lowest').appendChild(btnContainer);
+            overlay.querySelector('.bg-surface-container-lowest').appendChild(btnContainer);
+        }
 
-            } catch (err) {
-                overlay.querySelector('.animate-spin').textContent = 'error';
-                overlay.querySelector('.animate-spin').classList.remove('animate-spin');
-                overlay.querySelector('h3').textContent = 'Generation Failed';
-                overlay.querySelector('p').textContent = err.message;
-
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                    resetOverlay();
-                }, 3000);
+        function showGenerateError(message) {
+            if (overlay.classList.contains('hidden')) {
+                showToast(message || 'Generation failed', 'error');
+                return;
             }
+
+            const bgActions = overlay.querySelector('#generate-bg-actions');
+            if (bgActions) bgActions.classList.add('hidden');
+
+            const errorIcon = overlay.querySelector('.material-symbols-outlined');
+            if (errorIcon) {
+                errorIcon.textContent = 'error';
+                errorIcon.classList.remove('animate-spin', 'text-tertiary');
+                errorIcon.classList.add('text-error');
+            }
+            overlay.querySelector('h3').textContent = 'Generation Failed';
+            overlay.querySelector('p').textContent = message;
+            const errorBar = overlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (errorBar) {
+                errorBar.classList.remove('wai-indeterminate', 'bg-primary', 'bg-tertiary');
+                errorBar.style.position = '';
+                errorBar.style.left = '';
+                errorBar.style.width = '100%';
+                errorBar.classList.add('bg-error');
+            }
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                resetOverlay();
+            }, 3000);
         }
 
         function resetOverlay() {
             const icon = overlay.querySelector('.material-symbols-outlined');
             if (icon) {
                 icon.textContent = 'sync';
-                icon.classList.add('animate-spin');
+                icon.className = 'material-symbols-outlined text-4xl text-primary animate-spin';
             }
             const h3 = overlay.querySelector('h3');
             if (h3) h3.textContent = 'Analyzing Document';
             const p = overlay.querySelector('p');
             if (p) p.textContent = 'Splitting content into curriculum, generating lessons and quizzes...';
-            const pulse = overlay.querySelector('.bg-primary, .bg-tertiary');
+            const pulse = overlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
             if (pulse) {
-                pulse.style.width = '70%';
-                pulse.classList.add('animate-pulse');
+                pulse.style.width = '';
+                pulse.style.position = '';
+                pulse.style.left = '';
+                pulse.className = 'bg-primary h-full rounded-full wai-indeterminate';
             }
+            const bgActions = overlay.querySelector('#generate-bg-actions');
+            if (bgActions) bgActions.classList.remove('hidden');
             // Remove nav buttons if they exist
             const btns = overlay.querySelector('.mt-6.flex');
             if (btns) btns.remove();
@@ -535,6 +819,8 @@
 
     <script src="/js/api-client.js"></script>
     <script src="/js/theme-toggle.js"></script>
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/global-search.js"></script>
 </body>
 
 </html>

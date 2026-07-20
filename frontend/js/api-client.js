@@ -80,6 +80,47 @@ const WisdomAPI = (() => {
     return _request('POST', '/api/kb/validate', { document_content: content });
   }
 
+  // ── KB Upload (multipart) ──
+  async function uploadDocument(file, department, versionAction) {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (department) formData.append('department', department);
+    if (versionAction) formData.append('version_action', versionAction);
+
+    const res = await fetch(`${BASE}/api/kb/upload`, { method: 'POST', body: formData });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || `API error ${res.status}`);
+    }
+    return res.json();
+  }
+
+  async function getUploadStatus(jobId) {
+    return _request('GET', `/api/kb/upload/status/${jobId}`);
+  }
+
+  // ── Catalog ──
+  async function getCatalogInputs() {
+    return _request('GET', '/api/kb/catalog/inputs');
+  }
+
+  async function getCatalogLearningPaths(userId) {
+    return _request('GET', `/api/kb/catalog/learning-paths${userId ? '?user_id=' + userId : ''}`);
+  }
+
+  async function generateFromInput(filename, appendToLatest) {
+    return _request('POST', '/api/kb/generate-from-input', { filename, append_to_latest: !!appendToLatest });
+  }
+
+  // ── Conflicts (KB Review Queue) ──
+  async function getConflicts(status) {
+    return _request('GET', `/api/kb/conflicts?status=${status || 'pending'}`);
+  }
+
+  async function resolveConflict(conflictId, resolution, resolvedBy, notes) {
+    return _request('POST', `/api/kb/conflicts/${conflictId}/resolve`, { resolution, resolved_by: resolvedBy, notes });
+  }
+
   // ── Quiz Session ──
   async function startQuiz(topic, userId = 'emp_001', difficulty = 'medium', questionCount = 5, quizType = 'short_quiz') {
     return _request('POST', '/api/quiz/start', {
@@ -107,6 +148,13 @@ const WisdomAPI = (() => {
     getAtRiskUsers,
     getKBDocuments,
     validateDocument,
+    uploadDocument,
+    getUploadStatus,
+    getCatalogInputs,
+    getCatalogLearningPaths,
+    generateFromInput,
+    getConflicts,
+    resolveConflict,
     startQuiz,
     evaluateSingleAnswer,
   };

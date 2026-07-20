@@ -131,8 +131,11 @@ class DepartmentScopedStore:
         self.department_id = department_id
 
         if base_path is None:
-            # Default to the data/ directory at the project root
-            base_path = os.path.join(
+            # Precedence: explicit base_path arg > WAI_DATA_DIR env var > default.
+            # WAI_DATA_DIR lets tests redirect all storage to an isolated temp dir
+            # without touching the real project data/ directory. When unset, the
+            # behavior is identical to before (defaults to data/ at project root).
+            base_path = os.getenv("WAI_DATA_DIR") or os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                 "data"
             )
@@ -146,6 +149,8 @@ class DepartmentScopedStore:
         self.conflicts_path = self.base_path / "conflicts" / department_id
         self.kpi_store_path = self.base_path / "kpi_store"
         self.learning_paths_path = self.base_path / "learning_paths" / department_id
+        self.quizzes_path = self.base_path / "quizzes" / department_id
+        self.kb_jobs_path = self.base_path / "kb_jobs" / department_id
 
         # ── Catalog Paths (Knowledge Vault catalog structure) ──
         self.catalog_path = self.base_path / "knowledge_base" / department_id / "catalog"
@@ -162,6 +167,8 @@ class DepartmentScopedStore:
         self.conflicts_path.mkdir(parents=True, exist_ok=True)
         self.kpi_store_path.mkdir(parents=True, exist_ok=True)
         self.learning_paths_path.mkdir(parents=True, exist_ok=True)
+        self.quizzes_path.mkdir(parents=True, exist_ok=True)
+        self.kb_jobs_path.mkdir(parents=True, exist_ok=True)
         self.catalog_inputs_path.mkdir(parents=True, exist_ok=True)
         self.catalog_standard_paths_path.mkdir(parents=True, exist_ok=True)
         self.catalog_unofficial_paths_path.mkdir(parents=True, exist_ok=True)
@@ -214,6 +221,14 @@ class DepartmentScopedStore:
         file_path = self.knowledge_base_path / f"{doc_id}.json"
         file_path.write_text(json.dumps(data, indent=2))
 
+    def delete_knowledge_document(self, doc_id: str) -> bool:
+        """Delete a knowledge base document (e.g. a document's parsed chunks)."""
+        file_path = self.knowledge_base_path / f"{doc_id}.json"
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
+
     # ── Raw Document Storage ──
 
     def write_raw_document(self, filename: str, content: str) -> str:
@@ -237,6 +252,15 @@ class DepartmentScopedStore:
             if f.is_file() and f.name not in (".gitkeep",)
         ]
 
+    def delete_raw_document(self, filename: str) -> bool:
+        """Delete an uploaded raw document (.txt or .md) from the raw/ subdirectory."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        file_path = self.raw_documents_path / safe_name
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
+
     # ── Gap Cache (Phase 7 — Atomic Snippet Cache, Tier A scoped) ──
 
     def read_gap_cache(self, token_id: str) -> Optional[dict]:
@@ -252,6 +276,70 @@ class DepartmentScopedStore:
         data["cached_at"] = datetime.now(timezone.utc).isoformat()
         file_path.write_text(json.dumps(data, indent=2))
 
+    # ── Quiz Session Persistence ──
+    # Active quiz sessions are stored on disk (not in an in-process dict) so
+    # they survive server restarts and are shared across multiple workers.
+    # The FULL quiz — including correct answers — lives here server-side;
+    # API responses are sanitized separately before reaching the client.
+
+    def write_quiz(self, quiz_id: str, data: dict) -> None:
+        """Persist a generated quiz (with answer keys) for later evaluation."""
+        data["cached_at"] = datetime.now(timezone.utc).isoformat()
+        file_path = self.quizzes_path / f"{quiz_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_quiz(self, quiz_id: str) -> Optional[dict]:
+        """Read a persisted quiz session by its ID. Returns None if unknown."""
+        file_path = self.quizzes_path / f"{quiz_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    # ── KB Upload Jobs (Async Processing) ──
+    # Upload processing runs in a FastAPI BackgroundTask. Progress/status is
+    # written here (not to an in-process dict) so a polling client can read it
+    # across restarts and multiple workers, mirroring the quiz-session pattern.
+
+    def write_kb_job(self, job_id: str, data: dict) -> None:
+        """Persist the status/result of an async KB upload job."""
+        data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        file_path = self.kb_jobs_path / f"{job_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_kb_job(self, job_id: str) -> Optional[dict]:
+        """Read an async KB upload job's status by its ID. Returns None if unknown."""
+        file_path = self.kb_jobs_path / f"{job_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    # ── Duplicate Detection ──
+
+    def raw_document_exists(self, filename: str) -> bool:
+        """Return True if a raw document with this filename already exists."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        return (self.raw_documents_path / safe_name).exists()
+
+    def next_version_filename(self, filename: str) -> str:
+        """Return a non-colliding versioned filename, e.g. 'doc.txt' → 'doc_v2.txt'.
+
+        Increments the version suffix until a filename that does not already
+        exist in the raw documents directory is found.
+        """
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        if "." in safe_name:
+            stem, ext = safe_name.rsplit(".", 1)
+            ext = "." + ext
+        else:
+            stem, ext = safe_name, ""
+
+        version = 2
+        while True:
+            candidate = f"{stem}_v{version}{ext}"
+            if not self.raw_document_exists(candidate):
+                return candidate
+            version += 1
+
     # ── Learning Path Persistence ──
 
     def write_learning_path(self, path_id: str, data: dict) -> None:
@@ -266,6 +354,14 @@ class DepartmentScopedStore:
         if not file_path.exists():
             return None
         return json.loads(file_path.read_text())
+
+    def delete_learning_path(self, path_id: str) -> bool:
+        """Delete a persisted learning path (the activated/enrolled copy)."""
+        file_path = self.learning_paths_path / f"{path_id}.json"
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
 
     def read_latest_learning_path(self) -> Optional[dict]:
         """Read the most recently updated learning path for this department."""
@@ -283,6 +379,15 @@ class DepartmentScopedStore:
         file_path = self.catalog_inputs_path / safe_name
         file_path.write_text(content, encoding="utf-8")
         return str(file_path)
+
+    def delete_catalog_input(self, filename: str) -> bool:
+        """Delete an uploaded document's catalog/inputs/ copy."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        file_path = self.catalog_inputs_path / safe_name
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
 
     def list_catalog_inputs(self) -> list[dict]:
         """List all input files in catalog/inputs/ with metadata."""
@@ -312,6 +417,14 @@ class DepartmentScopedStore:
         if not file_path.exists():
             return None
         return json.loads(file_path.read_text())
+
+    def delete_standard_path(self, path_id: str) -> bool:
+        """Delete a standard (official) learning path from the catalog."""
+        file_path = self.catalog_standard_paths_path / f"{path_id}.json"
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
 
     def list_standard_paths(self) -> list[dict]:
         """List all standard learning paths with summary metadata."""
@@ -346,6 +459,21 @@ class DepartmentScopedStore:
         data["created_by"] = user_id
         file_path = user_dir / f"{path_id}.json"
         file_path.write_text(json.dumps(data, indent=2))
+
+    def read_unofficial_path(self, user_id: str, path_id: str) -> Optional[dict]:
+        """Read an unofficial (user-created) learning path."""
+        file_path = self.catalog_unofficial_paths_path / user_id / f"{path_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def delete_unofficial_path(self, user_id: str, path_id: str) -> bool:
+        """Delete an unofficial (user-created) learning path."""
+        file_path = self.catalog_unofficial_paths_path / user_id / f"{path_id}.json"
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
 
     def list_unofficial_paths(self, user_id: str | None = None) -> list[dict]:
         """List unofficial learning paths."""
@@ -481,7 +609,9 @@ class KPIStoreReader:
 
     def __init__(self, base_path: str | None = None):
         if base_path is None:
-            base_path = os.path.join(
+            # Precedence: explicit base_path arg > WAI_DATA_DIR env var > default.
+            # (Mirrors DepartmentScopedStore — keeps test isolation consistent.)
+            base_path = os.getenv("WAI_DATA_DIR") or os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                 "data"
             )

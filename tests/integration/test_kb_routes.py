@@ -28,7 +28,7 @@ def test_upload_txt_processes_and_completes(client):
     resp = client.post(
         "/api/kb/upload",
         files={"file": ("test.txt", content, "text/plain")},
-        data={"department": "operations"},
+        data={"department": "operations", "role": "manager"},
     )
     assert resp.status_code == 200
     body = resp.json()
@@ -59,7 +59,7 @@ def test_conflict_resolve_rejected_retracts_files(client, test_data_dir):
     up = client.post(
         "/api/kb/upload",
         files={"file": ("conflicting.txt", content, "text/plain")},
-        data={"department": "operations"},
+        data={"department": "operations", "role": "manager"},
     )
     assert up.status_code == 200
     job = _poll_job(client, up.json()["job_id"])
@@ -96,7 +96,7 @@ def test_duplicate_filename_then_new_version(client):
     first = client.post(
         "/api/kb/upload",
         files={"file": ("dup.txt", content, "text/plain")},
-        data={"department": "operations"},
+        data={"department": "operations", "role": "manager"},
     )
     assert first.status_code == 200
     _poll_job(client, first.json()["job_id"])
@@ -106,7 +106,7 @@ def test_duplicate_filename_then_new_version(client):
     second = client.post(
         "/api/kb/upload",
         files={"file": ("dup.txt", content, "text/plain")},
-        data={"department": "operations"},
+        data={"department": "operations", "role": "manager"},
     )
     assert second.status_code == 200
     assert second.json()["status"] == "duplicate"
@@ -115,7 +115,7 @@ def test_duplicate_filename_then_new_version(client):
     third = client.post(
         "/api/kb/upload",
         files={"file": ("dup.txt", content, "text/plain")},
-        data={"department": "operations", "version_action": "new_version"},
+        data={"department": "operations", "version_action": "new_version", "role": "manager"},
     )
     assert third.status_code == 200
     _poll_job(client, third.json()["job_id"])

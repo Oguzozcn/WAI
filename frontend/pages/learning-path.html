@@ -132,43 +132,41 @@
     </script>
 </head>
 <body class="bg-background text-on-background font-body-md min-h-screen">
+    <script src="/js/auth.js"></script>
 <!-- TopNavBar -->
-<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
-<div class="flex items-center gap-8"><button class="md:hidden p-2"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span><input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text"></div></div>
-<div class="flex items-center gap-4"><div class="hidden lg:flex items-center gap-4 mr-4"><div class="flex flex-col items-center"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full"><span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">military_tech</span><span class="font-stats-number text-sm text-on-surface">2.4k</span></div></div></div><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY"></div></div>
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
+<div class="flex items-center gap-8"><button id="mobile-menu-btn" class="md:hidden p-2"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span><input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-56 md:w-64 lg:w-80 focus:ring-2 focus:ring-primary text-sm h-10" id="global-search-input" placeholder="Search courses, paths..." type="text"></div></div>
+<div class="flex items-center gap-4"><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY"></div></div>
 </header>
-<div class="flex max-w-[1440px] mx-auto">
-<!-- SideNavBar (Hidden on Mobile) -->
-<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
-<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div><nav class="flex-1 space-y-2"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/learning-path"><span class="material-symbols-outlined">route</span><span class="font-label-md text-label-md">Learning Path</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault"><span class="material-symbols-outlined">folder</span><span class="font-label-md text-label-md">Knowledge Vault</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/manager-dashboard"><span class="material-symbols-outlined">groups</span><span class="font-label-md text-label-md">Team Dashboards</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Support</span></a></nav>
-<div class="mt-auto pt-6 border-t border-outline-variant"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></a></div></div>
-</aside>
+<div class="flex max-w-[1200px] mx-auto">
+<!-- SideNavBar (shared component) -->
+<div id="sidebar-mount"></div>
 <!-- Main Content Area -->
-<main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
+<main class="sidebar-offset p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
 <!-- Learning Path Central Column -->
 <div class="xl:col-span-8 flex flex-col items-center">
 <!-- Path Header -->
 <div class="w-full mb-12 text-center lg:text-left">
 <div class="flex items-center gap-2 mb-4 justify-center lg:justify-start">
-<span class="bg-primary text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Active Path</span>
+<span id="lp-active-badge" class="bg-primary text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Active Path</span>
 <span class="text-on-surface-variant text-sm flex items-center gap-1">
 <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            Vertex AI Engineer Path
-                        </span>
+<span id="lp-breadcrumb-path">Loading…</span>
+</span>
 </div>
-<h2 id="lp-title" class="font-display-lg text-display-lg text-on-surface mb-4">Vertex AI Engineer Path</h2>
+<h2 id="lp-title" class="font-display-lg text-display-lg text-on-surface mb-4">Loading your path…</h2>
 <p id="lp-desc" class="text-body-lg text-on-surface-variant max-w-2xl"></p>
 </div>
 <!-- Serpentine Learning Path -->
 <div class="relative w-full flex flex-col items-center">
-<div class="progress-line"></div>
+<div id="lp-progress-line" class="progress-line"></div>
 <!-- Path Nodes -->
 <div id="learning-path-container" class="serpentine-path w-full"></div>
 </div>
 <!-- Path Stats Sidebar -->
-<div class="xl:col-span-4 space-y-6">
+<div id="lp-stats-sidebar" class="xl:col-span-4 space-y-6">
 <!-- Progress Card -->
-<section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
+<section id="lp-stats-section" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
 <h4 class="font-headline-md text-on-surface mb-4">Path Stats</h4>
 <div class="space-y-4">
 <div class="flex justify-between items-end">
@@ -197,7 +195,7 @@
 <h4 class="font-headline-md font-bold">Weekly Goal</h4>
 <span class="material-symbols-outlined">trending_up</span>
 </div>
-<p id="lp-weekly-text" class="text-sm mb-4 opacity-90">Keep it up! Complete 1 module per week to stay on track.</p>
+<p id="lp-weekly-text" class="text-sm mb-4 opacity-90">Keep it up! Complete 1 course per week to stay on track.</p>
 <div id="lp-weekly-bars" class="flex gap-2">
 <!-- Populated dynamically by JS -->
 </div>
@@ -253,30 +251,75 @@
 
 <script src="/js/api-client.js"></script>
 <script src="/js/theme-toggle.js"></script>
+<script src="/js/sidebar.js"></script>
+<script src="/js/global-search.js"></script>
 
 <script>
+function renderLearningPathEmptyState() {
+    const badge = document.getElementById('lp-active-badge');
+    if (badge) badge.classList.add('hidden');
+    const breadcrumb = document.getElementById('lp-breadcrumb-path');
+    if (breadcrumb) breadcrumb.textContent = 'No active path';
+    const title = document.getElementById('lp-title');
+    if (title) title.textContent = "You haven't started a learning path yet";
+    const desc = document.getElementById('lp-desc');
+    if (desc) desc.textContent = '';
+
+    // No path, no spine, no stats — just the empty message and a way out.
+    const progressLine = document.getElementById('lp-progress-line');
+    if (progressLine) progressLine.classList.add('hidden');
+    const statsSidebar = document.getElementById('lp-stats-sidebar');
+    if (statsSidebar) statsSidebar.classList.add('hidden');
+
+    const container = document.getElementById('learning-path-container');
+    if (container) {
+        container.innerHTML = `
+        <div class="flex flex-col items-center text-center py-16 text-on-surface-variant">
+            <span class="material-symbols-outlined text-5xl mb-4">route</span>
+            <p class="font-headline-md text-on-surface mb-6">No path in progress</p>
+            <a href="/catalog" class="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold no-underline">Browse Catalog</a>
+        </div>`;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const userId = 'emp_001';
+        const session = window.WisdomAuth.requireAuth();
+        if (!session) return;
+        const userId = session.user_id;
+        let pathId = new URLSearchParams(window.location.search).get('path');
 
-        // 1. Fetch data
+        // 1. Fetch data — a specific path if ?path= is given, else this user's
+        // most-progressed real enrollment (never a global "latest generated"
+        // path — that could belong to someone else, or be an unpublished draft).
         let path, progress;
         try {
+            if (!pathId) {
+                const enrolledRes = await fetch('/api/learning-path/enrolled?user_id=' + userId);
+                if (enrolledRes.ok) {
+                    const enrolled = (await enrolledRes.json()).enrolled_paths || [];
+                    const best = enrolled.find(p => p.progress_pct < 100) || enrolled[0];
+                    if (best) pathId = best.path_id;
+                }
+            }
+
             const [pathRes, progRes] = await Promise.all([
-                fetch('/api/learning-path/latest?user_id=' + userId),
+                pathId ? fetch('/api/learning-path/' + encodeURIComponent(pathId)) : Promise.resolve(null),
                 WisdomAPI.getUserProgress(userId)
             ]);
-            
-            if (pathRes.ok) path = await pathRes.json();
+
+            if (pathRes && pathRes.ok) path = await pathRes.json();
             progress = progRes || { completed_courses: [] };
         } catch(e) {
             console.error('API Error:', e);
             progress = { completed_courses: [] };
         }
 
-        // Fallback to original API if no dynamic path exists
-        if (!path || !path.courses || path.courses.length === 0) {
-            path = await WisdomAPI.getLearningPath(userId);
+        // No enrolled path (or the specific ?path= no longer exists) — show a
+        // real empty state instead of a synthetic/generic curriculum.
+        if (!path || !Array.isArray(path.courses) || path.courses.length === 0) {
+            renderLearningPathEmptyState();
+            return;
         }
 
         // 2. Setup Sets and Variables
@@ -301,11 +344,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // 3. Update Title & Desc
-        const titleText = path.source_document
-            ? path.source_document.replace('.txt','').replace('.md','').replace(/_/g,' ')
-            : 'Learning Path';
+        const titleText = path.title
+            ? path.title
+            : (path.source_document
+                ? path.source_document.replace('.txt','').replace('.md','').replace(/_/g,' ')
+                : 'Learning Path');
         document.getElementById('lp-title').textContent = titleText;
-        document.getElementById('lp-desc').textContent = path.courses.length + ' modules • ' + (path.total_estimated_hours || '0') + 'h total';
+        const lpBreadcrumb = document.getElementById('lp-breadcrumb-path');
+        if (lpBreadcrumb) lpBreadcrumb.textContent = titleText;
+        document.getElementById('lp-desc').textContent = path.courses.length + ' courses • ' + (path.total_estimated_hours || '0') + 'h total';
+
+        // A manager's own unpublished draft isn't an "active" path — nobody
+        // (including them) is actually enrolled in it yet.
+        const activeBadge = document.getElementById('lp-active-badge');
+        if (activeBadge) {
+            if (path.path_type === 'unofficial') {
+                activeBadge.textContent = 'Draft — Not Published';
+                activeBadge.className = 'bg-tertiary-fixed text-on-tertiary-fixed-variant text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider';
+            } else {
+                activeBadge.textContent = 'Active Path';
+                activeBadge.className = 'bg-primary text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider';
+            }
+        }
 
         // Update section title
         const sectionTitle = document.getElementById('lp-section-title');
@@ -316,13 +376,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 4. Render Nodes
         const container = document.getElementById('learning-path-container');
         container.innerHTML = '';
-        let moduleNumber = 0;
+        let courseNumber = 0;
 
         path.courses.forEach((course) => {
             const isRemedial = course.is_remedial === true;
-            if (!isRemedial) moduleNumber++;
+            if (!isRemedial) courseNumber++;
 
-            // Course Module Header
+            // Course Header
             if (isRemedial) {
                 container.innerHTML += `
                 <div class="relative z-10 w-full max-w-lg my-2 mx-auto">
@@ -340,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="relative z-10 w-full max-w-lg my-4 mx-auto">
                     <div class="bg-primary text-on-primary p-6 rounded-2xl border-b-4 border-blue-900 flex justify-between items-center shadow-lg">
                         <div>
-                            <p class="font-label-md text-xs opacity-80 uppercase tracking-widest">Module ${moduleNumber}</p>
+                            <p class="font-label-md text-xs opacity-80 uppercase tracking-widest">Course ${courseNumber}</p>
                             <h3 class="font-headline-md text-white">${course.title}</h3>
                         </div>
                         <span class="material-symbols-outlined text-3xl">school</span>
@@ -430,7 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeRemaining = document.getElementById('lp-time-remaining');
         if (timeRemaining) timeRemaining.textContent = remainingHours.toFixed(1) + 'h';
 
-        // 6. Calculate Weekly Goal (MVP: 1 module per week)
+        // 6. Calculate Weekly Goal (MVP: 1 course per week)
         const weeklyBars = document.getElementById('lp-weekly-bars');
         const weeklyText = document.getElementById('lp-weekly-text');
         if (weeklyBars && weeklyText) {
@@ -440,9 +500,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const hasMetGoal = completedCount > 0;
             
             if (hasMetGoal) {
-                weeklyText.textContent = "Great job! You've completed a module and hit your weekly goal!";
+                weeklyText.textContent = "Great job! You've completed a course and hit your weekly goal!";
             } else {
-                weeklyText.textContent = "Keep it up! Complete 1 module to reach your weekly goal.";
+                weeklyText.textContent = "Keep it up! Complete 1 course to reach your weekly goal.";
             }
 
             // Draw 4 segments for the month (1 per week)

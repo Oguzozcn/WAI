@@ -1,8 +1,15 @@
 # WisdomAI Implementation Plan
 
-> **Version:** 2.1  
-> **Last Updated:** 2026-07-13  
-> **Archived Plans:** `archive/implementation_plan_v1_original.md`, `archive/implementation_plan_v1_file_upload.md`, `archive/catalog_implementation_plan.md`
+> **Version:** 2.2  
+> **Last Updated:** 2026-07-17  
+> **Archived Plans:** `archive/catalog_implementation_plan.md`
+
+> [!NOTE]
+> **v2.2 — Domain-driven refactor.** The codebase was reorganized from the flat
+> `WAI_agent/` + root `server.py` layout into a `src/` package (`src/api`,
+> `src/agents`, `src/core`, `src/services`) targeting **google-adk 2.3**.
+> Sections below that still describe `WAI_agent/…` or `server.py` are historical;
+> the **Directory Structure** and **Runtime** sections reflect the current code.
 
 ---
 
@@ -75,62 +82,78 @@
 ## Directory Structure
 
 ```
-WAI-main/
-├── server.py                            ← FastAPI server (13 endpoints + file upload)
-├── requirements.txt                     ← Python dependencies
-├── implementation_plan_v2.md            ← THIS FILE
+WisdomAI_MVP/
+├── requirements.txt                     ← Python dependencies (fastapi, uvicorn, google-adk)
+├── setup.py                             ← Bootstraps .venv, installs deps, runs uvicorn
+├── scope_project.md                     ← THIS FILE
+├── README.md                            ← Quick-start + architecture overview
+├── verify_agents.py                     ← Smoke-test for the ADK root_agent
 ├── archive/                             ← Archived plans
 │
 ├── frontend/
 │   ├── assets/                          ← Static assets (images, icons)
 │   ├── js/
-│   │   ├── api-client.js               ← WisdomAPI fetch wrapper
+│   │   ├── api-client.js               ← WisdomAPI fetch wrapper (same-origin)
+│   │   ├── quiz-controller.js          ← Quiz UI flow controller
 │   │   └── theme-toggle.js             ← Light/dark mode toggle
-│   └── pages/
-│       ├── dashboard.html               ← Main dashboard with serpentine map
-│       ├── dashboard-chat.html          ← Chat-enabled dashboard
-│       ├── learning-path.html           ← Full learning path view
-│       ├── lesson.html                  ← Lesson content viewer
-│       ├── quiz.html                    ← Quiz taking interface
-│       ├── quiz-passed.html             ← Quiz success screen
-│       ├── quiz-retake.html             ← Quiz retry screen
-│       ├── knowledge-vault.html         ← KB browser + upload zone
-│       └── chat.html                    ← Standalone chat
+│   └── pages/                           ← 15 HTML pages (dashboard, lesson, quiz,
+│                                          knowledge-vault, manager-dashboard, …)
 │
-├── WAI_agent/
-│   ├── __init__.py
-│   ├── agent.py                         ← Root Orchestrator
+├── src/
+│   ├── api/
+│   │   ├── main.py                      ← FastAPI app; mounts static + 7 routers
+│   │   └── routes/                      ← pages, progress, learning_path, quiz,
+│   │                                       department, knowledge_base, manager
 │   │
-│   ├── sub_agents/
-│   │   ├── curriculum_builder/          ← Learning path generation
-│   │   ├── knowledge_coach/             ← Quiz & assessment engine
-│   │   ├── kb_validator/                ← Document conflict detection
-│   │   ├── department_reporter/         ← Tier 1 KPI push
-│   │   └── corporate_report_agent/      ← Tier 3 executive reports
+│   ├── agents/
+│   │   ├── agent.py                     ← Root Orchestrator (ADK 2.0 SkillToolset)
+│   │   └── hooks.py                     ← LuckEliminationHook (pre-tool-call policy)
 │   │
-│   ├── tools/
-│   │   ├── curriculum_tools.py          ← Path generation + doc splitting
-│   │   ├── quiz_tools.py               ← Quiz generation & scoring
-│   │   ├── progress_tools.py           ← Readiness tracking
-│   │   ├── routing_tools.py            ← Adaptive path routing
-│   │   └── reporting_tools.py          ← KPI synthesis + executive reports
+│   ├── core/                            ← Framework-agnostic domain layer
+│   │   ├── config.py                    ← Thresholds & state constants
+│   │   ├── models.py                    ← Dataclass models (Course, Quiz, KPIPayload…)
+│   │   ├── database.py                  ← DepartmentScopedStore + KPIStoreReader (Tier A)
+│   │   ├── state_machine.py             ← Adaptive learning states
+│   │   ├── luck_elimination.py          ← Luck elimination + HLR memory decay
+│   │   └── data_compliance_gate.py      ← GDPR Art. 35 human-approval gate
 │   │
-│   ├── shared/
-│   │   ├── persistence.py              ← DepartmentScopedStore (Tier A)
-│   │   ├── state_machine.py            ← Adaptive learning states
-│   │   ├── luck_elimination.py         ← Luck elimination engine
-│   │   ├── models.py                   ← Pydantic data models
-│   │   └── constants.py                ← Thresholds and config
-│   │
-│   └── data/
-│       ├── vertex_ai_dtp.json           ← Vertex AI DTP (v1.1, reordered)
-│       ├── sample_competency_matrix.json ← Mock user profiles
-│       ├── seed_vertex.py               ← Data seeding script
-│       ├── kpi_store/                   ← Tier 2 central KPI payloads
-│       ├── user_progress/operations/    ← Per-user JSON (dept-scoped)
-│       └── knowledge_base/operations/   ← KB docs per department
-│           └── raw/                     ← Raw uploaded documents (Phase 7)
+│   └── services/                        ← Business logic (also exposed as agent tools)
+│       ├── curriculum_service.py        ← Path gen, chunking, remedial (Gemini)
+│       ├── quiz_service.py              ← Quiz gen/scoring + 4PL IRT engine
+│       ├── routing_service.py           ← Entry-path routing, bypass logic
+│       ├── reporting_service.py         ← Tier 1 KPI push + Tier 3 exec email
+│       └── user_service.py              ← Progress, readiness, at-risk flagging
+│
+├── .agents/skills/                      ← Declarative ADK skills (SKILL.md pers. defs)
+│   ├── curriculum-builder/ knowledge-coach/ kb-validator/
+│   └── department-reporter/ corporate-report-agent/
+│
+└── data/                                ← Department-namespaced JSON persistence
+    ├── knowledge_base/operations/       ← KB docs, raw/, catalog/, gap_cache/
+    ├── user_progress/operations/        ← Per-user JSON (dept-scoped)
+    ├── learning_paths/operations/       ← Generated learning paths
+    ├── quizzes/operations/              ← Active quiz sessions (persisted, v2.2)
+    ├── conflicts/operations/            ← KB conflict alerts
+    └── kpi_store/                       ← Tier 2 central KPI payloads (boundary)
 ```
+
+---
+
+## Runtime
+
+```bash
+# One-time setup: creates .venv, installs deps, writes .env template
+python setup.py
+
+# Run the server (either works):
+python setup.py                          # then answer "y" to start
+uvicorn src.api.main:app --reload        # direct — serves http://localhost:8000
+```
+
+- **App name / entry point:** FastAPI app is `src.api.main:app` (there is no root `server.py`).
+- **Model:** `gemini-3.5-flash` for all LLM calls (root agent + remedial generation), via Vertex AI ADC — no API key; configured through `.env` (`GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, `GOOGLE_GENAI_USE_VERTEXAI=TRUE`).
+- **ADK:** google-adk **2.3**. Skills are declarative — each `.agents/skills/<name>/SKILL.md` is loaded via `load_skill_from_dir` and exposed through a `SkillToolset` on `root_agent`; the concrete Python function tools are attached as `additional_tools`.
+- **Quiz sessions:** persisted to `data/quizzes/<dept>/` (survive restarts & multiple workers) rather than an in-process dict.
 
 ---
 
@@ -376,6 +399,7 @@ curl http://localhost:8000/api/kb/documents
 
 | Date | Change |
 |------|--------|
+| 2026-07-17 | **v2.2** — Domain-driven refactor to `src/` package (api/agents/core/services) on google-adk 2.3. Root agent rewired to the ADK 2.0 `SkillToolset` (declarative `.agents/skills/`), broken tool imports fixed, model unified to `gemini-3.5-flash`. Quiz sessions persisted to `data/quizzes/` instead of an in-memory dict. Docs + `setup.py` runner updated to `uvicorn src.api.main:app`. |
 | 2026-07-07 | **v2.0** — Consolidated from 3 separate plans into unified document. Switched theme from Capital Cities to Vertex AI. Reordered DTP courses (Gemini API → position 3). Enriched Gemini API KB content. Added Phase 6 (frontend integration) and Phase 7 (file upload pipeline). Archived v1 plans. |
 | 2026-07-02 | **v1.0** — Original TEAP plan: 5 agents, 3-tier reporting, Capital Cities theme |
 | 2026-07-05 | **v1.1** — File upload extension plan (separate doc, now merged into Phase 7) |

@@ -3,19 +3,55 @@
   "department": "operations",
   "display_name": "James Wilson",
   "entry_path": "standard",
-  "current_state": "enrolled",
+  "current_state": "course_in_progress",
   "learning_path_id": "",
   "completed_courses": [],
-  "current_course_id": "",
-  "quiz_attempts": [],
-  "assessment_scores": [],
+  "current_course_id": "course_fae3a35f",
+  "quiz_attempts": [
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.0,
+      "total_questions": 1,
+      "correct_answers": 0,
+      "attempted_at": "2026-07-19T18:21:58.480306"
+    }
+  ],
+  "assessment_scores": [
+    {
+      "quiz_id": "quiz_039e4c68",
+      "score": 0.0,
+      "type": "quiz"
+    }
+  ],
   "best_assessment_score": 0.0,
-  "error_retention_matrix": {},
+  "error_retention_matrix": {
+    "Foundation Models": 1,
+    "AI Training": 1
+  },
   "bypass_locked": false,
   "bypass_attempts": 0,
-  "readiness_score": 0.0,
+  "readiness_score": 0.05,
   "is_at_risk": true,
   "enrolled_at": "2026-06-25T09:00:00Z",
-  "manager_id": "",
-  "job_level": "individual_contributor"
+  "manager_id": "manager",
+  "job_level": "individual_contributor",
+  "last_activity_at": "2026-07-19T18:30:58.509279",
+  "enrolled_path_ids": [
+    "lp_ff5b91ff"
+  ],
+  "last_updated": "2026-07-19T18:30:58.514461+00:00",
+  "psychometric_ability": -1.7142857142857142,
+  "mastery_vectors": {
+    "Foundation Models": {
+      "concept_id": "Foundation Models",
+      "ability_score": 0.3,
+      "last_seen": "2026-07-19T18:21:58.491640+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 1,
+      "correct_count": 0
+    }
+  },
+  "luck_failures": {
+    "Foundation Models": 1
+  }
 }

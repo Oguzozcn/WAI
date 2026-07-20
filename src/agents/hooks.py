@@ -1,52 +1,39 @@
 """
-TEAP Agent Hooks — ADK 2.0
+TEAP Agent Hooks — ADK 2.3
 ============================
-Intercepts agent decisions to enforce corporate policies.
-Refactored from src/agents/hooks.py to import from src/core/ only.
+Intercepts agent tool calls to enforce the Luck Elimination policy: a user who
+has repeatedly failed the same concept must not be allowed to fast-track past
+it via check_bypass_eligibility / determine_user_entry_path.
 """
 
-from typing import Any
+from src.core.dev_config import get_param
 
-# In a real environment, you would import this from google.adk
-# from google.adk.hooks import PreToolCallDecideHook
-
-class PreToolCallDecideHook:
-    """Base class placeholder for PreToolCallDecideHook until SDK hook API is stable."""
-    def __init__(self, **kwargs):
-        pass
+_GATED_TOOLS = ("check_bypass_eligibility", "determine_user_entry_path")
 
 
-from src.core.luck_elimination import evaluate_luck_and_decay, ACTION_FORCE_MANDATORY
-from src.core.config import LUCK_FAILURE_THRESHOLD
+def luck_elimination_hook(tool, args: dict, tool_context) -> dict | None:
+    """ADK before_tool_callback: block fast-track tools for users stuck on a concept.
 
-
-class LuckEliminationHook(PreToolCallDecideHook):
+    Returning a dict short-circuits the tool call with that dict as its result;
+    returning None lets the tool execute normally. ADK invokes this callback
+    with keyword arguments tool=, args=, tool_context= (confirmed against the
+    installed SDK's call site in flows/llm_flows/functions.py).
     """
-    Intercepts routing tool calls (e.g. check_bypass_eligibility, determine_user_entry_path)
-    to check if the user has failed a concept too many times. If so, denies the tool call
-    and forces the LLM to route them to the mandatory path.
-    """
+    if tool.name not in _GATED_TOOLS:
+        return None
 
-    def on_pre_tool_call(self, tool_name: str, args: dict, context: Any) -> dict:
-        # We only care about fast-track/routing tools
-        if tool_name not in ("check_bypass_eligibility", "determine_user_entry_path"):
-            return {"allow": True}
+    user_progress = (getattr(tool_context, "state", None) or {}).get("user_progress", {})
+    error_matrix = user_progress.get("error_retention_matrix", {})
 
-        # In ADK, the context holds session state (e.g., user_progress)
-        user_progress = getattr(context, "state", {}).get("user_progress", {})
+    for concept, failures in error_matrix.items():
+        if failures >= get_param("LUCK_FAILURE_THRESHOLD"):
+            return {
+                "error": "luck_elimination_policy_triggered",
+                "message": (
+                    f"Luck Elimination Policy Triggered: user has failed concept "
+                    f"'{concept}' {failures} times. Fast-tracking is denied — route "
+                    f"the user to the mandatory learning path instead."
+                ),
+            }
 
-        # Check error retention matrix via the luck elimination engine
-        error_matrix = user_progress.get("error_retention_matrix", {})
-
-        for concept, failures in error_matrix.items():
-            if failures >= LUCK_FAILURE_THRESHOLD:
-                return {
-                    "allow": False,
-                    "reason": (
-                        f"Luck Elimination Policy Triggered: User has failed concept '{concept}' "
-                        f"{failures} times. Fast-tracking is denied. You must force the mandatory "
-                        f"learning path."
-                    )
-                }
-
-        return {"allow": True}
+    return None

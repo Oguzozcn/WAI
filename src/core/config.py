@@ -17,6 +17,9 @@ MAX_ASSESSMENT_QUESTIONS = 20  # Max questions per validation assessment
 MAX_QUIZ_ATTEMPTS = 3  # Maximum quiz attempts before state-locking
 DEFAULT_TIMEFRAME_WEEKS = 4  # Default transition timeframe
 
+# ── LLM / Vertex AI ──
+GEMINI_MODEL = "gemini-3.5-flash"
+
 # ── Departments (MVP: single department) ──
 DEPARTMENTS = ["operations"]
 DEFAULT_DEPARTMENT = "operations"

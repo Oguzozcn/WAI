@@ -13,6 +13,10 @@ def _serve_page(filename: str) -> HTMLResponse:
         raise HTTPException(status_code=404, detail=f"Page '{filename}' not found")
     return HTMLResponse(content=filepath.read_text(encoding="utf-8"))
 
+@router.get("/login", response_class=HTMLResponse)
+async def page_login():
+    return _serve_page("login.html")
+
 @router.get("/", response_class=HTMLResponse)
 async def page_dashboard():
     return _serve_page("dashboard.html")
@@ -53,10 +57,18 @@ async def page_chat():
 async def page_learning_materials():
     return _serve_page("learning-materials.html")
 
-@router.get("/learning-paths-catalog", response_class=HTMLResponse)
-async def page_learning_paths_catalog():
-    return _serve_page("learning-paths-catalog.html")
+@router.get("/learning-paths", response_class=HTMLResponse)
+async def page_learning_paths():
+    return _serve_page("learning-paths.html")
+
+@router.get("/catalog", response_class=HTMLResponse)
+async def page_catalog():
+    return _serve_page("catalog.html")
 
 @router.get("/manager-dashboard", response_class=HTMLResponse)
 async def page_manager_dashboard():
     return _serve_page("manager-dashboard.html")
+
+@router.get("/dev-console", response_class=HTMLResponse)
+async def page_dev_console():
+    return _serve_page("dev-console.html")

@@ -16,6 +16,6 @@
   "readiness_score": 0.0,
   "is_at_risk": true,
   "enrolled_at": "2026-06-25T09:00:00Z",
-  "manager_id": "",
+  "manager_id": "manager",
   "job_level": "individual_contributor"
 }

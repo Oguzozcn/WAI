@@ -7,6 +7,7 @@ Migrated from WAI_agent/shared/luck_elimination.py → src/core/luck_elimination
 """
 
 from src.core.config import LUCK_FAILURE_THRESHOLD
+from src.core.dev_config import get_param, get_logic_param
 
 import math
 from datetime import datetime, timezone
@@ -52,8 +53,14 @@ def evaluate_luck_and_decay(user_progress: dict, concept_token_id: str) -> str:
 class LuckEliminationEngine:
     """Analyzes historical quiz patterns to identify guessing behavior and enforce mastery."""
 
-    def __init__(self, mandatory_threshold: int = LUCK_FAILURE_THRESHOLD):
-        self.mandatory_threshold = mandatory_threshold
+    def __init__(self, mandatory_threshold: int | None = None):
+        # Read live (not a static default arg) so a developer-console change
+        # to LUCK_FAILURE_THRESHOLD takes effect without a restart.
+        self.mandatory_threshold = (
+            mandatory_threshold if mandatory_threshold is not None
+            else get_param("LUCK_FAILURE_THRESHOLD")
+        )
+        self.core_drift_concept_count = get_logic_param("luck_elimination", "core_drift_concept_count")
 
     def evaluate_user_progression(
         self,
@@ -74,7 +81,7 @@ class LuckEliminationEngine:
             if count >= self.mandatory_threshold:
                 flagged_concepts.append(tag)
 
-        if len(flagged_concepts) >= 3:
+        if len(flagged_concepts) >= self.core_drift_concept_count:
             action = ACTION_FORCE_MANDATORY
             reason = (
                 f"Core concept drift detected: {len(flagged_concepts)} concepts "

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" style="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WisdomAI | Learning Paths</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">try {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "surface-dim": "#d6dbdd",
+                            "on-secondary-container": "#004966",
+                            "surface": "#f6fafd",
+                            "on-surface": "#171c1f",
+                            "on-error-container": "#93000a",
+                            "inverse-primary": "#95ccff",
+                            "error-container": "#ffdad6",
+                            "secondary-fixed": "#c5e7ff",
+                            "tertiary": "#255f00",
+                            "on-secondary": "#ffffff",
+                            "primary-container": "#0070ad",
+                            "primary": "#005787",
+                            "on-primary": "#ffffff",
+                            "inverse-surface": "#2c3134",
+                            "on-tertiary": "#ffffff",
+                            "surface-bright": "#f6fafd",
+                            "on-primary-fixed": "#001d32",
+                            "secondary-container": "#2abcfd",
+                            "on-primary-fixed-variant": "#004a75",
+                            "surface-container": "#eaeef1",
+                            "surface-container-lowest": "#ffffff",
+                            "on-secondary-fixed": "#001e2d",
+                            "primary-fixed": "#cde5ff",
+                            "tertiary-container": "#327a00",
+                            "on-secondary-fixed-variant": "#004c6a",
+                            "surface-container-low": "#f0f4f7",
+                            "surface-container-high": "#e5e9ec",
+                            "secondary-fixed-dim": "#80d0ff",
+                            "on-tertiary-container": "#bbff92",
+                            "surface-container-highest": "#dfe3e6",
+                            "on-tertiary-fixed-variant": "#1f5100",
+                            "tertiary-fixed-dim": "#6be026",
+                            "on-error": "#ffffff",
+                            "surface-variant": "#dfe3e6",
+                            "primary-fixed-dim": "#95ccff",
+                            "on-background": "#171c1f",
+                            "surface-tint": "#00639a",
+                            "error": "#ba1a1a",
+                            "tertiary-fixed": "#87fe45",
+                            "on-primary-container": "#e0eeff",
+                            "on-tertiary-fixed": "#082100",
+                            "outline": "#707881",
+                            "inverse-on-surface": "#edf1f4",
+                            "secondary": "#00658c",
+                            "background": "#f6fafd",
+                            "on-surface-variant": "#404750",
+                            "outline-variant": "#c0c7d1"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                        },
+                        "spacing": {
+                            "unit": "4px",
+                            "margin-desktop": "40px",
+                            "card-gap": "20px",
+                            "gutter": "24px",
+                            "margin-mobile": "16px"
+                        },
+                        "fontFamily": {
+                            "headline-lg-mobile": ["Hanken Grotesk"],
+                            "stats-number": ["Hanken Grotesk"],
+                            "headline-lg": ["Hanken Grotesk"],
+                            "display-lg": ["Hanken Grotesk"],
+                            "body-md": ["Inter"],
+                            "body-lg": ["Inter"],
+                            "headline-md": ["Hanken Grotesk"],
+                            "label-md": ["JetBrains Mono"]
+                        },
+                        "fontSize": {
+                            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                            "stats-number": ["24px", { "lineHeight": "24px", "fontWeight": "800" }],
+                            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                            "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                        }
+                    }
+                }
+            }
+        } catch (_e) { }</script>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+    <script src="/js/auth.js"></script>
+    <!-- SideNavBar (shared component) -->
+    <div id="sidebar-mount"></div>
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col w-full min-w-0 relative">
+        <!-- TopAppBar -->
+        <header
+            class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
+            <div class="flex items-center gap-4">
+                <button id="mobile-menu-btn" class="md:hidden p-2">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="relative hidden sm:block">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input
+                        class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-56 md:w-64 lg:w-80 focus:ring-2 focus:ring-primary text-sm h-10"
+                        id="global-search-input" placeholder="Search courses, paths..." type="text">
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+                </div>
+            </div>
+        </header>
+        <!-- Page Content -->
+        <main class="flex-1 w-full max-w-[1200px] mx-auto p-margin-mobile md:p-margin-desktop sidebar-offset">
+            <!-- Breadcrumbs & Header -->
+            <div class="mb-8">
+                <div class="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
+                    <a class="hover:text-primary transition-colors font-body-md" href="/knowledge-vault">Knowledge
+                        Vault</a>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    <span class="font-body-md text-on-surface font-medium">Learning Paths</span>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-headline-lg text-headline-lg text-on-surface">Learning Paths</h2>
+                        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Curated curriculums designed
+                            to elevate your professional expertise.</p>
+                    </div>
+                    <div class="flex flex-row items-center gap-3 self-start md:self-auto shrink-0">
+                        <a href="/knowledge-vault"
+                            class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-2 px-4 font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-low no-underline whitespace-nowrap">
+                            <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Vault
+                        </a>
+                        <button
+                            class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-2 px-4 font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-low whitespace-nowrap"
+                            onclick="window.location.href='/learning-materials?create_path=true'">
+                            <span class="material-symbols-outlined text-[18px]">add</span> Create a Learning Path
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end items-center gap-2">
+                    <label for="sort-paths" class="text-sm font-label-md text-on-surface-variant">Sort by:</label>
+                    <select id="sort-paths"
+                        class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-1.5 px-3 text-sm font-body-md focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer">
+                        <option value="newest">Newest</option>
+                        <option value="approved">Approved</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Path Grid -->
+            <div id="paths-grid" class="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
+                <!-- Loading placeholder -->
+                <div class="col-span-full text-center py-12 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-4xl mb-2 block animate-spin">sync</span>
+                    Loading learning paths...
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ── Load Learning Paths from API ──
+        const ICON_MAP = {
+            'ai': { icon: 'architecture', color: 'text-primary', bg: 'bg-primary/10', tag: 'AI & ML', tagColor: 'text-primary' },
+            'ml': { icon: 'psychology', color: 'text-primary', bg: 'bg-primary/10', tag: 'AI & ML', tagColor: 'text-primary' },
+            'cloud': { icon: 'cloud_sync', color: 'text-secondary', bg: 'bg-secondary/10', tag: 'Cloud', tagColor: 'text-secondary' },
+            'data': { icon: 'database', color: 'text-on-surface-variant', bg: 'bg-surface-variant/30', tag: 'Data', tagColor: 'text-on-surface-variant' },
+            'vertex': { icon: 'model_training', color: 'text-primary', bg: 'bg-primary/10', tag: 'Vertex AI', tagColor: 'text-primary' },
+            'gemini': { icon: 'auto_awesome', color: 'text-secondary', bg: 'bg-secondary/10', tag: 'Gemini', tagColor: 'text-secondary' },
+            'default': { icon: 'school', color: 'text-primary', bg: 'bg-primary/10', tag: 'Course', tagColor: 'text-primary' },
+        };
+
+        function getIconConfig(title) {
+            const lower = (title || '').toLowerCase();
+            for (const [key, config] of Object.entries(ICON_MAP)) {
+                if (key !== 'default' && lower.includes(key)) return config;
+            }
+            return ICON_MAP.default;
+        }
+
+        let allPaths = [];
+        let enrolledByPathId = new Map();
+        let currentUserId = '';
+        let isManagerSession = false;
+
+        function renderGrid() {
+            const sortValue = document.getElementById('sort-paths').value;
+            let paths = allPaths.slice();
+
+            if (sortValue === 'approved') {
+                paths = paths.filter(p => p.path_type === 'official');
+            } else if (sortValue === 'draft') {
+                paths = paths.filter(p => p.path_type === 'unofficial');
+            }
+            // "newest" (default) applies no filter, just the created_at sort below.
+            paths.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+            const grid = document.getElementById('paths-grid');
+
+            if (paths.length === 0) {
+                const emptyMessage = sortValue === 'draft'
+                    ? 'No drafts right now. Generate a path from Learning Materials to create one.'
+                    : sortValue === 'approved'
+                        ? 'No approved learning paths yet.'
+                        : 'No learning paths available yet. Upload a document from the <a href="/knowledge-vault" class="text-primary font-semibold">Knowledge Vault</a> to generate one.';
+                grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-4xl mb-2 block">folder_open</span>
+                    ${emptyMessage}
+                </div>`;
+                return;
+            }
+
+            renderCards(grid, paths);
+        }
+
+        function getStatusInfo(p, enrollment) {
+            if (p.path_type === 'unofficial') {
+                return { label: 'Status', value: 'Awaiting Approval', color: 'text-on-surface-variant', big: false, progress: 0 };
+            }
+            const progress = enrollment ? enrollment.progress_pct : 0;
+            if (!enrollment || progress <= 0) {
+                return { label: 'Status', value: 'Not Started', color: 'text-on-surface-variant', big: false, progress: 0 };
+            }
+            if (progress >= 100) {
+                return { label: 'Status', value: 'Completed', color: 'text-tertiary', big: false, progress: 100 };
+            }
+            return { label: 'Progress', value: `${progress}%`, color: 'text-primary', big: true, progress };
+        }
+
+        function renderCards(grid, paths) {
+                grid.innerHTML = paths.map((p, idx) => {
+                    const iconConfig = getIconConfig(p.title);
+                    const isOfficial = p.path_type === 'official';
+                    const badge = isOfficial
+                        ? `<div class="absolute top-3 left-3 bg-surface-container-lowest/90 px-2 py-1 rounded text-xs font-label-md ${iconConfig.tagColor} font-bold shadow-sm">${iconConfig.tag}</div>`
+                        : `<div class="absolute top-3 left-3 bg-tertiary-fixed/90 px-2 py-1 rounded text-xs font-label-md text-on-tertiary-fixed-variant font-bold shadow-sm flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px]">drafts</span> Draft
+                      </div>`;
+
+                    // Real status: drafts are always "Awaiting Approval" until published;
+                    // published paths show this user's own enrollment progress.
+                    const enrollment = enrolledByPathId.get(p.path_id);
+                    const status = getStatusInfo(p, enrollment);
+                    const barColor = status.progress >= 100 ? 'bg-tertiary' : 'bg-secondary-container';
+
+                    const hours = p.total_estimated_hours || 0;
+                    const courseCount = p.total_courses || 0;
+
+                    const editBtn = isManagerSession
+                        ? `<button type="button" class="edit-path-btn absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity w-9 h-9 inline-flex items-center justify-center rounded-full bg-surface-container-lowest shadow-md border border-outline-variant text-on-surface-variant hover:bg-primary hover:text-on-primary hover:border-primary" data-path-id="${p.path_id}" data-path-type="${p.path_type}" data-path-title="${p.title.replace(/"/g, '&quot;')}" title="Edit path" aria-label="Edit path">
+                        <span class="material-symbols-outlined text-[20px] leading-none">edit</span>
+                    </button>`
+                        : '';
+
+                    return `
+                <div class="relative group" data-path-id="${p.path_id}">
+                <a href="/learning-path" data-path-id="${p.path_id}" data-path-type="${p.path_type}" class="path-card bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col hover:shadow-[0_4px_0_0_#0070ad] hover:-translate-y-1 transition-all duration-200 cursor-pointer no-underline">
+                    <div class="h-32 ${iconConfig.bg} relative flex items-center justify-center border-b border-outline-variant">
+                        <span class="material-symbols-outlined text-5xl ${iconConfig.color}">${iconConfig.icon}</span>
+                        ${badge}
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <h3 class="font-headline-md text-headline-md text-on-surface mb-2">${p.title}</h3>
+                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4 flex-1">
+                            ${isOfficial ? 'Official department learning path' : `Created by ${p.created_by || 'user'}`}
+                            ${p.source_document ? ` • Source: ${p.source_document}` : ''}
+                        </p>
+                        <div class="mt-auto">
+                            <div class="flex justify-between items-end mb-2">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-label-md text-on-surface-variant uppercase tracking-wider">${status.label}</span>
+                                    <span class="js-status-label ${status.big ? 'font-stats-number text-stats-number' : 'font-headline-sm text-[15px] font-bold'} ${status.color}">${status.value}</span>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <span class="text-xs text-on-surface-variant flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">view_module</span> ${courseCount} Course${courseCount !== 1 ? 's' : ''}
+                                    </span>
+                                    <span class="text-xs text-on-surface-variant flex items-center gap-1 mt-1">
+                                        <span class="material-symbols-outlined text-[14px]">schedule</span> ${hours} hrs
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                                <div class="${barColor} h-full rounded-full transition-all duration-500" style="width: ${status.progress}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                ${editBtn}
+                </div>`;
+                }).join('');
+
+                // Enroll in the clicked path (if not already), then open it.
+                // Enrolling never disturbs any other path you're already enrolled in.
+                grid.querySelectorAll('a.path-card[data-path-id]').forEach((card) => {
+                    card.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        if (card.dataset.busy === '1') return;
+                        card.dataset.busy = '1';
+                        const pathId = card.dataset.pathId;
+                        const pathType = card.dataset.pathType || 'official';
+                        const statusEl = card.querySelector('.js-status-label');
+                        const original = statusEl ? statusEl.textContent : '';
+                        if (statusEl) statusEl.textContent = 'Opening…';
+                        card.classList.add('opacity-60', 'pointer-events-none');
+                        try {
+                            const resp = await fetch(
+                                `/api/learning-path/${encodeURIComponent(pathId)}/enroll?path_type=${encodeURIComponent(pathType)}&user_id=${encodeURIComponent(currentUserId)}`,
+                                { method: 'POST' }
+                            );
+                            if (!resp.ok) throw new Error(`enroll failed (${resp.status})`);
+                            window.location.href = `/learning-path?path=${encodeURIComponent(pathId)}`;
+                        } catch (err) {
+                            card.classList.remove('opacity-60', 'pointer-events-none');
+                            card.dataset.busy = '';
+                            if (statusEl) {
+                                statusEl.textContent = 'Error — try again';
+                                setTimeout(() => { statusEl.textContent = original; }, 2500);
+                            }
+                        }
+                    });
+                });
+
+                grid.querySelectorAll('.edit-path-btn').forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openEditModal(btn.dataset.pathId, btn.dataset.pathType, btn.dataset.pathTitle);
+                    });
+                });
+        }
+
+        (async function loadPaths() {
+            try {
+                const session = window.WisdomAuth.requireAuth();
+                if (!session) return;
+                currentUserId = session.user_id;
+                isManagerSession = session.role === 'manager';
+                const catalogUrl = isManagerSession
+                    ? `/api/kb/catalog/learning-paths?user_id=${encodeURIComponent(currentUserId)}`
+                    : '/api/kb/catalog/learning-paths?official_only=true';
+                const [res, enrolledRes] = await Promise.all([
+                    fetch(catalogUrl),
+                    fetch(`/api/learning-path/enrolled?user_id=${currentUserId}`).catch(() => null),
+                ]);
+                const data = await res.json();
+                allPaths = data.learning_paths || [];
+
+                // Real per-path status: any path you're enrolled in shows its own
+                // progress, not just whichever one you opened most recently.
+                const enrolledData = enrolledRes && enrolledRes.ok ? await enrolledRes.json().catch(() => ({})) : {};
+                enrolledByPathId = new Map((enrolledData.enrolled_paths || []).map(p => [p.path_id, p]));
+
+                document.getElementById('sort-paths').addEventListener('change', renderGrid);
+                renderGrid();
+            } catch (e) {
+                document.getElementById('paths-grid').innerHTML = `
+                <div class="col-span-full text-center py-12 text-error">
+                    <span class="material-symbols-outlined text-4xl mb-2 block">error</span>
+                    Failed to load learning paths.
+                </div>`;
+            }
+        })();
+
+        // ── Edit path modal (rename, publish, remove) ──
+        const editModal = document.createElement('div');
+        editModal.id = 'edit-path-modal';
+        editModal.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden';
+        editModal.innerHTML = `
+        <div class="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl border border-outline-variant">
+            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">Edit Learning Path</h3>
+            <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Title</label>
+            <input id="edit-path-title-input" type="text"
+                class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl p-3 mb-4 focus:ring-2 focus:ring-primary outline-none">
+            <div id="edit-path-publish-row" class="hidden mb-2">
+                <button id="edit-path-publish-btn" type="button"
+                    class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-on-primary font-label-md text-sm rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">
+                    <span class="material-symbols-outlined text-[18px]">publish</span> Publish to Team
+                </button>
+            </div>
+            <div id="edit-path-error" class="hidden text-xs text-error mb-2"></div>
+            <div class="flex items-center justify-between gap-3 pt-4 mt-2 border-t border-outline-variant">
+                <button id="edit-path-remove-btn" type="button"
+                    class="flex items-center gap-1.5 px-3 py-2 text-error font-label-md text-sm rounded-lg hover:bg-error-container transition-colors disabled:opacity-50">
+                    <span class="material-symbols-outlined text-[18px]">delete</span> Remove Course
+                </button>
+                <div class="flex items-center gap-3">
+                    <button id="edit-path-cancel-btn" type="button" class="px-5 py-2 font-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">Cancel</button>
+                    <button id="edit-path-save-btn" type="button" class="px-5 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">Save</button>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(editModal);
+
+        let editingPathId = '';
+        let editingPathType = '';
+
+        function editModalError(message) {
+            const el = document.getElementById('edit-path-error');
+            if (!message) {
+                el.classList.add('hidden');
+                el.textContent = '';
+                return;
+            }
+            el.textContent = message;
+            el.classList.remove('hidden');
+        }
+
+        function openEditModal(pathId, pathType, title) {
+            editingPathId = pathId;
+            editingPathType = pathType;
+            document.getElementById('edit-path-title-input').value = title;
+            document.getElementById('edit-path-publish-row').classList.toggle('hidden', pathType !== 'unofficial');
+            editModalError('');
+            editModal.classList.remove('hidden');
+            document.getElementById('edit-path-title-input').focus();
+        }
+
+        document.getElementById('edit-path-cancel-btn').addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
+        document.getElementById('edit-path-save-btn').addEventListener('click', async () => {
+            const saveBtn = document.getElementById('edit-path-save-btn');
+            const title = document.getElementById('edit-path-title-input').value.trim();
+            if (!title) return;
+            editModalError('');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving…';
+            try {
+                const resp = await fetch(`/api/kb/learning-path/${encodeURIComponent(editingPathId)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        path_type: editingPathType,
+                        manager_id: currentUserId,
+                        role: isManagerSession ? 'manager' : '',
+                    }),
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Update failed');
+                }
+                const target = allPaths.find(p => p.path_id === editingPathId);
+                if (target) target.title = title;
+                editModal.classList.add('hidden');
+                renderGrid();
+            } catch (err) {
+                editModalError(err.message || 'Failed to update path.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        });
+
+        document.getElementById('edit-path-publish-btn').addEventListener('click', async () => {
+            const publishBtn = document.getElementById('edit-path-publish-btn');
+            editModalError('');
+            publishBtn.disabled = true;
+            publishBtn.textContent = 'Publishing…';
+            try {
+                const resp = await fetch(`/api/kb/learning-path/${encodeURIComponent(editingPathId)}/publish`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ manager_id: currentUserId, role: isManagerSession ? 'manager' : '' }),
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Publish failed');
+                }
+                const target = allPaths.find(p => p.path_id === editingPathId);
+                if (target) target.path_type = 'official';
+                editModal.classList.add('hidden');
+                renderGrid();
+            } catch (err) {
+                editModalError(err.message || 'Failed to publish path.');
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">publish</span> Publish to Team';
+            }
+        });
+
+        document.getElementById('edit-path-remove-btn').addEventListener('click', async () => {
+            if (!confirm('Remove this course? This cannot be undone.')) return;
+            const removeBtn = document.getElementById('edit-path-remove-btn');
+            editModalError('');
+            removeBtn.disabled = true;
+            try {
+                const resp = await fetch(`/api/kb/learning-path/${encodeURIComponent(editingPathId)}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path_type: editingPathType,
+                        manager_id: currentUserId,
+                        role: isManagerSession ? 'manager' : '',
+                    }),
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Remove failed');
+                }
+                allPaths = allPaths.filter(p => p.path_id !== editingPathId);
+                editModal.classList.add('hidden');
+                renderGrid();
+            } catch (err) {
+                editModalError(err.message || 'Failed to remove course.');
+            } finally {
+                removeBtn.disabled = false;
+            }
+        });
+    </script>
+
+    <script src="/js/api-client.js"></script>
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/global-search.js"></script>
+</body>
+
+</html>

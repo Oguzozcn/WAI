@@ -69,6 +69,8 @@ def seed():
             "readiness_score": 0.0,
             "is_at_risk": True, # At risk until they do something
             "enrolled_at": "2026-06-25T09:00:00Z",
+            "manager_id": user.get("manager_id", "manager"),
+            "job_level": user.get("job_level", "individual_contributor"),
         }
         filepath = progress_dir / f"{user['user_id']}.json"
         filepath.write_text(json.dumps(user_progress, indent=2))

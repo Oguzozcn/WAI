@@ -30,7 +30,7 @@ def _seed_team(seed_progress, data_dir):
 def test_team_kpis_aggregates(client, test_data_dir, seed_progress):
     _seed_team(seed_progress, test_data_dir)
 
-    resp = client.get("/api/manager/manager/team-kpis?department=operations")
+    resp = client.get("/api/manager/manager/team-kpis?department=operations&role=manager")
     assert resp.status_code == 200
     body = resp.json()
 
@@ -42,7 +42,7 @@ def test_team_kpis_aggregates(client, test_data_dir, seed_progress):
 def test_reports_sorted_by_readiness_ascending(client, test_data_dir, seed_progress):
     _seed_team(seed_progress, test_data_dir)
 
-    resp = client.get("/api/manager/manager/reports?department=operations")
+    resp = client.get("/api/manager/manager/reports?department=operations&role=manager")
     assert resp.status_code == 200
     rows = resp.json()["reports"]
 
@@ -53,7 +53,7 @@ def test_reports_sorted_by_readiness_ascending(client, test_data_dir, seed_progr
 
 
 def test_team_kpis_unknown_manager_404(client, test_data_dir):
-    resp = client.get("/api/manager/nonexistent_manager/team-kpis?department=operations")
+    resp = client.get("/api/manager/nonexistent_manager/team-kpis?department=operations&role=manager")
     assert resp.status_code == 404
 
 

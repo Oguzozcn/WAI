@@ -135,51 +135,14 @@
   .fade-up-3 { animation: fadeUp .4s .2s ease both; }
 </style>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen">
+    <script src="/js/auth.js"></script>
 
-<!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
-<aside class="hidden lg:flex flex-col h-screen sticky top-0 w-64 border-r border-outline-variant bg-surface-container-low px-4 py-6 shrink-0 z-40">
-<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
-<nav class="flex-1 space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-label-md text-label-md">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/learning-path">
-<span class="material-symbols-outlined">route</span>
-<span class="font-label-md text-label-md">Learning Path</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault">
-<span class="material-symbols-outlined">folder</span>
-<span class="font-label-md text-label-md">Knowledge Vault</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/manager-dashboard">
-<span class="material-symbols-outlined">groups</span>
-<span class="font-label-md text-label-md">Team Dashboards</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/learning-paths-catalog">
-<span class="material-symbols-outlined">menu_book</span>
-<span class="font-label-md text-label-md">Catalog</span>
-</a>
-<a id="support-link" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">help</span>
-<span class="font-label-md text-label-md">Support</span>
-</a></nav>
-<div class="mt-auto pt-6 border-t border-outline-variant">
-<div class="space-y-1">
-<div class="flex items-center gap-3 px-4 py-3">
-  <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-sm">M</div>
-  <div>
-    <div class="font-label-md text-label-md text-on-surface" id="sidebar-name">Manager</div>
-    <div class="text-[10px] text-on-surface-variant capitalize font-bold tracking-wider" id="sidebar-dept">—</div>
-  </div>
-</div>
-</div>
-</div>
-</aside>
+<!-- ── Sidebar (shared component) ───────────────────────────────────────── -->
+<div id="sidebar-mount"></div>
 
 <!-- ── Main ─────────────────────────────────────────────────────────────── -->
-<main class="flex-1 overflow-y-auto">
+<main class="flex-1 overflow-y-auto sidebar-offset">
 
   <!-- Top bar -->
   <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between">
@@ -190,23 +153,23 @@
     <div class="flex items-center gap-3">
       <div class="relative">
         <label for="dept-select" class="sr-only">Department</label>
-        <select id="dept-select" class="text-sm border border-outline-variant rounded-lg px-3 py-1.5 bg-surface focus:outline-none focus:ring-2 focus:ring-primary">
+        <select id="dept-select" class="appearance-none bg-none text-sm h-10 border border-outline-variant rounded-lg pl-4 pr-9 bg-surface focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
           <option value="operations">Operations</option>
         </select>
+        <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
       </div>
-      <div class="relative">
-        <label for="manager-input" class="sr-only">Manager ID</label>
-        <input id="manager-input" type="text" placeholder="Manager ID" value="manager"
-          class="text-sm border border-outline-variant rounded-lg px-3 py-1.5 bg-surface focus:outline-none focus:ring-2 focus:ring-primary w-36">
+      <div class="relative flex items-center gap-1.5 h-10 border border-outline-variant rounded-lg pl-3 pr-3 bg-surface-container-low text-sm text-on-surface-variant">
+        <span class="material-symbols-outlined text-outline text-lg">badge</span>
+        <span id="manager-id-label"></span>
       </div>
       <button id="refresh-btn" onclick="loadAll()"
-        class="flex items-center gap-1.5 bg-primary text-on-primary text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-primary-container transition-colors">
+        class="flex items-center gap-1.5 h-10 bg-primary text-on-primary text-sm font-semibold px-4 rounded-lg hover:bg-primary-container transition-colors">
         <span class="material-symbols-outlined text-base">refresh</span>Load
       </button>
     </div>
   </header>
 
-  <div class="px-6 py-6 max-w-6xl mx-auto space-y-10">
+  <div class="px-6 py-6 max-w-[1200px] mx-auto space-y-10">
 
     <!-- ══ BUCKET 1: Team KPIs (Headline) ═══════════════════════════════ -->
     <section id="section-team" class="fade-up">
@@ -241,6 +204,10 @@
         <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">person_search</span>
         <h2 class="font-display font-bold text-lg text-on-surface">Individual Progress</h2>
         <span class="text-xs text-on-surface-variant ml-1" id="reports-subtitle"></span>
+        <button id="export-excel-btn" type="button"
+          class="ml-auto flex items-center gap-1.5 text-sm font-semibold text-primary border border-outline-variant rounded-lg px-3 py-1.5 hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-base">download</span>Export Excel
+        </button>
       </div>
 
       <div class="bg-white rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
@@ -296,10 +263,21 @@
   </div><!-- /max-w -->
 </main>
 
+<!-- Shared sidebar component -->
+<script src="/js/sidebar.js"></script>
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
-const getManagerId  = () => document.getElementById('manager-input').value.trim() || 'manager';
+const wisdomSession = window.WisdomAuth.requireRole('manager');
+const getManagerId  = () => wisdomSession ? wisdomSession.user_id : '';
 const getDepartment = () => document.getElementById('dept-select').value;
+const getRole       = () => wisdomSession ? wisdomSession.role : '';
+if (wisdomSession) document.getElementById('manager-id-label').textContent = wisdomSession.user_id;
+
+document.getElementById('export-excel-btn').addEventListener('click', () => {
+  const managerId = getManagerId();
+  const dept = getDepartment();
+  window.location.href = `/api/manager/${encodeURIComponent(managerId)}/reports/export?department=${encodeURIComponent(dept)}&role=${encodeURIComponent(getRole())}`;
+});
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function ragClass(color) {
@@ -345,7 +323,7 @@ async function loadTeamKpis(managerId, dept) {
   ragBadge.classList.add('hidden');
 
   try {
-    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/team-kpis?department=${dept}`);
+    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/team-kpis?department=${dept}&role=${encodeURIComponent(getRole())}`);
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load team KPIs');
 
@@ -354,10 +332,6 @@ async function loadTeamKpis(managerId, dept) {
     ragBadge.className = `ml-auto text-xs font-semibold px-3 py-1 rounded-full ${ragClass(rag)} flex items-center gap-1`;
     ragBadge.innerHTML = `<span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">${ragIcon(rag)}</span>${rag.toUpperCase()}`;
     ragBadge.classList.remove('hidden');
-
-    // Sidebar info
-    document.getElementById('sidebar-name').textContent = managerId;
-    document.getElementById('sidebar-dept').textContent = dept;
 
     grid.innerHTML = [
       kpiCard('groups',      'Team Size',        d.team_size),
@@ -386,7 +360,7 @@ async function loadReports(managerId, dept) {
   errEl.classList.add('hidden');
 
   try {
-    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/reports?department=${dept}`);
+    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/reports?department=${dept}&role=${encodeURIComponent(getRole())}`);
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load reports');
 
@@ -466,7 +440,7 @@ async function loadStrategic(managerId, dept) {
   errEl.classList.add('hidden');
 
   try {
-    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/strategic?department=${dept}`);
+    const res = await fetch(`/api/manager/${encodeURIComponent(managerId)}/strategic?department=${dept}&role=${encodeURIComponent(getRole())}`);
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load strategic data');
 

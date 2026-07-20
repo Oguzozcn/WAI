@@ -168,39 +168,15 @@
     </style>
 </head>
 <body class="bg-background font-body-md text-on-background min-h-screen">
-<!-- Sidebar Navigation (SideNavBar) -->
-<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
-<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
-<nav class="flex-1 space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-label-md text-label-md">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/learning-path">
-<span class="material-symbols-outlined">route</span>
-<span class="font-label-md text-label-md">Learning Path</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault">
-<span class="material-symbols-outlined">folder</span>
-<span class="font-label-md text-label-md">Knowledge Vault</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">help</span>
-<span class="font-label-md text-label-md">Support</span>
-</a></nav>
-<div class="mt-auto pt-6 border-t border-outline-variant">
-<div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-label-md text-label-md">Settings</span>
-</a></div>
-</div>
-</aside>
+    <script src="/js/auth.js"></script>
+<!-- Sidebar Navigation (shared component) -->
+<div id="sidebar-mount"></div>
 <!-- Main Content Area -->
-<main class="ml-64 min-h-screen flex flex-col">
+<main class="sidebar-offset min-h-screen flex flex-col">
 <!-- Top Navigation (TopNavBar) -->
-<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant md:ml-64 md:w-[calc(100%-16rem)]">
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant">
 <div class="flex items-center gap-4">
-<button class="md:hidden p-2">
+<button id="mobile-menu-btn" class="md:hidden p-2">
 <span class="material-symbols-outlined">menu</span>
 </button>
 <div class="relative hidden sm:block">
@@ -209,14 +185,6 @@
 </div>
 </div>
 <div class="flex items-center gap-3">
-<div class="hidden lg:flex items-center gap-4 mr-4">
-<div class="flex flex-col items-center">
-<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
-<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span>
-<span class="font-stats-number text-sm text-on-surface">2.4k</span>
-</div>
-</div>
-</div>
 <div class="flex items-center gap-3">
 <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
 </div>
@@ -339,4 +307,5 @@
 <script src="/js/api-client.js"></script>
 <script src="/js/quiz-controller.js"></script>
 <script src="/js/theme-toggle.js"></script>
+<script src="/js/sidebar.js"></script>
 </body></html>

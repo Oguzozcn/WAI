@@ -18,6 +18,7 @@ CRITICAL SECURITY RULES:
 
 OUTPUT:
 A single JSON KPI payload containing ONLY:
+- Schema metadata (schema version, department ID, report date, reporting period, generation timestamp)
 - Aggregate workforce counts (enrolled, active, inactive)
 - Learning metrics (courses completed, completion rates)
 - Assessment metrics (quizzes administered, pass rates, bypass stats)

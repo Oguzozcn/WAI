@@ -19,11 +19,12 @@ class QuizSessionController {
    * @param {number} opts.passThreshold — e.g. 0.80
    */
   constructor(opts = {}) {
-    this.userId = opts.userId || 'emp_001';
+    this.userId = opts.userId || (window.WisdomAuth && window.WisdomAuth.getSession() || {}).user_id || 'emp_001';
     this.quizId = opts.quizId || '';
     this.quizType = opts.quizType || '';
     this.courseId = opts.courseId || '';
     this.lessonId = opts.lessonId || '';
+    this.pathId = opts.pathId || '';
     this.questions = opts.questions || [];
     this.currentIndex = 0;
     this.deferredList = [];                // question IDs skipped
@@ -37,6 +38,19 @@ class QuizSessionController {
 
     // DOM references (assigned after mount)
     this._dom = {};
+  }
+
+  // Fetch the specific enrolled path this quiz belongs to (if known), else
+  // fall back to the old single "latest" path — keeps links without a
+  // ?path= param working exactly as before.
+  _fetchPath() {
+    return this.pathId
+      ? fetch(`/api/learning-path/${encodeURIComponent(this.pathId)}`).then(r => r.json())
+      : fetch(`/api/learning-path/latest?user_id=${this.userId}`).then(r => r.json());
+  }
+
+  _learningPathUrl() {
+    return this.pathId ? `/learning-path?path=${encodeURIComponent(this.pathId)}` : '/learning-path';
   }
 
   // ──────────────────────────────────────────
@@ -450,7 +464,7 @@ class QuizSessionController {
             nextBtn.disabled = true;
             nextBtn.innerHTML = `Loading... <span class="material-symbols-outlined animate-spin">progress_activity</span>`;
             try {
-              const path = await fetch(`/api/learning-path/latest?user_id=${this.userId}`).then(r => r.json());
+              const path = await this._fetchPath();
               const course = (path.courses || []).find(c => c.course_id === this.courseId);
               if (course) {
                 const lessons = course.lessons || [];
@@ -463,15 +477,15 @@ class QuizSessionController {
                   // Last lesson — go to final assessment
                   nextBtn.innerHTML = `Take Final Assessment <span class="material-symbols-outlined">workspace_premium</span>`;
                   nextBtn.disabled = false;
-                  nextBtn.onclick = () => window.location.href = `/quiz?course=${this.courseId}&type=final_assessment`;
+                  nextBtn.onclick = () => window.location.href = `/quiz?course=${this.courseId}&type=final_assessment${this.pathId ? '&path=' + encodeURIComponent(this.pathId) : ''}`;
                 } else {
-                  window.location.href = '/learning-path';
+                  window.location.href = this._learningPathUrl();
                 }
               } else {
-                window.location.href = '/learning-path';
+                window.location.href = this._learningPathUrl();
               }
             } catch {
-              window.location.href = '/learning-path';
+              window.location.href = this._learningPathUrl();
             }
           };
         } else {
@@ -483,7 +497,7 @@ class QuizSessionController {
               nextBtn.disabled = true;
               nextBtn.innerHTML = `Loading... <span class="material-symbols-outlined">progress_activity</span>`;
               try {
-                const path = await fetch(`/api/learning-path/latest?user_id=${this.userId}`).then(r => r.json());
+                const path = await this._fetchPath();
                 const courses = (path.courses || []).filter(c => !c.is_remedial);
                 const currentIdx = courses.findIndex(c => c.course_id === this.courseId);
                 if (currentIdx !== -1 && currentIdx < courses.length - 1) {
@@ -498,16 +512,16 @@ class QuizSessionController {
                   // No next course — this is the last module
                   nextBtn.innerHTML = `Return to Learning Path <span class="material-symbols-outlined">route</span>`;
                   nextBtn.disabled = false;
-                  nextBtn.onclick = () => window.location.href = '/learning-path';
+                  nextBtn.onclick = () => window.location.href = this._learningPathUrl();
                 }
               } catch {
-                window.location.href = '/learning-path';
+                window.location.href = this._learningPathUrl();
               }
             };
           } else {
             nextBtn.innerHTML = `Return to Learning Path <span class="material-symbols-outlined">route</span>`;
             nextBtn.disabled = false;
-            nextBtn.onclick = () => window.location.href = '/learning-path';
+            nextBtn.onclick = () => window.location.href = this._learningPathUrl();
           }
         }
       } else {
@@ -644,6 +658,46 @@ class QuizSessionController {
   }
 }
 
+// Pull the real server-side error message out of a failed response instead
+// of discarding it — "Failed to load quiz" told nobody whether the lesson
+// was missing, the user lacked access, or the server errored.
+async function _quizErrorDetail(res) {
+  try {
+    const body = await res.json();
+    if (body && body.detail) return body.detail;
+  } catch (_e) { /* body wasn't JSON */ }
+  return `Failed to load quiz (${res.status}).`;
+}
+
+// Full, visible failure state — the old version only touched the small
+// question-text element, leaving the title stuck on "Loading Quiz..." and
+// the options list, counters, etc. all showing stale placeholder content.
+function _showQuizLoadError(message) {
+  const titleEl = document.querySelector('[data-quiz="title"]');
+  if (titleEl) titleEl.textContent = 'Couldn\'t load this quiz';
+
+  const textEl = document.querySelector('[data-quiz="question-text"]');
+  if (textEl) textEl.textContent = message || 'Something went wrong loading this quiz.';
+
+  const counterEl = document.querySelector('[data-quiz="question-counter"]');
+  if (counterEl) counterEl.textContent = '';
+
+  const optionsEl = document.querySelector('[data-quiz="options"]');
+  if (optionsEl) {
+    optionsEl.innerHTML = `
+      <button id="quiz-retry-btn" class="self-start px-6 py-3 bg-primary text-on-primary rounded-xl font-bold squishy-button">
+        Try Again
+      </button>`;
+    const retryBtn = document.getElementById('quiz-retry-btn');
+    if (retryBtn) retryBtn.addEventListener('click', () => window.location.reload());
+  }
+
+  const nextBtn = document.querySelector('[data-quiz="next-btn"]');
+  if (nextBtn) nextBtn.style.display = 'none';
+  const skipBtn = document.querySelector('[data-quiz="skip-btn"]');
+  if (skipBtn) skipBtn.style.display = 'none';
+}
+
 // ──────────────────────────────────────────
 //  Auto-initialization when the DOM is ready
 // ──────────────────────────────────────────
@@ -651,11 +705,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Only run on pages that have the quiz mount point
   if (!document.querySelector('[data-quiz="options"]')) return;
 
+  const session = window.WisdomAuth.requireAuth();
+  if (!session) return;
+
   const urlParams = new URLSearchParams(window.location.search);
   const courseId = urlParams.get('course') || urlParams.get('course_id');
   const lessonId = urlParams.get('lesson') || urlParams.get('lesson_id');
   const topic = urlParams.get('topic') || '';
-  const userId = urlParams.get('user') || 'emp_001';
+  const userId = urlParams.get('user') || session.user_id;
+  const pathId = urlParams.get('path') || '';
 
   // Determine which initialization method to use
   let quizData = null;
@@ -664,7 +722,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (courseId && lessonId) {
       // Lesson-scoped short quiz (existing flow via by-lesson endpoint)
       const res = await fetch(`/api/quiz/by-lesson/${courseId}/${lessonId}?user_id=${userId}`);
-      if (!res.ok) throw new Error('Failed to load quiz');
+      if (!res.ok) throw new Error(await _quizErrorDetail(res));
       quizData = await res.json();
       // Add default attempt info if not present
       quizData.attempts_remaining = quizData.attempts_remaining ?? 3;
@@ -674,7 +732,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Course-level final assessment (no specific lesson)
       const quizType = urlParams.get('type') || 'final_assessment';
       const res = await fetch(`/api/quiz/by-course/${courseId}?type=${quizType}&user_id=${userId}`);
-      if (!res.ok) throw new Error('Failed to load quiz');
+      if (!res.ok) throw new Error(await _quizErrorDetail(res));
       quizData = await res.json();
       // Add default attempt info if not present
       quizData.attempts_remaining = quizData.attempts_remaining ?? 3;
@@ -688,10 +746,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Fallback: generate a default quiz
       quizData = await WisdomAPI.startQuiz('General Knowledge', userId);
     }
+    if (!quizData || !Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+      throw new Error('The quiz came back with no questions.');
+    }
   } catch (err) {
     console.error('Quiz initialization error:', err);
-    const textEl = document.querySelector('[data-quiz="question-text"]');
-    if (textEl) textEl.textContent = 'Error loading quiz. Please try again.';
+    _showQuizLoadError(err.message);
     return;
   }
 
@@ -702,37 +762,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Initialize the controller
-  const quizTypeParam = urlParams.get('type');
-  const controller = new QuizSessionController({
-    userId,
-    quizId: quizData.quiz_id,
-    questions: quizData.questions || [],
-    attemptsRemaining: quizData.attempts_remaining,
-    maxAttempts: quizData.max_attempts,
-    passThreshold: quizData.pass_threshold,
-    quizType: quizTypeParam,
-    courseId,
-    lessonId,
-  });
+  // Rendering can fail too (e.g. a malformed question from the LLM) — without
+  // this try/catch that would be a silent uncaught error, leaving the page
+  // frozen on "Loading Quiz..." with no feedback at all.
+  try {
+    // Initialize the controller
+    const quizTypeParam = urlParams.get('type');
+    const controller = new QuizSessionController({
+      userId,
+      quizId: quizData.quiz_id,
+      questions: quizData.questions || [],
+      attemptsRemaining: quizData.attempts_remaining,
+      maxAttempts: quizData.max_attempts,
+      passThreshold: quizData.pass_threshold,
+      quizType: quizTypeParam,
+      courseId,
+      lessonId,
+      pathId,
+    });
 
-  // Set quiz title and dynamic subtitle
-  const titleEl = document.querySelector('[data-quiz="title"]');
-  if (titleEl) titleEl.textContent = quizData.topic || 'Knowledge Check';
+    // Set quiz title and dynamic subtitle
+    const titleEl = document.querySelector('[data-quiz="title"]');
+    if (titleEl) titleEl.textContent = quizData.topic || 'Knowledge Check';
 
-  const subtitleEl = document.querySelector('[data-quiz="subtitle"]');
-  if (subtitleEl) {
-    subtitleEl.textContent = quizTypeParam === 'short_quiz' ? 'Short Quiz' : 'Final Assessment';
+    const subtitleEl = document.querySelector('[data-quiz="subtitle"]');
+    if (subtitleEl) {
+      subtitleEl.textContent = quizTypeParam === 'short_quiz' ? 'Short Quiz' : 'Final Assessment';
+    }
+
+    // Hide skip button for short quizzes
+    if (quizTypeParam === 'short_quiz') {
+      const skipBtn = document.querySelector('[data-quiz="skip-btn"]');
+      if (skipBtn) skipBtn.style.display = 'none';
+    }
+
+    controller.mount();
+
+    // Expose for debugging
+    window.__quizController = controller;
+  } catch (err) {
+    console.error('Quiz render error:', err);
+    _showQuizLoadError('This quiz\'s data looked malformed and could not be displayed.');
   }
-
-  // Hide skip button for short quizzes
-  if (quizTypeParam === 'short_quiz') {
-    const skipBtn = document.querySelector('[data-quiz="skip-btn"]');
-    if (skipBtn) skipBtn.style.display = 'none';
-  }
-
-  controller.mount();
-
-  // Expose for debugging
-  window.__quizController = controller;
 });

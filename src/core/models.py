@@ -179,6 +179,7 @@ class UserProgress:
     entry_path: str = ""  # "veteran" | "intermediate" | "standard"
     current_state: str = "enrolled"
     learning_path_id: str = ""
+    enrolled_path_ids: list[str] = field(default_factory=list)
 
     # Course tracking
     completed_courses: list[str] = field(default_factory=list)
@@ -348,6 +349,8 @@ class ConflictAlert:
     status: str = "pending"  # "pending" | "resolved" | "dismissed"
     flagged_at: str = ""
     resolved_by: str = ""
+    resolved_at: str = ""
+    resolution_notes: str = ""
 
     def __post_init__(self):
         if not self.flagged_at:

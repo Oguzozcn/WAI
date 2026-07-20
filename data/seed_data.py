@@ -70,6 +70,8 @@ def seed():
             "readiness_score": user.get("readiness_score", 0.0),
             "is_at_risk": user.get("readiness_score", 0.0) < 0.60,
             "enrolled_at": "2026-06-25T09:00:00Z",
+            "manager_id": user.get("manager_id", "manager"),
+            "job_level": user.get("job_level", "individual_contributor"),
         }
         filepath = progress_dir / f"{user['user_id']}.json"
         filepath.write_text(json.dumps(user_progress, indent=2))

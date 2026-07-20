@@ -13,22 +13,25 @@ from src.core.state_machine import (
     get_state_description,
 )
 from src.core.config import DEFAULT_DEPARTMENT, ENTRY_PATH_VETERAN, ENTRY_PATH_INTERMEDIATE, ENTRY_PATH_STANDARD
+from src.core.dev_config import get_param, get_logic_param
 
 class AdaptiveMetacognitiveRouter:
     """
     Implements Howell's Conscious-Competence matrix for routing.
     """
-    
+
     @staticmethod
     def evaluate_competence(accuracy: float, average_confidence: float) -> str:
+        confidence_threshold = get_logic_param("adaptive_routing", "confidence_threshold")
+        accuracy_threshold = get_logic_param("adaptive_routing", "accuracy_threshold")
         # High confidence, low accuracy
-        if average_confidence > 0.7 and accuracy < 0.6:
+        if average_confidence > confidence_threshold and accuracy < accuracy_threshold:
             return "hidden_knowledge_gaps"
         # Low confidence, low accuracy
-        elif average_confidence <= 0.7 and accuracy < 0.6:
+        elif average_confidence <= confidence_threshold and accuracy < accuracy_threshold:
             return "conscious_incompetence"
         # Low confidence, high accuracy
-        elif average_confidence <= 0.7 and accuracy >= 0.6:
+        elif average_confidence <= confidence_threshold and accuracy >= accuracy_threshold:
             return "unconscious_competence"
         # High confidence, high accuracy
         else:
@@ -53,7 +56,7 @@ def determine_user_entry_path(
     Routes the user to one of three paths:
     - Veteran: Fast-track directly to validation assessment
     - Intermediate: Choice of gap rerun or validation test
-    - Standard: Full 10-course learning path
+    - Standard: Full learning path (all configured courses)
 
     Args:
         user_id: The user to evaluate
@@ -121,8 +124,9 @@ def handle_user_assessment_failure(
     """Handle the logic when a user fails a validation assessment.
 
     Implements Case 1 (bypass lockout) and Case 2 (iterative retake):
-    - Case 1: User tried to skip learning path and failed (<80%) → bypass locked,
-              full learning path becomes mandatory (minus completed courses)
+    - Case 1: User tried to skip learning path and failed (below the configured
+              pass threshold) → bypass locked, full learning path becomes
+              mandatory (minus completed courses)
     - Case 2: User went through courses and failed → gap review + retake allowed
 
     Args:
@@ -154,8 +158,8 @@ def handle_user_assessment_failure(
 
     # If bypass is being locked (Case 1), calculate mandatory courses
     if result["lock_bypass"]:
-        # All 10 courses minus completed ones
-        all_courses = [f"course_{i:02d}" for i in range(1, 11)]
+        # All configured courses minus completed ones
+        all_courses = [f"course_{i:02d}" for i in range(1, get_param("MAX_COURSES") + 1)]
         completed = progress.get("completed_courses", [])
         mandatory = get_mandatory_courses(all_courses, completed)
 
@@ -213,8 +217,8 @@ def check_bypass_eligibility(
             "eligible": False,
             "reason": (
                 "Bypass is LOCKED. You previously attempted to skip the learning path "
-                "and did not meet the 80% threshold. You must complete the mandatory "
-                "courses before taking the assessment again."
+                f"and did not meet the {get_param('PASS_THRESHOLD'):.0%} threshold. You must "
+                "complete the mandatory courses before taking the assessment again."
             ),
             "bypass_attempts": progress.get("bypass_attempts", 0),
         }
@@ -242,20 +246,21 @@ def check_bypass_eligibility(
         "entry_path": entry_path,
         "reason": (
             f"As a {entry_path} learner, you can attempt the validation "
-            f"assessment directly. Warning: scoring below 80% will lock "
-            f"bypass and make the full learning path mandatory."
+            f"assessment directly. Warning: scoring below {get_param('PASS_THRESHOLD'):.0%} "
+            f"will lock bypass and make the full learning path mandatory."
         ),
     }
 
 
 def _get_path_options(experience_level: str) -> list[dict]:
     """Get the available options for a given entry path."""
+    pass_pct = f"{get_param('PASS_THRESHOLD'):.0%}"
     if experience_level == ENTRY_PATH_VETERAN:
         return [
             {
                 "option": "Take Validation Assessment",
-                "description": "Skip directly to the final assessment. Score ≥80% to pass.",
-                "warning": "Scoring below 80% will lock this bypass option.",
+                "description": f"Skip directly to the final assessment. Score ≥{pass_pct} to pass.",
+                "warning": f"Scoring below {pass_pct} will lock this bypass option.",
             },
         ]
     elif experience_level == ENTRY_PATH_INTERMEDIATE:
@@ -263,7 +268,7 @@ def _get_path_options(experience_level: str) -> list[dict]:
             {
                 "option": "Take Validation Assessment",
                 "description": "Attempt the assessment directly.",
-                "warning": "Scoring below 80% will lock bypass and require full courses.",
+                "warning": f"Scoring below {pass_pct} will lock bypass and require full courses.",
             },
             {
                 "option": "Review Gap Areas",
@@ -274,6 +279,6 @@ def _get_path_options(experience_level: str) -> list[dict]:
         return [
             {
                 "option": "Start Learning Path",
-                "description": "Begin the 10-course structured learning path.",
+                "description": f"Begin the {get_param('MAX_COURSES')}-course structured learning path.",
             },
         ]

@@ -11,8 +11,11 @@ target-version = "py311"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-v --tb=short"
+addopts = "-v --tb=short -m \"not llm\""
 testpaths = ["tests"]
+markers = [
+    "llm: tests that call the real Gemini/Vertex AI API (costs money, needs ADC) — excluded by default",
+]
 
 [tool.pyright]
 include = ["src", "WAI_agent", "tests"]

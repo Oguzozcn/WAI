@@ -140,36 +140,14 @@
 </head>
 
 <body class="bg-background text-on-background font-body-md min-h-screen">
-    <!-- Side Navigation Shell -->
-    <nav class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen"
-        style="transition: width 1s cubic-bezier(0.65, 0, 0.35, 1);">
-        <div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhvctwVTGynDkdYDTIPbZnBmxxrJauAxoJArSKL96yK-scizt9gcCDg6Lqc0v7kLxIlrlBhXZn-2IfHppn0OOi_0QFAzKgxbJsGKY5fp-iL32DwpQKJY7oBY8tsamIMlwigmUUEIRDddJq6JiNPhsS1jIGiepdtRSD2pPaLWuR84OBRjdVbU70Yq75ltH3Ts_bhlh2xUk53QBsB8SbH3L9tPhVMmL1RqU9lSr2YeQpZsuT8LcHFq7ovRaF4fI1hQ5QcQ"><span
-                class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
-        <nav class="flex-1 space-y-1"><a
-                class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200"
-                href="/"><span class="material-symbols-outlined">dashboard</span><span
-                    class="font-label-md text-label-md">Dashboard</span></a><a
-                class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                href="/learning-path"><span class="material-symbols-outlined">route</span><span
-                    class="font-label-md text-label-md">Learning Path</span></a><a
-                class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                href="/knowledge-vault"><span class="material-symbols-outlined">folder</span><span
-                    class="font-label-md text-label-md">Knowledge Vault</span></a><a
-                class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                href="#"><span class="material-symbols-outlined">help</span><span
-                    class="font-label-md text-label-md">Support</span></a></nav>
-        <div class="mt-auto pt-6 border-t border-outline-variant">
-            <div class="space-y-1"><a
-                    class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all"
-                    href="#"><span class="material-symbols-outlined">settings</span><span
-                        class="font-label-md text-label-md">Settings</span></a></div>
-        </div>
-    </nav>
+    <script src="/js/auth.js"></script>
+    <script>window.WisdomAuth.requireAuth();</script>
+    <!-- Side Navigation Shell (shared component) -->
+    <div id="sidebar-mount"></div>
     <!-- Top AppBar Shell -->
     <header
-        class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-spacing-margin-desktop h-16 md:ml-64 md:max-w-[calc(100%-16rem)] fixed top-0 z-20 z-50">
-        <div class="flex items-center gap-4"><button class="md:hidden p-2"><span
+        class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-spacing-margin-desktop h-16 sidebar-offset sidebar-offset-header fixed top-0 z-20 z-50">
+        <div class="flex items-center gap-4"><button id="mobile-menu-btn" class="md:hidden p-2"><span
                     class="material-symbols-outlined">menu</span></button>
             <div class="relative hidden sm:block"><span
                     class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span><input
@@ -177,15 +155,6 @@
                     placeholder="Search..." type="text"></div>
         </div>
         <div class="flex items-center gap-3">
-            <div class="hidden lg:flex items-center gap-4 mr-4">
-                <div class="flex flex-col items-center">
-                    <div
-                        class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
-                        <span class="material-symbols-outlined text-primary text-sm"
-                            style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span><span
-                            class="font-stats-number text-sm text-on-surface">2.4k</span></div>
-                </div>
-            </div>
             <div class="flex items-center gap-3"><img alt="User profile avatar"
                     class="w-10 h-10 rounded-full border-2 border-primary object-cover"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8XlmnoH4Y6H8NVQKZ1KJBFOtq13dIOpxJWmkcICvEy0wIU5o6imgGH8t1C6mob0I1WYDAbAqcR5u2PAZz7jz_ok-cG4Po4chUpLx0NR4eGSCZPeh4AU_9qVkliShiVm65rx1XEvjpiiO8xhRxoLrKb19q49zZfwdDs3eLGJvYPfqt89yW7UOau38_JGqQHWChH886R95h7-0VEYf8TFnUVV_nvK03rXpTLP7ABXqSrSLjA7oNVP_7">
@@ -193,7 +162,7 @@
         </div>
     </header>
     <!-- Main Content Canvas -->
-    <main class="md:ml-64 p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)] pt-32 pt-8 pt-16">
+    <main class="sidebar-offset p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)] pt-32 pt-8 pt-16">
         <!-- Background Animation Overlay -->
         <div class="max-w-[1200px] mx-auto">
             <!-- Celebratory Header Section -->
@@ -325,7 +294,7 @@
                         <span class="material-symbols-outlined text-4xl mb-2 text-on-surface-variant">lock</span>
                         <p class="font-label-md text-xs uppercase mb-1">Next Milestone</p>
                         <h5 class="font-headline-md text-on-surface">Go-to-Market Strategy</h5>
-                        <p class="text-xs mt-2">Unlock by completing 'Pricing Models' module</p>
+                        <p class="text-xs mt-2">Unlock by completing 'Pricing Models' course</p>
                     </div>
                 </div>
             </div>
@@ -360,6 +329,7 @@
 
     <script src="/js/api-client.js"></script>
     <script src="/js/theme-toggle.js"></script>
+    <script src="/js/sidebar.js"></script>
 </body>
 
 </html>

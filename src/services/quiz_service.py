@@ -10,11 +10,10 @@ import uuid
 from datetime import datetime
 
 from src.core.database import DepartmentScopedStore
-from src.core.config import (
-    DEFAULT_DEPARTMENT, PASS_THRESHOLD,
-    MAX_QUIZ_QUESTIONS, MAX_ASSESSMENT_QUESTIONS,
-)
+from src.core.config import DEFAULT_DEPARTMENT
+from src.core.dev_config import get_param, get_config, get_logic_param
 from src.core.luck_elimination import LuckEliminationEngine
+from src.services.llm_client import get_gemini_client
 import math
 
 class EnterprisePsychometricEngine:
@@ -37,15 +36,20 @@ class EnterprisePsychometricEngine:
         administered_items: list[dict],
         user_responses: list[int]
     ) -> float:
-        learning_rate = 0.5
+        learning_rate = get_logic_param("assessment_scoring", "irt_learning_rate")
+        theta_clamp = get_logic_param("assessment_scoring", "irt_theta_clamp")
+        default_a = get_logic_param("assessment_scoring", "irt_default_discrimination")
+        default_b = 0.0
+        default_c = get_logic_param("assessment_scoring", "irt_default_guessing")
+        default_d = get_logic_param("assessment_scoring", "irt_default_slip")
         gradient = 0.0
         fisher_information = 0.0
 
         for index, item in enumerate(administered_items):
-            a = item.get("discrimination", 1.0)
-            b = item.get("difficulty", 0.0)
-            c = item.get("guessing", 0.25)
-            d = item.get("slip", 0.95)
+            a = item.get("discrimination", default_a)
+            b = item.get("difficulty", default_b)
+            c = item.get("guessing", default_c)
+            d = item.get("slip", default_d)
             response = user_responses[index]
 
             probability = EnterprisePsychometricEngine.calculate_item_probability(current_theta, a, b, c, d)
@@ -62,7 +66,7 @@ class EnterprisePsychometricEngine:
             return current_theta
 
         new_theta = current_theta + (gradient / fisher_information) * learning_rate
-        return max(-4.0, min(4.0, new_theta))
+        return max(-theta_clamp, min(theta_clamp, new_theta))
 
 
 def generate_quiz(
@@ -91,16 +95,15 @@ def generate_quiz(
     knowledge_base = store.read_knowledge_base()
 
     # Cap question count based on quiz type
-    max_questions = MAX_ASSESSMENT_QUESTIONS if quiz_type == "validation_assessment" else MAX_QUIZ_QUESTIONS
+    max_questions = get_param("MAX_ASSESSMENT_QUESTIONS") if quiz_type == "validation_assessment" else get_param("MAX_QUIZ_QUESTIONS")
     question_count = min(question_count, max_questions)
 
     quiz_id = f"quiz_{uuid.uuid4().hex[:8]}"
 
-    # Generate heuristic/mock questions for the demo
-    questions = []
-    for i in range(question_count):
+    def _build_template_question(i: int) -> dict:
+        """Deterministic fallback question (unchanged legacy behavior)."""
         correct_idx = i % 4
-        
+
         # Build 4 options: 1 correct, 3 obviously incorrect
         options = []
         for j in range(4):
@@ -117,14 +120,101 @@ def generate_quiz(
             else:
                 rationale[str(j)] = f"This is incorrect. It focuses on the wrong aspect of {topic} and misses the main point."
 
-        questions.append({
+        return {
             "question_id": f"q_{uuid.uuid4().hex[:6]}",
             "text": f"Regarding '{topic}', which of the following represents the core concept for part {i+1}?",
             "options": options,
             "correct_answer_index": correct_idx,
             "rationale": rationale,
-            "concept_tags": [topic.lower().replace(" ", "_"), f"concept_{i+1}"]
-        })
+            "concept_tags": [topic.lower().replace(" ", "_"), f"concept_{i+1}"],
+        }
+
+    # ── Gather grounding content from the knowledge base ──
+    # Keep docs whose topics/title/content relate to the requested topic
+    # (simple case-insensitive substring match — no new search infra).
+    topic_lower = topic.lower()
+    topic_words = {w for w in topic_lower.split() if len(w) > 2}
+    grounding_parts: list[str] = []
+    grounding_len = 0
+    GROUNDING_CAP = 4000
+    for doc in knowledge_base:
+        topics = [str(t).lower() for t in (doc.get("topics") or [])]
+        title = str(doc.get("title", "")).lower()
+        content = str(doc.get("content", ""))
+        content_lower = content.lower()
+
+        related = (
+            any(topic_lower in t or t in topic_lower for t in topics)
+            or any(w in title for w in topic_words)
+            or any(w in content_lower for w in topic_words)
+            or topic_lower in title
+            or topic_lower in content_lower
+        )
+        if not related or not content.strip():
+            continue
+
+        remaining = GROUNDING_CAP - grounding_len
+        if remaining <= 0:
+            break
+        snippet = content[:remaining]
+        grounding_parts.append(snippet)
+        grounding_len += len(snippet)
+
+    grounding_context = "\n\n".join(grounding_parts).strip()
+
+    # ── Generate questions: LLM (grounded) with heuristic fallback ──
+    questions = []
+    if grounding_context:
+        try:
+            tool_config = get_config()["tools"]["generate_quiz"]
+            prompt = tool_config["prompt_template"].format(
+                question_count=question_count,
+                topic=topic,
+                difficulty=difficulty,
+                grounding_context=grounding_context,
+            )
+
+            client = get_gemini_client()
+            response = client.models.generate_content(
+                model=tool_config.get("model") or get_param("GEMINI_MODEL"),
+                contents=prompt,
+            )
+            raw = (response.text or "").strip()
+            if not raw:
+                raise ValueError("LLM returned an empty response.")
+
+            # Strip markdown code fences if present
+            if raw.startswith("```"):
+                raw = raw.split("```", 2)[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+                raw = raw.rsplit("```", 1)[0].strip()
+
+            llm_data = json.loads(raw)
+            if not isinstance(llm_data, dict):
+                raise ValueError(f"LLM returned unexpected type: {type(llm_data).__name__}")
+
+            llm_questions = llm_data.get("questions")
+            if not isinstance(llm_questions, list) or not llm_questions:
+                raise ValueError("LLM response missing a non-empty 'questions' list.")
+
+            # Truncate to question_count; assign our own IDs (LLM must not invent them).
+            for q in llm_questions[:question_count]:
+                if not isinstance(q, dict):
+                    continue
+                q["question_id"] = f"q_{uuid.uuid4().hex[:6]}"
+                questions.append(q)
+
+            # Pad any shortfall with heuristic questions.
+            for i in range(len(questions), question_count):
+                questions.append(_build_template_question(i))
+
+        except Exception as e:
+            print(f"[generate_quiz] LLM call failed ({e}), using fallback.")
+            questions = [_build_template_question(i) for i in range(question_count)]
+    else:
+        # No grounding content — fall back to the deterministic template loop.
+        questions = [_build_template_question(i) for i in range(question_count)]
 
     quiz = {
         "quiz_id": quiz_id,
@@ -168,7 +258,8 @@ def evaluate_answers(
     total = len(answers)
     correct = sum(1 for a in answers if a.get("is_correct", False))
     score = correct / total if total > 0 else 0.0
-    passed = score >= PASS_THRESHOLD
+    pass_threshold = get_param("PASS_THRESHOLD")
+    passed = score >= pass_threshold
 
     # Update user progress
     progress = store.read_user_progress(user_id)
@@ -214,7 +305,13 @@ def evaluate_answers(
 
     # Run IRT Psychometric update
     current_ability = progress.get("psychometric_ability", 0.0)
-    administered_items = [{"discrimination": 1.0, "difficulty": 0.0, "guessing": 0.25, "slip": 0.95} for _ in answers]
+    default_item_params = {
+        "discrimination": get_logic_param("assessment_scoring", "irt_default_discrimination"),
+        "difficulty": 0.0,
+        "guessing": get_logic_param("assessment_scoring", "irt_default_guessing"),
+        "slip": get_logic_param("assessment_scoring", "irt_default_slip"),
+    }
+    administered_items = [dict(default_item_params) for _ in answers]
     user_responses = [1 if a.get("is_correct", False) else 0 for a in answers]
     new_ability = EnterprisePsychometricEngine.update_learner_ability(current_ability, administered_items, user_responses)
     progress["psychometric_ability"] = new_ability
@@ -241,12 +338,12 @@ def evaluate_answers(
         "total_questions": total,
         "correct_answers": correct,
         "incorrect_answers": len(incorrect_answers),
-        "pass_threshold": f"{PASS_THRESHOLD:.0%}",
+        "pass_threshold": f"{pass_threshold:.0%}",
         "gaps": gaps,
         "luck_elimination_status": luck_result,
         "message": (
             f"You scored {score:.0%} ({correct}/{total}). "
-            + ("Congratulations, you passed! " if passed else f"You need {PASS_THRESHOLD:.0%} to pass. ")
+            + ("Congratulations, you passed! " if passed else f"You need {pass_threshold:.0%} to pass. ")
             + luck_result["reason"]
         ),
     }

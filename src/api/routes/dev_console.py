@@ -61,6 +61,92 @@ INTERNAL_LLM_TOOL = {
     "description": "Course Splitter — turns each document section into a teaching summary. Internal helper, not itself an ADK tool.",
 }
 
+# Deterministic (non-LLM) tools whose behavior is still driven by tunable
+# numeric constants. Maps tool name -> logic_params category (see
+# dev_config.DEFAULT_CONFIG["logic_params"]), or the sentinel "platform_params"
+# for tools that only read knobs already exposed via Platform Parameters.
+TOOL_LOGIC_CATEGORY = {
+    "evaluate_answers": "assessment_scoring",
+    "update_progress": "readiness_scoring",
+    "determine_user_entry_path": "adaptive_routing",
+    "handle_user_assessment_failure": "luck_elimination",
+    "trigger_curriculum_generation": "curriculum_generation",
+    "identify_content_gaps": "curriculum_generation",
+    "flag_at_risk_users": "platform_params",
+    "get_user_progress": "platform_params",
+}
+
+# Known fields per logic_params category — used to validate PATCH bodies so a
+# typo'd key fails loudly instead of silently no-op'ing.
+LOGIC_PARAM_FIELDS = {
+    "assessment_scoring": {
+        "irt_learning_rate", "irt_theta_clamp", "irt_default_discrimination",
+        "irt_default_guessing", "irt_default_slip",
+    },
+    "readiness_scoring": {
+        "course_completion_weight", "quiz_performance_weight",
+        "state_progress_weight", "quiz_window_size",
+    },
+    "luck_elimination": {"core_drift_concept_count"},
+    "adaptive_routing": {"confidence_threshold", "accuracy_threshold"},
+    "curriculum_generation": {
+        "conflict_overlap_ratio", "conflict_min_overlap_count",
+        "pregenerated_short_quiz_questions", "pregenerated_final_assessment_questions",
+        "remedial_short_quiz_questions", "remedial_final_assessment_questions",
+    },
+}
+
+
+def _validate_logic_params(category: str, merged: dict) -> str | None:
+    """Return an error message if `merged` (current values with the patch
+    already applied) is out of range, else None. Runs on the POST-merge state
+    so a partial update is checked in the shape it will actually be saved."""
+    if category == "assessment_scoring":
+        if not (0 < merged["irt_learning_rate"] <= 2):
+            return "irt_learning_rate must be greater than 0 and at most 2."
+        if not (1 <= merged["irt_theta_clamp"] <= 10):
+            return "irt_theta_clamp must be between 1 and 10."
+        if not (merged["irt_default_discrimination"] > 0):
+            return "irt_default_discrimination must be greater than 0."
+        if not (0 <= merged["irt_default_guessing"] < merged["irt_default_slip"] <= 1):
+            return "irt_default_guessing must be less than irt_default_slip, and both must be within 0-1."
+    elif category == "readiness_scoring":
+        weights = (
+            merged["course_completion_weight"],
+            merged["quiz_performance_weight"],
+            merged["state_progress_weight"],
+        )
+        if not all(0 <= w <= 1 for w in weights):
+            return "All three readiness weights must be between 0 and 1."
+        total = sum(weights)
+        if abs(total - 1.0) > 0.02:
+            return f"course_completion_weight + quiz_performance_weight + state_progress_weight must sum to ~1.0 (currently {total:.2f})."
+        if merged["quiz_window_size"] < 1:
+            return "quiz_window_size must be at least 1."
+    elif category == "luck_elimination":
+        if merged["core_drift_concept_count"] < 1:
+            return "core_drift_concept_count must be at least 1."
+    elif category == "adaptive_routing":
+        if not (0 <= merged["confidence_threshold"] <= 1):
+            return "confidence_threshold must be between 0 and 1."
+        if not (0 <= merged["accuracy_threshold"] <= 1):
+            return "accuracy_threshold must be between 0 and 1."
+    elif category == "curriculum_generation":
+        if not (0 <= merged["conflict_overlap_ratio"] <= 1):
+            return "conflict_overlap_ratio must be between 0 and 1."
+        if merged["conflict_min_overlap_count"] < 1:
+            return "conflict_min_overlap_count must be at least 1."
+        platform_params = get_config()["platform_params"]
+        max_quiz_q = platform_params["MAX_QUIZ_QUESTIONS"]
+        max_assess_q = platform_params["MAX_ASSESSMENT_QUESTIONS"]
+        for key in ("pregenerated_short_quiz_questions", "remedial_short_quiz_questions"):
+            if not (1 <= merged[key] <= max_quiz_q):
+                return f"{key} must be between 1 and the configured MAX_QUIZ_QUESTIONS ({max_quiz_q})."
+        for key in ("pregenerated_final_assessment_questions", "remedial_final_assessment_questions"):
+            if not (1 <= merged[key] <= max_assess_q):
+                return f"{key} must be between 1 and the configured MAX_ASSESSMENT_QUESTIONS ({max_assess_q})."
+    return None
+
 
 def _require_developer(role: str) -> None:
     if role != "developer":
@@ -130,6 +216,7 @@ async def api_dev_graph():
             "name": name,
             "description": doc[0].strip() if doc else "",
             "has_llm_prompt": name in LLM_ADK_TOOL_NAMES,
+            "logic_category": TOOL_LOGIC_CATEGORY.get(name),
         })
     # Satellite node: an LLM-calling helper that isn't itself an ADK tool.
     tools.append({
@@ -220,7 +307,11 @@ async def api_dev_update_tool(tool_name: str, body: ToolUpdate):
     dummy_values = {
         "generate_quiz": {"question_count": 3, "topic": "Sample Topic", "difficulty": "medium", "grounding_context": "Sample grounding text."},
         "process_document_to_curriculum": {"section_count": 2, "sections_text": "--- SECTION 0 ---\nSample"},
-        "generate_remedial_course": {"gap_text": "1. Sample gap"},
+        "generate_remedial_course": {
+            "gap_text": "1. Sample gap",
+            "short_quiz_question_count": 3,
+            "final_assessment_question_count": 5,
+        },
     }[tool_name]
     try:
         body.prompt_template.format(**dummy_values)
@@ -244,6 +335,11 @@ class PlatformParamsUpdate(BaseModel):
     MAX_QUIZ_QUESTIONS: int | None = None
     MAX_ASSESSMENT_QUESTIONS: int | None = None
     MAX_QUIZ_ATTEMPTS: int | None = None
+    MAX_COURSES: int | None = None
+    DEFAULT_TIMEFRAME_WEEKS: int | None = None
+    AT_RISK_READINESS_THRESHOLD: float | None = None
+    AT_RISK_PERCENTAGE_THRESHOLD: float | None = None
+    LUCK_FAILURE_THRESHOLD: int | None = None
 
 
 @router.patch("/config/platform-params")
@@ -254,6 +350,47 @@ async def api_dev_update_platform_params(body: PlatformParamsUpdate):
         raise HTTPException(status_code=400, detail="No parameters provided.")
     if "PASS_THRESHOLD" in patch and not (0 < patch["PASS_THRESHOLD"] <= 1):
         raise HTTPException(status_code=400, detail="PASS_THRESHOLD must be between 0 and 1.")
+    if "AT_RISK_READINESS_THRESHOLD" in patch and not (0 <= patch["AT_RISK_READINESS_THRESHOLD"] <= 1):
+        raise HTTPException(status_code=400, detail="AT_RISK_READINESS_THRESHOLD must be between 0 and 1.")
+    if "AT_RISK_PERCENTAGE_THRESHOLD" in patch and not (0 <= patch["AT_RISK_PERCENTAGE_THRESHOLD"] <= 100):
+        raise HTTPException(status_code=400, detail="AT_RISK_PERCENTAGE_THRESHOLD must be between 0 and 100.")
+    if "MAX_COURSES" in patch and patch["MAX_COURSES"] < 1:
+        raise HTTPException(status_code=400, detail="MAX_COURSES must be at least 1.")
+    if "DEFAULT_TIMEFRAME_WEEKS" in patch and patch["DEFAULT_TIMEFRAME_WEEKS"] < 1:
+        raise HTTPException(status_code=400, detail="DEFAULT_TIMEFRAME_WEEKS must be at least 1.")
+    if "LUCK_FAILURE_THRESHOLD" in patch and patch["LUCK_FAILURE_THRESHOLD"] < 1:
+        raise HTTPException(status_code=400, detail="LUCK_FAILURE_THRESHOLD must be at least 1.")
 
     config = update_config(["platform_params"], patch)
     return config["platform_params"]
+
+
+class LogicParamsUpdate(BaseModel):
+    role: str = ""
+    values: dict[str, float] = {}
+
+
+@router.patch("/config/logic-params/{category}")
+async def api_dev_update_logic_params(category: str, body: LogicParamsUpdate):
+    _require_developer(body.role)
+    if category not in LOGIC_PARAM_FIELDS:
+        raise HTTPException(status_code=404, detail=f"Unknown logic-params category '{category}'.")
+    if not body.values:
+        raise HTTPException(status_code=400, detail="No values provided.")
+
+    unknown_keys = set(body.values) - LOGIC_PARAM_FIELDS[category]
+    if unknown_keys:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown field(s) for '{category}': {', '.join(sorted(unknown_keys))}. "
+                   f"Valid fields: {', '.join(sorted(LOGIC_PARAM_FIELDS[category]))}.",
+        )
+
+    current = get_config()["logic_params"][category]
+    merged = {**current, **body.values}
+    error = _validate_logic_params(category, merged)
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+
+    config = update_config(["logic_params", category], body.values)
+    return config["logic_params"][category]

@@ -117,55 +117,23 @@
     </style>
 </head>
 <body class="bg-background text-on-background font-body-md">
-<!-- SideNavBar -->
-<nav class="hidden md:flex flex-col h-screen py-6 px-4 fixed left-0 border-r border-outline-variant bg-surface-container-low w-64 top-0 z-50 min-h-screen"><div class="flex items-center gap-3 px-3 mb-6">
-<img alt="WisdomAI Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwMqFdpZCVuIBnoxnrq7qDeQCQVL2xi7-myWhD3x86DNycw9y6p4j5TADUudUh1RE4wnHjwv4SkDHY38Q0XoIX45cElBGy89MAI75U8V_kE-N-HDgllxxsv4TGKCutTi0S7i_Axzi3dXtXjGbgA2SHb31oDg5fLTYpovP7IqSf1NPH8tulWXwzp-eY4PolQru8qwy6ZPrUqDtbL3U-9fAyPZ9lBAGgkTEGOEMut5bOZ9bHawO4LyO7eHqtRcvMrwF53Q">
-<span class="font-headline-md text-headline-md font-bold text-primary">WisdomAI</span>
-</div>
-
-<div class="flex-1 space-y-1"><!-- Active State: Learning Path -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-label-md text-label-md">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/learning-path">
-<span class="material-symbols-outlined">route</span>
-<span class="font-label-md text-label-md">Learning Path</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault">
-<span class="material-symbols-outlined">folder</span>
-<span class="font-label-md text-label-md">Knowledge Vault</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">help</span>
-<span class="font-label-md text-label-md">Support</span>
-</a></div>
-
-<div class="mt-auto pt-6 border-t border-outline-variant"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-label-md text-label-md">Settings</span>
-</a></div></div></nav>
+    <script src="/js/auth.js"></script>
+<!-- SideNavBar (shared component) -->
+<div id="sidebar-mount"></div>
 <!-- TopNavBar -->
-<header class="flex justify-between items-center w-full md:w-[calc(100%-16rem)] md:ml-64 px-margin-desktop h-16 sticky top-0 z-40 bg-surface border-b border-outline-variant"><div class="flex items-center gap-8">
+<header class="flex justify-between items-center w-full sidebar-offset sidebar-offset-header px-margin-desktop h-16 sticky top-0 z-40 bg-surface border-b border-outline-variant"><div class="flex items-center gap-8">
 <div class="relative hidden sm:block">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
 <input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
 </div>
 </div>
-<div class="flex items-center gap-6"><div class="hidden lg:flex items-center gap-4 mr-4">
-<div class="flex flex-col items-center">
-<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full">
-<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">military_tech</span>
-<span class="font-stats-number text-sm text-on-surface">2.4k</span>
-</div>
-</div>
-</div>
+<div class="flex items-center gap-6">
 <div class="flex items-center gap-3">
 <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkqfsn8zgmmZlLSYYnIrP6Mv2FcPJT3H5troA3U6-0ACK6daZ405Y_vsgx-RYYmm5J6SRXxPNAnh20CtOrQCX1exrljUQoNhLFaG30H9ZBUhuJ7xWcraztgpBJLXIK4jS5w1Acj-HUFIQl4XnXXBd_Q8HysY7nHEp8iWn9vGPL0fJIM8i1H1p8d6Exq22_bZxjsEFriSkNoeXw-E2G0CUx8NNK0NsQuYdEAU7vCdCkyFtFAU68kHZ">
 </div></div></header>
 <div class="flex min-h-[calc(100vh-64px)]">
 <!-- Main Canvas -->
-<main class="flex-1 md:ml-64 p-gutter md:p-margin-desktop max-w-[1200px] mx-auto w-full">
+<main class="flex-1 sidebar-offset p-gutter md:p-margin-desktop max-w-[1200px] mx-auto w-full">
 <!-- Breadcrumbs -->
 <nav class="flex items-center gap-2 text-on-surface-variant mb-6 overflow-x-auto whitespace-nowrap">
 <a class="hover:text-primary transition-colors" href="#">Catalog</a>
@@ -192,10 +160,6 @@
 </div>
 <!-- Integrated Progress -->
 <div class="flex items-center gap-4 bg-[#00000020] p-4 rounded-2xl">
-<button class="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-xl font-bold squishy-button flex items-center gap-2" style="transform: scale(1) translateY(0px);">
-<span class="material-symbols-outlined">play_arrow</span>
-                                    Resume Lesson
-                                </button>
 <div class="flex-1 h-3 bg-[#ffffff30] rounded-full overflow-hidden">
 <div id="lesson-progress-bar" class="h-full bg-secondary-container w-[0%] transition-all duration-1000"></div>
 </div>
@@ -259,10 +223,13 @@
 
 <script src="/js/api-client.js"></script>
 <script src="/js/theme-toggle.js"></script>
+<script src="/js/sidebar.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        const session = window.WisdomAuth.requireAuth();
+        if (!session) return;
         const urlParams = new URLSearchParams(window.location.search);
         const courseId = urlParams.get('course') || 'course_03';
         const lessonId = urlParams.get('lesson');
@@ -272,9 +239,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         let lessonContent = '';
         let totalCourses = 1;
         let courseIdx = 0;
+        let pathId = urlParams.get('path') || '';
 
         // Try to fetch dynamic lesson content first
-        const userId = urlParams.get('user') || 'emp_001';
+        const userId = urlParams.get('user') || session.user_id;
+
+        // Mark this course as the user's in-progress course (fire-and-forget).
+        WisdomAPI.updateProgress(userId, 'course_started', { course_id: courseId }).catch(() => {});
+
         if (lessonId) {
             try {
                 const res = await fetch(`/api/lesson/${courseId}/${lessonId}?user_id=${userId}`);
@@ -282,6 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const data = await res.json();
                     courseMeta = data.course;
                     lessonData = data.lesson;
+                    if (!pathId && data.path_id) pathId = data.path_id;
                     // Remedial lessons use content_summary + key_points instead of content
                     if (lessonData) {
                         if (!lessonData.content && lessonData.content_summary) {
@@ -302,8 +275,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Fallback to original API
         if (!courseMeta) {
             const [path, progress, kbRes] = await Promise.all([
-                WisdomAPI.getLearningPath('emp_001'),
-                WisdomAPI.getUserProgress('emp_001'),
+                WisdomAPI.getLearningPath(userId),
+                WisdomAPI.getUserProgress(userId),
                 fetch('/api/kb/documents').then(r => r.json())
             ]);
 
@@ -332,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unitLabel = document.getElementById('lesson-unit-label');
             if (unitLabel) unitLabel.textContent = lessonData
                 ? `Lesson ${lessonData.order} of ${totalCourses}`
-                : `Module ${courseIdx + 1} of ${totalCourses}`;
+                : `Lesson ${courseIdx + 1} of ${totalCourses}`;
 
             // Estimated time
             const estTime = document.getElementById('lesson-est-time');
@@ -395,10 +368,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const startQuizBtn = document.getElementById('start-quiz-btn');
         if (startQuizBtn && courseMeta) {
             startQuizBtn.addEventListener('click', () => {
+                const pathParam = pathId ? `&path=${encodeURIComponent(pathId)}` : '';
                 if (lessonId) {
-                    window.location.href = `/quiz?course=${courseId}&lesson=${lessonId}&type=short_quiz`;
+                    window.location.href = `/quiz?course=${courseId}&lesson=${lessonId}&type=short_quiz${pathParam}`;
                 } else {
-                    window.location.href = `/quiz?course=${courseId}&type=short_quiz`;
+                    window.location.href = `/quiz?course=${courseId}&type=short_quiz${pathParam}`;
                 }
             });
         }

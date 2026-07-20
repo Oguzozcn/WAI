@@ -2,6 +2,8 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add project root to path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -9,6 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.services.curriculum_service import generate_remedial_course
 from src.core.config import DEFAULT_DEPARTMENT
 
+@pytest.mark.llm
 def test_gemini_adc_remedial_generation():
     """
     Check Test: Verifies that the existing learning module generation

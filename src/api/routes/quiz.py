@@ -8,11 +8,10 @@ from src.services.quiz_service import (
 )
 from src.services.curriculum_service import generate_remedial_course
 from src.core.database import DepartmentScopedStore
-from src.core.config import DEFAULT_DEPARTMENT, MAX_QUIZ_ATTEMPTS, PASS_THRESHOLD
+from src.core.config import DEFAULT_DEPARTMENT
+from src.core.dev_config import get_param
 
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
-
-_active_quizzes = {}
 
 class QuizGenerateRequest(BaseModel):
     topic: str
@@ -29,13 +28,14 @@ async def api_generate_quiz(body: QuizGenerateRequest, department: str = DEFAULT
         quiz_type=body.quiz_type,
         department=department,
     )
-    
-    _active_quizzes[result["quiz_id"]] = result
+
+    store = DepartmentScopedStore(department)
+    store.write_quiz(result["quiz_id"], result)
     import copy
     sanitized = copy.deepcopy(result)
     for q in sanitized.get("questions", []):
         q.pop("correct_answer_index", None)
-        
+
     return sanitized
 
 class QuizStartRequest(BaseModel):
@@ -57,13 +57,13 @@ async def api_quiz_start(body: QuizStartRequest, department: str = DEFAULT_DEPAR
             if a.get("topic", "") == body.topic or a.get("quiz_type", "") == body.quiz_type
         )
 
-    attempts_remaining = max(0, MAX_QUIZ_ATTEMPTS - previous_attempts)
+    attempts_remaining = max(0, get_param("MAX_QUIZ_ATTEMPTS") - previous_attempts)
 
     if attempts_remaining <= 0:
         return {
             "status": "locked",
             "attempts_remaining": 0,
-            "max_attempts": MAX_QUIZ_ATTEMPTS,
+            "max_attempts": get_param("MAX_QUIZ_ATTEMPTS"),
             "message": "You have used all your attempts. Please complete the remedial learning path.",
         }
 
@@ -75,15 +75,15 @@ async def api_quiz_start(body: QuizStartRequest, department: str = DEFAULT_DEPAR
         department=department,
     )
 
-    _active_quizzes[result["quiz_id"]] = result
+    store.write_quiz(result["quiz_id"], result)
     import copy
     sanitized = copy.deepcopy(result)
     for q in sanitized.get("questions", []):
         q.pop("correct_answer_index", None)
 
     sanitized["attempts_remaining"] = attempts_remaining
-    sanitized["max_attempts"] = MAX_QUIZ_ATTEMPTS
-    sanitized["pass_threshold"] = PASS_THRESHOLD
+    sanitized["max_attempts"] = get_param("MAX_QUIZ_ATTEMPTS")
+    sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
 
     return sanitized
 
@@ -93,8 +93,9 @@ class QuizAnswerSingleRequest(BaseModel):
     selected_index: int
 
 @router.post("/evaluate/single")
-async def api_evaluate_single_answer(body: QuizAnswerSingleRequest):
-    cached_quiz = _active_quizzes.get(body.quiz_id)
+async def api_evaluate_single_answer(body: QuizAnswerSingleRequest, department: str = DEFAULT_DEPARTMENT):
+    store = DepartmentScopedStore(department)
+    cached_quiz = store.read_quiz(body.quiz_id)
     if not cached_quiz:
         raise HTTPException(status_code=404, detail="Quiz session expired or not found.")
 
@@ -147,7 +148,8 @@ class QuizEvaluateRequest(BaseModel):
 
 @router.post("/evaluate")
 async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT_DEPARTMENT):
-    cached_quiz = _active_quizzes.get(body.quiz_id)
+    store = DepartmentScopedStore(department)
+    cached_quiz = store.read_quiz(body.quiz_id)
     if not cached_quiz:
         raise HTTPException(status_code=404, detail="Quiz session expired or not found.")
 
@@ -177,7 +179,6 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
         department=department,
     )
 
-    store = DepartmentScopedStore(department)
     progress = store.read_user_progress(body.user_id)
     if progress is None:
         progress = {}
@@ -223,14 +224,14 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
 
     previous_attempts = len(progress.get("quiz_attempts", []))
     result["attempts_used"] = previous_attempts
-    result["attempts_remaining"] = max(0, MAX_QUIZ_ATTEMPTS - previous_attempts)
-    result["max_attempts"] = MAX_QUIZ_ATTEMPTS
+    result["attempts_remaining"] = max(0, get_param("MAX_QUIZ_ATTEMPTS") - previous_attempts)
+    result["max_attempts"] = get_param("MAX_QUIZ_ATTEMPTS")
 
     if body.quiz_type == "final_assessment":
         if not result.get("passed", True):
             incorrect = [a for a in enriched_answers if not a.get("is_correct", False)]
             if incorrect:
-                cached_quiz = _active_quizzes.get(body.quiz_id, {})
+                cached_quiz = store.read_quiz(body.quiz_id) or {}
                 q_lookup = {q["question_id"]: q for q in cached_quiz.get("questions", [])}
                 for ans in incorrect:
                     q = q_lookup.get(ans.get("question_id", ""))
@@ -309,17 +310,18 @@ async def api_quiz_by_lesson(course_id: str, lesson_id: str, user_id: str = "emp
                         if lesson.get("lesson_id") == lesson_id:
                             sq = lesson.get("short_quiz")
                             if sq and sq.get("questions"):
-                                _active_quizzes[sq["quiz_id"]] = sq
+                                store.write_quiz(sq["quiz_id"], sq)
                                 sanitized = _copy.deepcopy(sq)
                                 for q in sanitized.get("questions", []):
                                     q.pop("correct_answer_index", None)
                                 sanitized["attempts_remaining"] = 3
                                 sanitized["max_attempts"] = 3
-                                sanitized["pass_threshold"] = PASS_THRESHOLD
+                                sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
                                 return sanitized
 
     lesson_content = None
     lesson_title = None
+    found_lesson = None
     for path_file in store.learning_paths_path.glob("*.json"):
         path_data = _json.loads(path_file.read_text())
         for course in path_data.get("courses", []):
@@ -328,25 +330,96 @@ async def api_quiz_by_lesson(course_id: str, lesson_id: str, user_id: str = "emp
                     if lesson["lesson_id"] == lesson_id:
                         lesson_content = lesson.get("content", "")
                         lesson_title = lesson.get("title", "")
+                        found_lesson = lesson
                         break
-    
+
     if not lesson_content:
         raise HTTPException(status_code=404, detail="Lesson not found.")
 
-    result = generate_quiz(
-        topic=lesson_title,
-        difficulty="medium",
-        question_count=3,
-        quiz_type="short_quiz",
-        department=department,
-    )
-    _active_quizzes[result["quiz_id"]] = result
+    # Prefer the quiz pre-generated at course-creation time — only fall back
+    # to a live Gemini call for paths created before pre-generation existed.
+    cached_quiz_id = (found_lesson or {}).get("short_quiz_id")
+    result = store.read_quiz(cached_quiz_id) if cached_quiz_id else None
+    if not result:
+        result = generate_quiz(
+            topic=lesson_title or "Lesson",
+            difficulty="medium",
+            question_count=3,
+            quiz_type="short_quiz",
+            department=department,
+        )
+        store.write_quiz(result["quiz_id"], result)
+
     sanitized = _copy.deepcopy(result)
     for q in sanitized.get("questions", []):
         q.pop("correct_answer_index", None)
 
     sanitized["attempts_remaining"] = 3
     sanitized["max_attempts"] = 3
-    sanitized["pass_threshold"] = PASS_THRESHOLD
+    sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
+
+    return sanitized
+
+
+@router.get("/by-course/{course_id}")
+async def api_quiz_by_course(course_id: str, type: str = "final_assessment", user_id: str = "emp_001", department: str = DEFAULT_DEPARTMENT):
+    """Return a course's final assessment quiz.
+
+    Mirrors /by-lesson: prefers the quiz pre-generated at course-creation
+    time, falling back to a live Gemini call for courses created before
+    pre-generation existed. Previously this endpoint didn't exist at all —
+    the frontend called it for every final assessment and always got a 404.
+    """
+    store = DepartmentScopedStore(department)
+    import copy as _copy, json as _json
+
+    if user_id:
+        progress = store.read_user_progress(user_id)
+        if progress:
+            for rc in progress.get("remedial_courses", []):
+                if rc.get("course_id") == course_id:
+                    fa = rc.get("final_assessment")
+                    if fa and fa.get("questions"):
+                        store.write_quiz(fa["quiz_id"], fa)
+                        sanitized = _copy.deepcopy(fa)
+                        for q in sanitized.get("questions", []):
+                            q.pop("correct_answer_index", None)
+                        sanitized["attempts_remaining"] = 3
+                        sanitized["max_attempts"] = 3
+                        sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
+                        return sanitized
+
+    found_course = None
+    for path_file in store.learning_paths_path.glob("*.json"):
+        path_data = _json.loads(path_file.read_text())
+        for course in path_data.get("courses", []):
+            if course["course_id"] == course_id:
+                found_course = course
+                break
+        if found_course:
+            break
+
+    if not found_course:
+        raise HTTPException(status_code=404, detail="Course not found.")
+
+    cached_quiz_id = found_course.get("final_assessment_id")
+    result = store.read_quiz(cached_quiz_id) if cached_quiz_id else None
+    if not result:
+        result = generate_quiz(
+            topic=found_course.get("title") or "Course",
+            difficulty="medium",
+            question_count=6,
+            quiz_type=type,
+            department=department,
+        )
+        store.write_quiz(result["quiz_id"], result)
+
+    sanitized = _copy.deepcopy(result)
+    for q in sanitized.get("questions", []):
+        q.pop("correct_answer_index", None)
+
+    sanitized["attempts_remaining"] = 3
+    sanitized["max_attempts"] = 3
+    sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
 
     return sanitized

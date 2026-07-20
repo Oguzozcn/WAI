@@ -118,19 +118,17 @@
     </style>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
-<!-- SideNavBar Shell -->
-<aside class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">
-<div class="mb-10 px-2"><img alt="WisdomAI Logo" class="w-8 h-8 inline-block mr-2 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ"><span class="font-headline-md text-headline-md font-extrabold text-primary">WisdomAI</span></div>
-<nav class="flex-1 space-y-2 px-4"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Dashboard</span></a><a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200" href="/learning-path"><span class="material-symbols-outlined">route</span><span class="font-label-md text-label-md">Learning Path</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="/knowledge-vault"><span class="material-symbols-outlined">folder</span><span class="font-label-md text-label-md">Knowledge Vault</span></a><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">help</span><span class="font-label-md text-label-md">Support</span></a></nav>
-<div class="mt-auto pt-6 border-t border-outline-variant"><div class="space-y-1"><a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Settings</span></a></div></div>
-</aside>
+    <script src="/js/auth.js"></script>
+    <script>window.WisdomAuth.requireAuth();</script>
+<!-- SideNavBar Shell (shared component) -->
+<div id="sidebar-mount"></div>
 <!-- Main Viewport -->
-<div class="ml-64 min-h-screen flex flex-col">
+<div class="sidebar-offset min-h-screen flex flex-col">
 <!-- TopAppBar -->
-<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant"><div class="flex items-center gap-4"><button class="md:hidden p-2"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block">
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant"><div class="flex items-center gap-4"><button id="mobile-menu-btn" class="md:hidden p-2"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
 <input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
-</div></div><div class="flex items-center gap-3"><div class="hidden lg:flex items-center gap-4 mr-4"><div class="flex flex-col items-center"><div class="flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-outline-variant rounded-full"><span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: &quot;FILL&quot; 1;">military_tech</span><span class="font-stats-number text-sm text-on-surface">2.4k</span></div></div></div><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2xJ6R8mLxhp0DbI0A9UJtYvEYYJo2Ov4HNA6DyyNy7wlFbrugD1odxHNJriyl-PuyHwx9EvGsZR8OTAj6WPhdHVSWKXgk9IKeRW8TR57xbewQu5h3TKCSEX1AN71ER1JTDR3U13fGZ0mI0muVqQrADdIZssHvrqz5XsLyox0gKSDyCVtQ7SxBD5N7pRKpBG1Ldo_kRJP4JtNphQ7ejtydcb2KuKJpVFbRm7L8SnzUIUKKhJ1v4BEO"></div></div></header>
+</div></div><div class="flex items-center gap-3"><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2xJ6R8mLxhp0DbI0A9UJtYvEYYJo2Ov4HNA6DyyNy7wlFbrugD1odxHNJriyl-PuyHwx9EvGsZR8OTAj6WPhdHVSWKXgk9IKeRW8TR57xbewQu5h3TKCSEX1AN71ER1JTDR3U13fGZ0mI0muVqQrADdIZssHvrqz5XsLyox0gKSDyCVtQ7SxBD5N7pRKpBG1Ldo_kRJP4JtNphQ7ejtydcb2KuKJpVFbRm7L8SnzUIUKKhJ1v4BEO"></div></div></header>
 <!-- Content Canvas -->
 <main class="flex-1 p-margin-desktop bg-background">
 <div class="max-w-[1200px] mx-auto">
@@ -295,4 +293,5 @@
 
 <script src="/js/api-client.js"></script>
 <script src="/js/theme-toggle.js"></script>
+<script src="/js/sidebar.js"></script>
 </body></html>

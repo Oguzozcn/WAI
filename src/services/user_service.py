@@ -9,7 +9,8 @@ import json
 from datetime import datetime
 
 from src.core.database import DepartmentScopedStore
-from src.core.config import DEFAULT_DEPARTMENT, PASS_THRESHOLD, AT_RISK_READINESS_THRESHOLD
+from src.core.config import DEFAULT_DEPARTMENT
+from src.core.dev_config import get_param, get_logic_param
 from src.core.data_compliance_gate import DataComplianceGate
 
 
@@ -42,13 +43,13 @@ def get_user_progress(
     completed_count = len(progress.get("completed_courses", []))
     total_quizzes = len(progress.get("quiz_attempts", []))
     error_matrix = progress.get("error_retention_matrix", {})
-    active_gaps = sum(1 for v in error_matrix.values() if v >= 2)
+    active_gaps = sum(1 for v in error_matrix.values() if v >= get_param("LUCK_FAILURE_THRESHOLD"))
 
     progress["summary"] = {
         "courses_completed": completed_count,
         "total_quizzes_taken": total_quizzes,
         "active_knowledge_gaps": active_gaps,
-        "is_at_risk": progress.get("readiness_score", 0) < AT_RISK_READINESS_THRESHOLD,
+        "is_at_risk": progress.get("readiness_score", 0) < get_param("AT_RISK_READINESS_THRESHOLD"),
         "current_state_description": progress.get("current_state", "unknown"),
     }
 
@@ -86,6 +87,7 @@ def update_progress(
             "user_id": user_id,
             "department": department,
             "current_state": "enrolled",
+            "enrolled_path_ids": [],
             "completed_courses": [],
             "quiz_attempts": [],
             "assessment_scores": [],
@@ -103,6 +105,20 @@ def update_progress(
         course_id = event_data.get("course_id", "")
         if course_id and course_id not in progress.get("completed_courses", []):
             progress.setdefault("completed_courses", []).append(course_id)
+        if progress.get("current_course_id") == course_id:
+            progress["current_course_id"] = ""
+
+    elif event_type == "course_started":
+        course_id = event_data.get("course_id", "")
+        if course_id and course_id not in progress.get("completed_courses", []):
+            progress["current_course_id"] = course_id
+            if progress.get("current_state") == "enrolled":
+                progress["current_state"] = "course_in_progress"
+
+    elif event_type == "path_enrolled":
+        path_id = event_data.get("path_id", "")
+        if path_id and path_id not in progress.get("enrolled_path_ids", []):
+            progress.setdefault("enrolled_path_ids", []).append(path_id)
 
     elif event_type == "state_changed":
         proposed_state = event_data.get("new_state", progress["current_state"])
@@ -171,7 +187,7 @@ def get_department_readiness(
     total = len(all_progress)
     scores = [p.get("readiness_score", 0.0) for p in all_progress]
     avg_score = sum(scores) / total if total > 0 else 0.0
-    at_risk = sum(1 for s in scores if s < AT_RISK_READINESS_THRESHOLD)
+    at_risk = sum(1 for s in scores if s < get_param("AT_RISK_READINESS_THRESHOLD"))
     completed = sum(1 for p in all_progress if p.get("current_state") == "completed")
 
     return {
@@ -207,7 +223,7 @@ def flag_at_risk_users(
     at_risk_users = []
     for progress in all_progress:
         score = progress.get("readiness_score", 0.0)
-        if score < AT_RISK_READINESS_THRESHOLD:
+        if score < get_param("AT_RISK_READINESS_THRESHOLD"):
             # Find the biggest gap area
             error_matrix = progress.get("error_retention_matrix", {})
             top_gap = max(error_matrix, key=error_matrix.get) if error_matrix else "general"
@@ -231,30 +247,36 @@ def flag_at_risk_users(
 def _recalculate_readiness(progress: dict) -> None:
     """Recalculate a user's readiness score based on their progress."""
     completed_courses = len(progress.get("completed_courses", []))
-    total_courses = 10  # MAX_COURSES
+    total_courses = get_param("MAX_COURSES")
 
-    # Base readiness from course completion (50% weight)
-    course_readiness = (completed_courses / total_courses) * 0.5 if total_courses > 0 else 0.0
+    course_weight = get_logic_param("readiness_scoring", "course_completion_weight")
+    quiz_weight = get_logic_param("readiness_scoring", "quiz_performance_weight")
+    quiz_window = int(get_logic_param("readiness_scoring", "quiz_window_size"))
 
-    # Quiz performance (30% weight)
+    # Base readiness from course completion
+    course_readiness = (completed_courses / total_courses) * course_weight if total_courses > 0 else 0.0
+
+    # Quiz performance (rolling window of most recent attempts)
     quiz_attempts = progress.get("quiz_attempts", [])
     if quiz_attempts:
-        recent_scores = [a.get("score", 0.0) for a in quiz_attempts[-5:]]  # Last 5
+        recent_scores = [a.get("score", 0.0) for a in quiz_attempts[-quiz_window:]]
         avg_quiz = sum(recent_scores) / len(recent_scores)
-        quiz_readiness = avg_quiz * 0.3
+        quiz_readiness = avg_quiz * quiz_weight
     else:
         quiz_readiness = 0.0
 
-    # State bonus (20% weight)
+    # State bonus, scaled to the configured state-progress weight (default bonuses
+    # below assume a 0.2 weight; scale proportionally if it's been retuned)
+    state_weight = get_logic_param("readiness_scoring", "state_progress_weight")
     state = progress.get("current_state", "enrolled")
-    state_bonuses = {
-        "completed": 0.2,
-        "passed": 0.2,
-        "validation_assessment": 0.15,
-        "gap_review": 0.05,
+    state_bonus_ratios = {
+        "completed": 1.0,
+        "passed": 1.0,
+        "validation_assessment": 0.75,
+        "gap_review": 0.25,
         "enrolled": 0.0,
     }
-    state_readiness = state_bonuses.get(state, 0.05)
+    state_readiness = state_bonus_ratios.get(state, 0.25) * state_weight
 
     # Don't override if they've already passed
     if progress.get("current_state") == "passed" or progress.get("current_state") == "completed":
@@ -264,4 +286,4 @@ def _recalculate_readiness(progress: dict) -> None:
             min(course_readiness + quiz_readiness + state_readiness, 0.99), 2
         )
 
-    progress["is_at_risk"] = progress["readiness_score"] < AT_RISK_READINESS_THRESHOLD
+    progress["is_at_risk"] = progress["readiness_score"] < get_param("AT_RISK_READINESS_THRESHOLD")

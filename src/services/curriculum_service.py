@@ -7,12 +7,14 @@ Generates learning paths, daily agendas, and content gap analysis.
 
 import json
 import uuid
-import os
 from datetime import datetime, timezone
-from typing import Any
+from pathlib import Path
+from typing import Any, Callable, Optional
 
 from src.core.database import DepartmentScopedStore
-from src.core.config import MAX_COURSES, DEFAULT_DEPARTMENT, DEFAULT_TIMEFRAME_WEEKS
+from src.core.config import DEFAULT_DEPARTMENT, DEFAULT_TIMEFRAME_WEEKS
+from src.core.dev_config import get_config, get_param, get_logic_param
+from src.services.llm_client import get_gemini_client
 
 
 def generate_learning_path(
@@ -42,11 +44,11 @@ def generate_learning_path(
 
     if knowledge_base:
         # Extract topics from the knowledge base documents
-        for i, doc in enumerate(knowledge_base[:MAX_COURSES]):
+        for i, doc in enumerate(knowledge_base[:get_param("MAX_COURSES")]):
             course_topics = doc.get("topics", [])
             courses.append({
                 "course_id": f"course_{i + 1:02d}",
-                "title": doc.get("title", f"Module {i + 1}"),
+                "title": doc.get("title", f"Course {i + 1}"),
                 "description": doc.get("description", ""),
                 "topics": course_topics,
                 "estimated_hours": doc.get("estimated_hours", 1.5),
@@ -104,7 +106,7 @@ def generate_daily_agenda(
     """
     # Calculate which course this day falls into
     # Assuming 20 business days over 4 weeks, 2 days per course for 10 courses
-    course_index = min((day_number - 1) // 2, MAX_COURSES - 1)
+    course_index = min((day_number - 1) // 2, get_param("MAX_COURSES") - 1)
     is_first_day_of_course = (day_number - 1) % 2 == 0
 
     if is_first_day_of_course:
@@ -226,7 +228,7 @@ def identify_content_gaps(
             "Expand the document with detailed step-by-step procedures."
         )
 
-    # Check for potential conflicts with existing documents
+    # Check for potential conflicts with existing documents via concept overlap.
     if existing_docs:
         analysis["findings"].append({
             "type": "info",
@@ -237,8 +239,260 @@ def identify_content_gaps(
             ),
         })
 
+        new_concepts = {c.lower() for c in _extract_key_concepts(document_content)}
+        if new_concepts:
+            for doc in existing_docs:
+                # Prefer the pre-extracted `topics` list; fall back to running the
+                # concept extractor on the stored document content.
+                topics = doc.get("topics", []) or []
+                if topics:
+                    existing_concepts = {str(t).lower() for t in topics}
+                else:
+                    existing_concepts = {
+                        c.lower() for c in _extract_key_concepts(doc.get("content", ""))
+                    }
+                if not existing_concepts:
+                    continue
+
+                overlap = new_concepts & existing_concepts
+                overlap_ratio = len(overlap) / len(new_concepts)
+
+                min_ratio = get_logic_param("curriculum_generation", "conflict_overlap_ratio")
+                min_count = get_logic_param("curriculum_generation", "conflict_min_overlap_count")
+                if overlap_ratio >= min_ratio and len(overlap) >= min_count:
+                    doc_title = doc.get("title", doc.get("course_id", "unknown"))
+                    analysis["findings"].append({
+                        "type": "conflict",
+                        "severity": "medium",
+                        "description": (
+                            f"Significant concept overlap ({len(overlap)} shared concepts: "
+                            f"{', '.join(list(overlap)[:5])}) with existing document "
+                            f"'{doc_title}'."
+                        ),
+                        "existing_doc_title": doc_title,
+                        "overlapping_concepts": list(overlap)[:10],
+                    })
+                    analysis["recommendations"].append(
+                        f"Review '{doc_title}' for potential duplication or contradiction "
+                        "before publishing this document."
+                    )
+
     return analysis
 
+
+def process_kb_upload_job(
+    job_id: str,
+    filename: str,
+    content: str,
+    department: str,
+    version_action: str = "",
+) -> None:
+    """Background task: validate → chunk → save an uploaded KB document.
+
+    Fire-and-forget: this function returns nothing. All progress and results are
+    written to the KB job doc via `store.write_kb_job` so a polling client can
+    observe stage-by-stage progress. Any exception is caught and persisted as an
+    ``error`` status (FastAPI BackgroundTasks swallow unhandled exceptions, so we
+    must record the failure ourselves for the poller to see it).
+    """
+    store = DepartmentScopedStore(department)
+    try:
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "stage": "validating",
+            "filename": filename,
+        })
+
+        # Resolve the actual filename to use (new version vs. overwrite/as-is).
+        if version_action == "new_version":
+            actual_filename = store.next_version_filename(filename)
+        else:
+            actual_filename = filename
+
+        # Stage: Validate
+        gap_analysis = identify_content_gaps(
+            document_content=content,
+            department=department,
+        )
+
+        # Stage: Chunk
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "stage": "chunking",
+            "filename": actual_filename,
+        })
+        chunks = recursive_character_splitter(content, max_tokens=1024, overlap=200)
+        upload_timestamp = datetime.now(timezone.utc).isoformat()
+        enriched_chunks = [
+            {
+                **chunk,
+                "source_filename": actual_filename,
+                "department": department,
+                "uploaded_at": upload_timestamp,
+            }
+            for chunk in chunks
+        ]
+
+        # Stage: Save
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "stage": "saving",
+            "filename": actual_filename,
+        })
+        chunks_doc_id = f"{Path(actual_filename).stem}_chunks"
+        store.write_raw_document(actual_filename, content)
+        store.write_catalog_input(actual_filename, content)
+        store.write_knowledge_document(
+            chunks_doc_id,
+            {
+                "source_filename": actual_filename,
+                "department": department,
+                "chunk_count": len(enriched_chunks),
+                "uploaded_at": upload_timestamp,
+                "chunks": enriched_chunks,
+            },
+        )
+
+        # Determine conflict findings (high/medium severity) → soft-flag for review.
+        conflict_findings = [
+            f for f in gap_analysis.get("findings", [])
+            if f.get("severity") in ("high", "medium")
+        ]
+
+        if conflict_findings:
+            flagged_at = datetime.now(timezone.utc).isoformat()
+            conflicts_written = []
+            for finding in conflict_findings:
+                overlapping = finding.get("overlapping_concepts", [])
+                conflict = {
+                    "conflict_id": f"conflict_{uuid.uuid4().hex[:8]}",
+                    "department": department,
+                    "document_a": actual_filename,
+                    "document_b": finding.get("existing_doc_title", "existing knowledge base"),
+                    "field_name": finding.get("type", "content"),
+                    "value_a": finding.get("description", ""),
+                    "value_b": ", ".join(overlapping) if overlapping else "N/A",
+                    "severity": finding.get("severity", "medium"),
+                    "status": "pending",
+                    "flagged_at": flagged_at,
+                    "resolved_by": "",
+                    "resolved_at": "",
+                    "resolution_notes": "",
+                    # Retraction handles for the resolve endpoint.
+                    "raw_filename": actual_filename,
+                    "chunks_doc_id": chunks_doc_id,
+                }
+                store.write_conflict(conflict["conflict_id"], conflict)
+                conflicts_written.append(conflict)
+
+            store.write_kb_job(job_id, {
+                "job_id": job_id,
+                "status": "flagged",
+                "stage": "completed",
+                "filename": actual_filename,
+                "chunk_count": len(chunks),
+                "conflicts": [c["conflict_id"] for c in conflicts_written],
+                "validation": {
+                    "status": "FLAGGED",
+                    "findings_count": len(gap_analysis.get("findings", [])),
+                },
+            })
+        else:
+            store.write_kb_job(job_id, {
+                "job_id": job_id,
+                "status": "completed",
+                "stage": "completed",
+                "filename": actual_filename,
+                "chunk_count": len(chunks),
+                "validation": {
+                    "status": "APPROVED",
+                    "findings_count": len(gap_analysis.get("findings", [])),
+                },
+            })
+
+    except Exception as e:
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "error",
+            "stage": "failed",
+            "message": str(e),
+        })
+
+
+def process_generate_job(
+    job_id: str,
+    filename: str,
+    department: str,
+    append_to_latest: bool,
+    manager_id: str,
+) -> None:
+    """Background task: generate a course (lessons + short quizzes + final
+    assessment) from an uploaded document and save it as the manager's
+    private draft.
+
+    Fire-and-forget, mirroring process_kb_upload_job — progress is written to
+    the KB job doc via store.write_kb_job so a polling client can observe
+    stage-by-stage progress, including after the user dismisses the modal via
+    "Continue in Background" and navigates away.
+    """
+    store = DepartmentScopedStore(department)
+
+    def _progress(stage: str) -> None:
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "stage": stage,
+            "filename": filename,
+        })
+
+    try:
+        _progress("parsing_document")
+        result = trigger_curriculum_generation(
+            filename=filename,
+            department=department,
+            append_to_latest=append_to_latest,
+            progress_cb=_progress,
+        )
+
+        if result.get("status") != "success":
+            store.write_kb_job(job_id, {
+                "job_id": job_id,
+                "status": "error",
+                "stage": "failed",
+                "filename": filename,
+                "message": result.get("message", "Curriculum generation failed."),
+            })
+            return
+
+        if result.get("path_id"):
+            path_data = store.read_learning_path(result["path_id"])
+            if path_data:
+                path_data["source_input_files"] = [filename]
+                # write_unofficial_path stamps path_type="unofficial" on this dict
+                # in place — sync that into the activated copy too, so "Preview
+                # Draft" (which reads the activated copy directly, without ever
+                # calling /enroll) already knows it's a draft, not an active path.
+                store.write_unofficial_path(manager_id, result["path_id"], path_data)
+                store.write_learning_path(result["path_id"], path_data)
+
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "done",
+            "stage": "complete",
+            "filename": filename,
+            "result": result,
+        })
+    except Exception as e:
+        store.write_kb_job(job_id, {
+            "job_id": job_id,
+            "status": "error",
+            "stage": "failed",
+            "filename": filename,
+            "message": str(e),
+        })
 
 
 # ── Chunking Utilities ──
@@ -369,8 +623,8 @@ def _split_text_into_sections(text: str) -> list[dict]:
         # Paragraph-based chunking: split on double newlines
         paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
 
-        # Group paragraphs into chunks of roughly equal size (max 10 chunks)
-        max_sections = min(MAX_COURSES, max(1, len(paragraphs)))
+        # Group paragraphs into chunks of roughly equal size (max MAX_COURSES chunks)
+        max_sections = min(get_param("MAX_COURSES"), max(1, len(paragraphs)))
         chunk_size = max(1, len(paragraphs) // max_sections)
 
         for i in range(0, len(paragraphs), chunk_size):
@@ -382,7 +636,7 @@ def _split_text_into_sections(text: str) -> list[dict]:
                 first_line += "..."
             sections.append({"title": first_line, "content": combined})
 
-    return sections[:MAX_COURSES]
+    return sections[:get_param("MAX_COURSES")]
 
 
 def _extract_key_concepts(text: str) -> list[str]:
@@ -417,7 +671,7 @@ def process_document_to_curriculum(
     document_title: str = "Uploaded Document",
     department: str = DEFAULT_DEPARTMENT,
 ) -> dict:
-    """Split a document into a structured curriculum: Module → Lessons.
+    """Split a document into a structured curriculum: Course → Lessons.
 
     The Course Splitter logic. Analyzes document_text and generates a
     structured curriculum with up to 10 lessons per module, each with
@@ -439,14 +693,83 @@ def process_document_to_curriculum(
             "message": "Could not extract any content from the document.",
         }
 
-    # Build lessons from sections
+    # Ask Gemini — in ONE batched call for the whole document — to turn each
+    # structural section into a teaching summary + key concepts. On any failure
+    # we fall back per-section to the deterministic heuristic below.
+    llm_sections: dict[int, dict] = {}
+    try:
+        section_blocks = []
+        for i, section in enumerate(sections):
+            # Cap per-section content so the batched prompt stays bounded.
+            section_content = section["content"][:2500]
+            section_blocks.append(
+                f"--- SECTION {i} ---\n"
+                f"Title: {section['title']}\n"
+                f"Content:\n{section_content}"
+            )
+        sections_text = "\n\n".join(section_blocks)
+
+        tool_config = get_config()["tools"]["process_document_to_curriculum"]
+        prompt = tool_config["prompt_template"].format(
+            section_count=len(sections),
+            sections_text=sections_text,
+        )
+
+        client = get_gemini_client()
+        response = client.models.generate_content(
+            model=tool_config.get("model") or get_param("GEMINI_MODEL"),
+            contents=prompt,
+        )
+        raw = (response.text or "").strip()
+        if not raw:
+            raise ValueError("LLM returned an empty response.")
+
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("```", 2)[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.rsplit("```", 1)[0].strip()
+
+        parsed = json.loads(raw)
+        if not isinstance(parsed, dict):
+            raise ValueError(f"LLM returned unexpected type: {type(parsed).__name__}")
+
+        # Index by the section index so per-section fallback stays simple/defensive.
+        for entry in parsed.get("sections", []):
+            if not isinstance(entry, dict):
+                continue
+            idx = entry.get("index")
+            if isinstance(idx, int) and 0 <= idx < len(sections):
+                llm_sections[idx] = entry
+
+    except Exception as e:
+        print(f"[process_document_to_curriculum] LLM call failed ({e}), using fallback.")
+
+    # Build lessons from sections. Use LLM output where available and valid,
+    # otherwise fall back to the deterministic heuristic for that section.
     lessons = []
     for i, section in enumerate(sections):
-        key_concepts = _extract_key_concepts(section["content"])
+        entry = llm_sections.get(i)
+        content = None
+        key_concepts = None
+        if entry is not None:
+            summary = entry.get("content_summary")
+            points = entry.get("key_points")
+            if isinstance(summary, str) and summary.strip():
+                content = summary.strip()
+            if isinstance(points, list) and points:
+                key_concepts = [str(p) for p in points]
+
+        if content is None:
+            content = section["content"]
+        if key_concepts is None:
+            key_concepts = _extract_key_concepts(section["content"])
+
         lessons.append({
             "lesson_id": f"lesson_{i + 1:02d}",
             "title": section["title"],
-            "content": section["content"],
+            "content": content,
             "key_concepts": key_concepts,
             "estimated_minutes": max(10, min(30, len(section["content"]) // 200)),
             "order": i + 1,
@@ -486,24 +809,71 @@ def process_document_to_curriculum(
     }
 
 
+def _generate_course_quizzes(
+    course: dict,
+    department: str,
+    progress_cb: Optional[Callable[[str], None]] = None,
+) -> None:
+    """Pre-generate a short quiz per lesson and one final assessment for the
+    course, persisting each via store.write_quiz and stamping the resulting
+    quiz_id back onto the lesson/course dicts (short_quiz_id / final_assessment_id
+    — the same field names generate_remedial_course already uses) so
+    /api/quiz/by-lesson and /api/quiz/by-course can serve them instantly
+    instead of calling Gemini live when the learner clicks "Start Quiz"."""
+    from src.services.quiz_service import generate_quiz
+
+    store = DepartmentScopedStore(department)
+    lessons = course.get("lessons", [])
+
+    for i, lesson in enumerate(lessons):
+        if progress_cb:
+            progress_cb(f"generating_quiz_{i + 1}_of_{len(lessons)}")
+        quiz = generate_quiz(
+            topic=lesson.get("title") or "Lesson",
+            difficulty="medium",
+            question_count=int(get_logic_param("curriculum_generation", "pregenerated_short_quiz_questions")),
+            quiz_type="short_quiz",
+            department=department,
+        )
+        store.write_quiz(quiz["quiz_id"], quiz)
+        lesson["short_quiz_id"] = quiz["quiz_id"]
+
+    if progress_cb:
+        progress_cb("generating_final_assessment")
+    final_quiz = generate_quiz(
+        topic=course.get("title") or "Course",
+        difficulty="medium",
+        question_count=int(get_logic_param("curriculum_generation", "pregenerated_final_assessment_questions")),
+        quiz_type="final_assessment",
+        department=department,
+    )
+    store.write_quiz(final_quiz["quiz_id"], final_quiz)
+    course["final_assessment_id"] = final_quiz["quiz_id"]
+
+
 def trigger_curriculum_generation(
     filename: str,
     department: str = DEFAULT_DEPARTMENT,
     user_id: str = "manager",
     append_to_latest: bool = False,
+    progress_cb: Optional[Callable[[str], None]] = None,
 ) -> dict:
     """Orchestrate the full upload-to-curriculum pipeline.
 
     1. Reads the saved raw document from the knowledge base.
     2. Splits it into a structured curriculum (Course → Lessons).
-    3. Saves the course JSON to the knowledge base.
-    4. Generates and persists the learning path (either new or appended).
+    3. Pre-generates each lesson's short quiz and the course's final assessment.
+    4. Saves the course JSON to the knowledge base.
+    5. Generates and persists the learning path (either new or appended).
 
     Args:
         filename: The filename of the raw document.
         department: The department scope.
         user_id: The user who triggered the generation.
         append_to_latest: If True, merges this course into the latest existing path.
+        progress_cb: Optional callback invoked with a stage name as generation
+            progresses, so a background job can report granular status to a
+            polling client.
 
     Returns:
         The generated learning path details.
@@ -519,6 +889,8 @@ def trigger_curriculum_generation(
         }
 
     # Step 2: Split into curriculum
+    if progress_cb:
+        progress_cb("generating_lessons")
     result = process_document_to_curriculum(
         document_text=document_text,
         document_title=filename,
@@ -530,7 +902,10 @@ def trigger_curriculum_generation(
 
     course = result["course"]
 
-    # Step 3: Save the course to the knowledge base
+    # Step 3: Pre-generate quizzes + final assessment for this course
+    _generate_course_quizzes(course, department, progress_cb)
+
+    # Step 4: Save the course to the knowledge base
     course_doc = {
         "title": course["title"],
         "description": course["description"],
@@ -548,7 +923,7 @@ def trigger_curriculum_generation(
     }
     store.write_knowledge_document(course["course_id"], course_doc)
 
-    # Step 4: Build or Append to learning path
+    # Step 5: Build or Append to learning path
     from src.core.database import _store_lock
     
     with _store_lock:
@@ -637,64 +1012,12 @@ def generate_remedial_course(
     unique_tags = list(dict.fromkeys(all_concept_tags))  # preserve order, deduplicate
     gap_text = "\n".join(gap_summary_lines) if gap_summary_lines else "General knowledge gaps detected."
 
-    prompt = f"""You are an expert corporate training curriculum designer.
-
-A learner failed their Final Assessment. Below are the questions they got wrong:
-
-{gap_text}
-
-Your task:
-1. Identify the core knowledge gaps from these mistakes.
-2. Generate a targeted remedial training course in strict JSON format.
-
-The JSON must follow EXACTLY this structure (no extra keys, no markdown, raw JSON only):
-{{
-  "course_title": "<short title for the remedial course, e.g. 'Targeted Review: Topic X'>",
-  "course_description": "<2-3 sentence description of what this course covers and why>",
-  "gap_topics": ["<topic 1>", "<topic 2>"],
-  "lesson": {{
-    "lesson_title": "<lesson title>",
-    "content_summary": "<3-4 paragraph explanation of the gap concepts in plain English>",
-    "key_points": ["<key point 1>", "<key point 2>", "<key point 3>"]
-  }},
-  "short_quiz": {{
-    "title": "<short quiz title>",
-    "questions": [
-      {{
-        "text": "<question text>",
-        "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
-        "correct_answer_index": 0,
-        "rationale": {{
-          "0": "<why option A is correct or wrong>",
-          "1": "<why option B is correct or wrong>",
-          "2": "<why option C is correct or wrong>",
-          "3": "<why option D is correct or wrong>"
-        }},
-        "concept_tags": ["<tag>"]
-      }}
-    ]
-  }},
-  "final_assessment": {{
-    "title": "<final assessment title>",
-    "questions": [
-      {{
-        "text": "<question text>",
-        "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
-        "correct_answer_index": 0,
-        "rationale": {{
-          "0": "<rationale>",
-          "1": "<rationale>",
-          "2": "<rationale>",
-          "3": "<rationale>"
-        }},
-        "concept_tags": ["<tag>"]
-      }}
-    ]
-  }}
-}}
-
-Generate exactly 3 questions for the short quiz and 5 questions for the final assessment.
-Focus strictly on the gap topics identified. Return ONLY valid JSON."""
+    tool_config = get_config()["tools"]["generate_remedial_course"]
+    prompt = tool_config["prompt_template"].format(
+        gap_text=gap_text,
+        short_quiz_question_count=int(get_logic_param("curriculum_generation", "remedial_short_quiz_questions")),
+        final_assessment_question_count=int(get_logic_param("curriculum_generation", "remedial_final_assessment_questions")),
+    )
 
     # Call Gemini via Vertex AI using ADC (Application Default Credentials)
     # This matches how the rest of the project connects — no API key needed.
@@ -729,16 +1052,10 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON."""
     }
 
     try:
-        from google import genai
-
-        client = genai.Client(
-            vertexai=True,
-            project=os.getenv("GOOGLE_CLOUD_PROJECT"),
-            location=os.getenv("GOOGLE_CLOUD_LOCATION", "global"),
-        )
+        client = get_gemini_client()
 
         response = client.models.generate_content(
-            model="gemini-3.5-flash",
+            model=tool_config.get("model") or get_param("GEMINI_MODEL"),
             contents=prompt,
         )
         raw = (response.text or "").strip()

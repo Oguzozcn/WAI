@@ -58,17 +58,22 @@ def setup_env_file():
         print("[*] .env file already exists.")
 
 def run_server():
-    """Run the FastAPI server using the venv python."""
+    """Run the FastAPI server (src/api/main.py) via uvicorn using the venv python."""
     venv_python = get_venv_python()
-    server_script = PROJECT_ROOT / "server.py"
-    if server_script.exists():
-        print("[*] Starting the server...")
-        try:
-            subprocess.run([venv_python, str(server_script)])
-        except KeyboardInterrupt:
-            print("\n[*] Server stopped by user.")
-    else:
-        print(f"[-] Error: {server_script.name} not found. Cannot start server.")
+    print("[*] Starting the server on http://localhost:8000 ...")
+    try:
+        subprocess.run(
+            [
+                venv_python, "-m", "uvicorn",
+                "src.api.main:app",
+                "--reload",
+                "--host", "0.0.0.0",
+                "--port", "8000",
+            ],
+            cwd=str(PROJECT_ROOT),
+        )
+    except KeyboardInterrupt:
+        print("\n[*] Server stopped by user.")
 
 def main():
     print("========================================")

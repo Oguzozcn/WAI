@@ -61,10 +61,15 @@
   .font-display { font-family: 'Hanken Grotesk', sans-serif; }
   .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-  #graph-svg { width: 100%; height: auto; display: block; }
+  #graph-svg { display: block; }
+  #graph-viewport { overflow: auto; max-height: 72vh; cursor: grab; }
+  #graph-viewport.is-panning { cursor: grabbing; user-select: none; }
   .graph-node { cursor: pointer; transition: filter .15s, transform .15s; }
   .graph-node:hover { filter: brightness(1.06); }
-  .graph-node-box { border-radius: 14px; border-width: 1.5px; display: flex; flex-direction: column; justify-content: center; height: 100%; padding: 8px 12px; overflow: hidden; }
+  .graph-node-box { border-radius: 14px; border-width: 1.5px; display: flex; flex-direction: column; justify-content: center; height: 100%; padding: 8px 12px; overflow: hidden; box-shadow: 0 0 0 0 transparent; transition: box-shadow .15s; }
+  .graph-node-box.is-selected { box-shadow: 0 0 0 3px #f59e0b, 0 6px 16px rgba(0,0,0,.2); }
+  .graph-node-title { font-size: 11.5px; font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .graph-node-subtitle { font-size: 10px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .graph-edge { stroke: #c0c7d1; stroke-width: 1.5; fill: none; }
   .graph-edge-dashed { stroke-dasharray: 4 4; }
 
@@ -99,16 +104,20 @@
       <span id="graph-error-msg"></span>
     </div>
     <div id="graph-loading" class="text-sm text-on-surface-variant py-10 text-center">Loading agent graph…</div>
-    <div class="bg-white rounded-2xl border border-outline-variant p-4 overflow-x-auto">
-      <svg id="graph-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
 
-    <div class="flex items-center gap-5 mt-4 text-xs text-on-surface-variant flex-wrap">
+    <div class="flex items-center gap-5 mb-3 text-xs text-on-surface-variant flex-wrap">
       <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#005787"></span> Orchestrator</span>
       <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#2abcfd"></span> Skill</span>
-      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#327a00"></span> Tool — editable prompt</span>
-      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#c0c7d1"></span> Tool — deterministic (no prompt)</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#327a00"></span> Green = calls Gemini, has an editable prompt</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#7c3aed"></span> Purple = plain code, but has tunable numbers</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#c0c7d1"></span> Grey = plain code, nothing to edit</span>
       <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#0070ad"></span> Gemini</span>
+      <span class="ml-auto flex items-center gap-1 italic text-on-surface-variant/80">
+        <span class="material-symbols-outlined text-sm">pan_tool</span> Drag empty space to pan
+      </span>
+    </div>
+    <div id="graph-viewport" class="bg-white rounded-2xl border border-outline-variant p-4">
+      <svg id="graph-svg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
   </div>
 </main>
@@ -136,6 +145,14 @@ const getRole = () => wisdomSession ? wisdomSession.role : '';
 
 let graphData = null;
 let devConfig = null;
+let nodeElements = {};
+let selectedKey = null;
+
+function selectNode(key) {
+  Object.values(nodeElements).forEach(el => el.classList.remove('is-selected'));
+  selectedKey = key || null;
+  if (selectedKey && nodeElements[selectedKey]) nodeElements[selectedKey].classList.add('is-selected');
+}
 
 function showToast(message, type) {
   if (window.WisdomSidebar && window.WisdomSidebar.toast) { window.WisdomSidebar.toast(message, type); return; }
@@ -162,8 +179,8 @@ async function loadGraphAndConfig() {
 }
 
 // ── Layout + render ──────────────────────────────────────────────────────
-const NODE_W = 210, NODE_H = 56, TOOL_W = 190, TOOL_H = 42;
-const COL_GAP = 20, ROW_GAP = 14, TOP_MARGIN = 30, SKILL_ROW_Y = 150, TOOLS_START_Y = 260;
+const NODE_W = 220, NODE_H = 56, TOOL_W = 232, TOOL_H = 54;
+const COL_GAP = 20, ROW_GAP = 16, TOP_MARGIN = 30, SKILL_ROW_Y = 150, TOOLS_START_Y = 260;
 
 function renderGraph() {
   const skills = graphData.skills;
@@ -186,8 +203,13 @@ function renderGraph() {
   const maxRows = Math.max(1, ...skillTools.map(ts => ts.length));
   const graphHeight = TOOLS_START_Y + maxRows * (TOOL_H + ROW_GAP) + 140;
 
+  nodeElements = {};
+  selectedKey = null;
+
   const svg = document.getElementById('graph-svg');
   svg.setAttribute('viewBox', `0 0 ${totalWidth} ${graphHeight}`);
+  svg.setAttribute('width', totalWidth);
+  svg.setAttribute('height', graphHeight);
   svg.innerHTML = '';
 
   const edgesLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -211,10 +233,14 @@ function renderGraph() {
     fo.setAttribute('height', h);
     fo.setAttribute('class', 'graph-node');
     fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" class="graph-node-box" style="background:${opts.bg};border-color:${opts.border};color:${opts.fg}">
-        <div style="font-size:12.5px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${opts.title}</div>
-        ${opts.subtitle ? `<div style="font-size:10.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${opts.subtitle}</div>` : ''}
+        <div class="graph-node-title">${opts.title}</div>
+        ${opts.subtitle ? `<div class="graph-node-subtitle">${opts.subtitle}</div>` : ''}
       </div>`;
-    if (opts.onClick) fo.addEventListener('click', opts.onClick);
+    if (opts.key) nodeElements[opts.key] = fo.querySelector('.graph-node-box');
+    fo.addEventListener('click', () => {
+      selectNode(opts.key || null);
+      if (opts.onClick) opts.onClick();
+    });
     nodesLayer.appendChild(fo);
     return { x, y };
   }
@@ -224,6 +250,7 @@ function renderGraph() {
   addNode(rootX, rootY, NODE_W + 40, NODE_H, {
     bg: '#005787', border: '#004a75', fg: '#ffffff',
     title: 'Root Orchestrator', subtitle: graphData.orchestrator.model,
+    key: 'root',
     onClick: () => openOrchestratorPanel(),
   });
 
@@ -235,6 +262,7 @@ function renderGraph() {
     addNode(sx, sy, NODE_W, NODE_H, {
       bg: '#2abcfd', border: '#0092c7', fg: '#00293a',
       title: s.name, subtitle: `${skillTools[i].length} tool${skillTools[i].length === 1 ? '' : 's'}`,
+      key: 'skill:' + s.skill_id,
       onClick: () => openSkillPanel(s.skill_id),
     });
 
@@ -243,13 +271,19 @@ function renderGraph() {
       const isSatellite = tool.name === 'process_document_to_curriculum';
       addEdge(sx, isSatellite ? (TOOLS_START_Y + (j - 1) * (TOOL_H + ROW_GAP)) : sy + NODE_H / 2, sx, ty - TOOL_H / 2, isSatellite);
       const editable = tool.has_llm_prompt;
+      const tunable = !editable && !!tool.logic_category;
       addNode(sx, ty, TOOL_W, TOOL_H, {
-        bg: editable ? '#327a00' : '#e5e9ec',
-        border: editable ? '#255f00' : '#c0c7d1',
-        fg: editable ? '#ffffff' : '#404750',
+        bg: editable ? '#327a00' : (tunable ? '#7c3aed' : '#e5e9ec'),
+        border: editable ? '#255f00' : (tunable ? '#5b21b6' : '#c0c7d1'),
+        fg: editable ? '#ffffff' : (tunable ? '#ffffff' : '#404750'),
         title: tool.name,
-        subtitle: editable ? 'Editable prompt' : 'Deterministic',
-        onClick: () => editable ? openToolPanel(tool.name) : openReadOnlyToolPanel(tool),
+        subtitle: editable ? 'Editable prompt' : (tunable ? 'Tunable parameters' : 'Deterministic'),
+        key: 'tool:' + tool.name,
+        onClick: () => {
+          if (editable) return openToolPanel(tool.name);
+          if (tunable) return openLogicParamsPanel(tool);
+          return openReadOnlyToolPanel(tool);
+        },
       });
       if (editable) geminiEdgesFrom.push({ x: sx, y: ty + TOOL_H / 2 });
     });
@@ -262,6 +296,7 @@ function renderGraph() {
   addNode(geminiX, geminiY, NODE_W, NODE_H, {
     bg: '#0070ad', border: '#005787', fg: '#ffffff',
     title: 'Gemini', subtitle: graphData.gemini_model,
+    key: 'gemini',
     onClick: () => openGeminiPanel(),
   });
 }
@@ -276,6 +311,7 @@ function openPanel(kicker, title) {
 function closePanel() {
   document.getElementById('dev-panel-backdrop').classList.add('hidden');
   document.getElementById('dev-panel').classList.add('translate-x-full');
+  selectNode(null);
 }
 document.getElementById('dev-panel-close').addEventListener('click', closePanel);
 document.getElementById('dev-panel-backdrop').addEventListener('click', closePanel);
@@ -385,6 +421,83 @@ function openToolPanel(toolName) {
   });
 }
 
+// ── Tunable logic-params panel (deterministic tools with numeric knobs) ──
+const LOGIC_CATEGORY_LABELS = {
+  assessment_scoring: 'Assessment Scoring (IRT)',
+  readiness_scoring: 'Readiness Scoring',
+  luck_elimination: 'Luck Elimination',
+  adaptive_routing: 'Adaptive Routing',
+  curriculum_generation: 'Curriculum Generation',
+};
+const LOGIC_FIELD_META = {
+  assessment_scoring: {
+    irt_learning_rate: { label: 'IRT learning rate', step: 0.05, min: 0.05, max: 2 },
+    irt_theta_clamp: { label: 'Ability score clamp (±)', step: 0.5, min: 1, max: 10 },
+    irt_default_discrimination: { label: 'Default item discrimination', step: 0.1, min: 0.1, max: 5 },
+    irt_default_guessing: { label: 'Default guessing rate', step: 0.01, min: 0, max: 1 },
+    irt_default_slip: { label: 'Default slip (mastery ceiling)', step: 0.01, min: 0, max: 1 },
+  },
+  readiness_scoring: {
+    course_completion_weight: { label: 'Course completion weight', step: 0.05, min: 0, max: 1 },
+    quiz_performance_weight: { label: 'Quiz performance weight', step: 0.05, min: 0, max: 1 },
+    state_progress_weight: { label: 'State progress weight', step: 0.05, min: 0, max: 1 },
+    quiz_window_size: { label: 'Recent-quiz window size', step: 1, min: 1, max: 20 },
+  },
+  luck_elimination: {
+    core_drift_concept_count: { label: 'Concepts flagged before "core drift"', step: 1, min: 1, max: 10 },
+  },
+  adaptive_routing: {
+    confidence_threshold: { label: 'Confidence threshold', step: 0.05, min: 0, max: 1 },
+    accuracy_threshold: { label: 'Accuracy threshold', step: 0.05, min: 0, max: 1 },
+  },
+  curriculum_generation: {
+    conflict_overlap_ratio: { label: 'Conflict overlap ratio', step: 0.05, min: 0, max: 1 },
+    conflict_min_overlap_count: { label: 'Min overlapping concepts for conflict', step: 1, min: 1, max: 20 },
+    pregenerated_short_quiz_questions: { label: 'Pre-generated short-quiz questions', step: 1, min: 1, max: 20 },
+    pregenerated_final_assessment_questions: { label: 'Pre-generated final-assessment questions', step: 1, min: 1, max: 30 },
+    remedial_short_quiz_questions: { label: 'Remedial short-quiz questions', step: 1, min: 1, max: 20 },
+    remedial_final_assessment_questions: { label: 'Remedial final-assessment questions', step: 1, min: 1, max: 30 },
+  },
+};
+
+function openLogicParamsPanel(tool) {
+  if (tool.logic_category === 'platform_params') {
+    return openPlatformParamsPanel();
+  }
+  const category = tool.logic_category;
+  const values = devConfig.logic_params[category];
+  const meta = LOGIC_FIELD_META[category];
+  openPanel('TOOL · TUNABLE LOGIC', tool.name);
+  const fieldsHtml = Object.keys(meta).map(key => `
+    <label class="block text-xs font-bold text-on-surface-variant mb-1">${meta[key].label}</label>
+    <input id="lp-${key}" type="number" step="${meta[key].step}" min="${meta[key].min}" max="${meta[key].max}" value="${values[key]}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
+  `).join('');
+  setPanelBody(`
+    <p class="text-xs text-on-surface-variant bg-surface-container-low rounded-lg px-3 py-2 mb-4">
+      ${tool.description || ''} This tool doesn't call Gemini, but its behavior is driven by these tunable numbers
+      (category: ${LOGIC_CATEGORY_LABELS[category] || category}).
+    </p>
+    ${fieldsHtml}
+    ${panelErrorHtml('lp-error')}
+  `);
+  setPanelFooter(`
+    <button id="lp-cancel" class="px-5 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-container rounded-lg">Cancel</button>
+    <button id="lp-save" class="px-5 py-2 text-sm font-bold bg-primary text-on-primary rounded-lg hover:bg-primary/90">Save</button>
+  `);
+  document.getElementById('lp-cancel').addEventListener('click', closePanel);
+  document.getElementById('lp-save').addEventListener('click', async () => {
+    const newValues = {};
+    Object.keys(meta).forEach(key => {
+      newValues[key] = parseFloat(document.getElementById(`lp-${key}`).value);
+    });
+    const result = await saveAndRefresh(`/api/dev/config/logic-params/${category}`, { values: newValues }, (data) => {
+      devConfig.logic_params[category] = data;
+      closePanel();
+    });
+    if (result instanceof Error) showPanelError('lp-error', result.message);
+  });
+}
+
 function openReadOnlyToolPanel(tool) {
   openPanel('TOOL · DETERMINISTIC', tool.name);
   setPanelBody(`
@@ -413,6 +526,7 @@ function openGeminiPanel() {
 
 // ── Platform parameters ──
 function openPlatformParamsPanel() {
+  selectNode(null);
   const p = devConfig.platform_params;
   openPanel('PLATFORM PARAMETERS', 'Tunable settings');
   setPanelBody(`
@@ -426,6 +540,16 @@ function openPlatformParamsPanel() {
     <input id="pp-assessq" type="number" min="1" value="${p.MAX_ASSESSMENT_QUESTIONS}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
     <label class="block text-xs font-bold text-on-surface-variant mb-1">Max quiz attempts</label>
     <input id="pp-attempts" type="number" min="1" value="${p.MAX_QUIZ_ATTEMPTS}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
+    <label class="block text-xs font-bold text-on-surface-variant mb-1">Courses per learning path</label>
+    <input id="pp-maxcourses" type="number" min="1" value="${p.MAX_COURSES}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
+    <label class="block text-xs font-bold text-on-surface-variant mb-1">Default transition timeframe (weeks)</label>
+    <input id="pp-timeframe" type="number" min="1" value="${p.DEFAULT_TIMEFRAME_WEEKS}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
+    <label class="block text-xs font-bold text-on-surface-variant mb-1">At-risk readiness threshold (0–1)</label>
+    <input id="pp-atrisk-readiness" type="number" step="0.01" min="0" max="1" value="${p.AT_RISK_READINESS_THRESHOLD}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
+    <label class="block text-xs font-bold text-on-surface-variant mb-1">At-risk team percentage threshold (0–100)</label>
+    <input id="pp-atrisk-pct" type="number" step="0.5" min="0" max="100" value="${p.AT_RISK_PERCENTAGE_THRESHOLD}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
+    <label class="block text-xs font-bold text-on-surface-variant mb-1">Luck-elimination failure threshold</label>
+    <input id="pp-luckthreshold" type="number" min="1" value="${p.LUCK_FAILURE_THRESHOLD}" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm mb-4 font-mono">
     ${panelErrorHtml('pp-error')}
   `);
   setPanelFooter(`
@@ -440,11 +564,41 @@ function openPlatformParamsPanel() {
       MAX_QUIZ_QUESTIONS: parseInt(document.getElementById('pp-quizq').value, 10),
       MAX_ASSESSMENT_QUESTIONS: parseInt(document.getElementById('pp-assessq').value, 10),
       MAX_QUIZ_ATTEMPTS: parseInt(document.getElementById('pp-attempts').value, 10),
+      MAX_COURSES: parseInt(document.getElementById('pp-maxcourses').value, 10),
+      DEFAULT_TIMEFRAME_WEEKS: parseInt(document.getElementById('pp-timeframe').value, 10),
+      AT_RISK_READINESS_THRESHOLD: parseFloat(document.getElementById('pp-atrisk-readiness').value),
+      AT_RISK_PERCENTAGE_THRESHOLD: parseFloat(document.getElementById('pp-atrisk-pct').value),
+      LUCK_FAILURE_THRESHOLD: parseInt(document.getElementById('pp-luckthreshold').value, 10),
     }, (data) => { devConfig.platform_params = data; graphData.gemini_model = data.GEMINI_MODEL; renderGraph(); closePanel(); });
     if (result instanceof Error) showPanelError('pp-error', result.message);
   });
 }
 document.getElementById('open-platform-params-btn').addEventListener('click', openPlatformParamsPanel);
+
+// ── Drag-to-pan on empty graph space (left mouse button) ──
+(function setupPan() {
+  const viewport = document.getElementById('graph-viewport');
+  let isPanning = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest('.graph-node')) return;
+    isPanning = true;
+    startX = e.clientX; startY = e.clientY;
+    startLeft = viewport.scrollLeft; startTop = viewport.scrollTop;
+    viewport.classList.add('is-panning');
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!isPanning) return;
+    viewport.scrollLeft = startLeft - (e.clientX - startX);
+    viewport.scrollTop = startTop - (e.clientY - startY);
+  });
+  window.addEventListener('mouseup', () => {
+    if (!isPanning) return;
+    isPanning = false;
+    viewport.classList.remove('is-panning');
+  });
+})();
 
 loadGraphAndConfig();
 </script>

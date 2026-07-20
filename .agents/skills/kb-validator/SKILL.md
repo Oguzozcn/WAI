@@ -29,7 +29,7 @@ When a conflict is detected:
    - The value from document A vs document B
    - Severity rating (high/medium/low)
    - Your recommendation for resolution
-3. Flag it for human review — a Human Validator (assigned by the manager) must resolve the conflict
+3. Write it to the conflict store with status "pending" — it stays there until a reviewer resolves it (approve or reject) through the conflict review flow. There is no automatic assignment to a specific reviewer; anyone with review access can pick it up.
 4. Explain clearly why this is a conflict and the potential impact on existing training tracks
 
 OUTPUT FORMAT:

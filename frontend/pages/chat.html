@@ -167,71 +167,15 @@
     </script>
 </head>
 <body class="bg-background text-on-background h-screen flex overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
-<!-- SideNavBar (Shared Component) -->
-<nav class="h-full w-64 fixed left-0 top-0 border-r border-outline-variant bg-surface flex flex-col py-margin-desktop z-20 transition-transform duration-300 transform -translate-x-full md:translate-x-0" id="sidebar">
-<div class="px-gutter mb-8 flex justify-between items-center">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 flex-shrink-0"><img alt="WisdomAI Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLsAkB4ePHTFQXxwSxibiAU_vt1oswMNkG6zqwfpKmQrzljXJHlqke0k75mUtJK6IpQiPTz_6C_wg-3wCyvkRfLiE2t3cFg1gXdWgKszjvwjc5QD3Yh9L7Fwuv1wyI3IO7On6WnEQhOAmqHuy7vUqB9EEtyF_5GsDxm5fAgJURhvCdtjuUU3TLL7hvXq8FAlGScgtEvgwAg7ua_XD6b9i4zOMBIwNk4rcBnq4aPg7S9b1Pb8YAGU42jaePq5tJ-W3aNTuJRFNtNnPg"/></div>
-<div>
-<h1 class="text-headline-md font-headline-md font-extrabold text-primary">WisdomAI</h1>
-</div>
-</div>
-<button class="md:hidden text-on-surface-variant p-2" id="close-sidebar">
-<span class="material-symbols-outlined">close</span>
-</button>
-</div>
-<div class="flex-1 overflow-y-auto px-4 flex flex-col gap-2">
-<button class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary-container text-on-primary-container rounded-lg font-body-md shadow-[0_2px_0_0_#004a75] hover:opacity-90 transition-opacity mb-4">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
-                New Chat
-            </button>
-<!-- Navigation Links -->
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="/">
-<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">dashboard</span>
-<span class="font-body-md text-body-md">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="/learning-path">
-<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">auto_stories</span>
-<span class="font-body-md text-body-md">Learning Path</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="/knowledge-vault">
-<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">library_books</span>
-<span class="font-body-md text-body-md">Library</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors group" href="#">
-<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">support_agent</span>
-<span class="font-body-md text-body-md">Support</span>
-</a>
-<!-- Recent Chats Section (Contextual to Chat UI) -->
-<div class="mt-8 mb-2 px-4">
-<h3 class="font-label-md text-label-md text-outline tracking-wider uppercase">Recent Chats</h3>
-</div>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-r-4 border-primary bg-surface-container-low transition-all duration-200" href="#">
-<span class="material-symbols-outlined">chat_bubble</span>
-<span class="font-body-md text-body-md truncate">Leadership Models</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
-<span class="material-symbols-outlined text-outline">chat_bubble</span>
-<span class="font-body-md text-body-md truncate">Agile Methodologies Explained</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
-<span class="material-symbols-outlined text-outline">chat_bubble</span>
-<span class="font-body-md text-body-md truncate">Python Data Analysis</span>
-</a>
-</div>
-<div class="p-4 mt-auto">
-<button class="w-full py-3 rounded-lg border border-outline-variant text-on-surface-variant font-body-md hover:bg-surface-container transition-colors flex items-center justify-center gap-2">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; color: #ffc800;">local_fire_department</span>
-                View Streak
-            </button>
-</div>
-</nav>
+    <script src="/js/auth.js"></script>
+<!-- SideNavBar (shared component) -->
+<div id="sidebar-mount"></div>
 <!-- Main Content Area -->
-<div class="flex-1 flex flex-col md:ml-64 relative w-full h-full">
+<div class="flex-1 flex flex-col sidebar-offset relative w-full h-full">
 <!-- TopAppBar (Shared Component) -->
 <header class="flex justify-between items-center w-full px-margin-desktop h-16 border-b border-outline-variant bg-surface shrink-0 z-10 sticky top-0">
 <div class="flex items-center gap-4">
-<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container rounded-full" id="open-sidebar">
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container rounded-full" id="mobile-menu-btn">
 <span class="material-symbols-outlined">menu</span>
 </button>
 <div class="hidden md:flex items-center bg-surface-container rounded-full px-4 py-2 border border-transparent focus-within:border-primary focus-within:bg-surface transition-colors w-64 lg:w-96">
@@ -240,10 +184,6 @@
 </div>
 </div>
 <div class="flex items-center gap-4">
-<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors relative">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; color: #ffc800;">local_fire_department</span>
-<span class="absolute -top-1 -right-1 bg-error text-on-error text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
-</button>
 <button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
 <span class="material-symbols-outlined">notifications</span>
 </button>
@@ -260,58 +200,7 @@
 <div class="flex flex-col gap-1">
 <span class="font-label-md text-label-md text-on-surface-variant">WisdomAI</span>
 <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl rounded-tl-sm shadow-sm text-body-md font-body-md text-on-surface">
-<p>Welcome back! Let's continue exploring <strong>Leadership Models</strong>. Last time, we discussed Transformational Leadership. Would you like to dive into Situational Leadership next, or review some real-world case studies?</p>
-<div class="mt-4 flex flex-wrap gap-2">
-<button class="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full text-sm font-body-md border border-outline-variant transition-colors">Explore Situational Leadership</button>
-<button class="px-4 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full text-sm font-body-md border border-outline-variant transition-colors">Show Case Studies</button>
-</div>
-</div>
-</div>
-</div>
-<!-- User Message -->
-<div class="flex gap-4 max-w-3xl mx-auto w-full flex-row-reverse">
-<img alt="User profile photo" class="w-10 h-10 rounded-full border border-outline-variant object-cover flex-shrink-0" data-alt="A small, circular professional headshot photograph of a person, well-lit against a neutral background, used as an avatar in a clean, modern corporate gamification user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaTpo3S-OJISsHtE4kCySk80yaGck9jSJaYivxvcSZfujXtdSWefeaXScAyll84kiL87_m4Vc1bmvH0EHa-YiaJ9AoOVHyD2Yz76tQmuKCc7YK7hHLBNngYsf3he-6W2M0bqo0Ty8vb6psJLPH_0fI810XZ8DdIkx6Klw5C_dCdYJTuwz6MmGer1K00vth60sxssM40QTVV9StnztHadXTAExV0tZ_d7Yop1OyOBsIULz0ABb5nM9m"/>
-<div class="flex flex-col gap-1 items-end">
-<span class="font-label-md text-label-md text-on-surface-variant">You</span>
-<div class="bg-primary-container text-on-primary-container p-4 rounded-xl rounded-tr-sm shadow-[0_2px_0_0_#004a75] text-body-md font-body-md">
-<p>Let's look at some real-world case studies for Transformational Leadership first to solidify my understanding before moving on.</p>
-</div>
-</div>
-</div>
-<!-- AI Response -->
-<div class="flex gap-4 max-w-3xl mx-auto w-full">
-<div class="w-10 h-10 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary shadow-sm">
-<span class="material-symbols-outlined">school</span>
-</div>
-<div class="flex flex-col gap-1 w-full">
-<span class="font-label-md text-label-md text-on-surface-variant">WisdomAI</span>
-<div class="bg-surface-container-lowest border border-outline-variant p-5 rounded-xl rounded-tl-sm shadow-sm text-body-md font-body-md text-on-surface flex flex-col gap-4">
-<p>Excellent choice. Examining real-world applications is a great way to solidify the concepts.</p>
-<p>Here is a classic case study often cited in organizational psychology:</p>
-<!-- Bento Grid style content card inside chat -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant border-b-2 border-b-secondary-container">
-<div class="flex items-center gap-2 mb-2">
-<span class="material-symbols-outlined text-secondary-container">business</span>
-<h4 class="font-headline-md text-base font-bold text-on-surface">The Turnaround</h4>
-</div>
-<p class="text-sm text-on-surface-variant">How a failing tech division was revitalized not by changing the product, but by reshaping the engineering culture to value innovation over strict adherence to legacy processes.</p>
-</div>
-<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant border-b-2 border-b-tertiary-fixed">
-<div class="flex items-center gap-2 mb-2">
-<span class="material-symbols-outlined text-tertiary">psychology</span>
-<h4 class="font-headline-md text-base font-bold text-on-surface">Key Element</h4>
-</div>
-<p class="text-sm text-on-surface-variant">The leader exhibited <strong>Intellectual Stimulation</strong> (one of the 4 I's) by challenging the team's assumptions about 'how things are done here.'</p>
-</div>
-</div>
-<div class="mt-2 p-3 bg-tertiary-fixed bg-opacity-10 border border-tertiary-fixed rounded-lg flex items-start gap-3">
-<span class="material-symbols-outlined text-tertiary mt-0.5" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
-<div>
-<p class="text-sm font-bold text-on-surface">Concept Unlocked!</p>
-<p class="text-xs text-on-surface-variant">You've engaged deeply with Transformational Leadership.</p>
-</div>
-</div>
+<p>Hi! Ask me anything about your learning path, quizzes, or the knowledge base.</p>
 </div>
 </div>
 </div>
@@ -343,7 +232,7 @@
 <span class="material-symbols-outlined">attach_file</span>
 </button>
 <textarea class="w-full bg-transparent border-none focus:ring-0 resize-none py-3 px-2 font-body-md text-on-surface placeholder:text-outline max-h-32" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 128) + 'px'" placeholder="Ask WisdomAI a question..." rows="1" style="min-height: 48px;"></textarea>
-<button class="p-3 bg-primary text-on-primary hover:bg-primary-container rounded-lg transition-colors shrink-0 shadow-[0_2px_0_0_#004a75] active:translate-y-[2px] active:shadow-none ml-2">
+<button class="p-3 bg-primary text-on-primary hover:bg-primary-container rounded-lg transition-colors shrink-0 shadow-[0_2px_0_0_#004a75] active:translate-y-[2px] active:shadow-none ml-2" id="send-btn">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
 </button>
 </div>
@@ -356,40 +245,95 @@
 <!-- Scripts for interaction -->
 <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = document.getElementById('sidebar');
-            const openBtn = document.getElementById('open-sidebar');
-            const closeBtn = document.getElementById('close-sidebar');
+            // Sidebar (incl. mobile show/hide) is handled by the shared /js/sidebar.js.
 
-            openBtn.addEventListener('click', () => {
-                sidebar.classList.remove('-translate-x-full');
-            });
-
-            closeBtn.addEventListener('click', () => {
-                sidebar.classList.add('-translate-x-full');
-            });
-
-            // Simulate typing indicator demo
+            // Chat wiring
             const textarea = document.querySelector('textarea');
             const typingIndicator = document.getElementById('typing-indicator');
-            const sendBtn = document.querySelector('button .material-symbols-outlined:contains("send")').parentElement;
+            const sendBtn = document.getElementById('send-btn');
+            const chatContainer = document.getElementById('chat-container');
 
-            sendBtn.addEventListener('click', () => {
-                if(textarea.value.trim() !== '') {
-                    textarea.value = '';
-                    typingIndicator.classList.remove('hidden');
-                    
-                    // Scroll to bottom
-                    const chatContainer = document.getElementById('chat-container');
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
+            const session = window.WisdomAuth.requireAuth();
+            if (!session) return;
+            const USER_ID = session.user_id;
+            const DEPARTMENT = 'operations';
 
-                    // Hide after a delay
-                    setTimeout(() => {
-                        typingIndicator.classList.add('hidden');
-                    }, 2000);
+            const scrollToBottom = () => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            };
+
+            const appendUserMessage = (text) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex gap-4 max-w-3xl mx-auto w-full flex-row-reverse';
+                wrapper.innerHTML = `
+                    <img alt="User profile photo" class="w-10 h-10 rounded-full border border-outline-variant object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaTpo3S-OJISsHtE4kCySk80yaGck9jSJaYivxvcSZfujXtdSWefeaXScAyll84kiL87_m4Vc1bmvH0EHa-YiaJ9AoOVHyD2Yz76tQmuKCc7YK7hHLBNngYsf3he-6W2M0bqo0Ty8vb6psJLPH_0fI810XZ8DdIkx6Klw5C_dCdYJTuwz6MmGer1K00vth60sxssM40QTVV9StnztHadXTAExV0tZ_d7Yop1OyOBsIULz0ABb5nM9m"/>
+                    <div class="flex flex-col gap-1 items-end">
+                        <span class="font-label-md text-label-md text-on-surface-variant">You</span>
+                        <div class="bg-primary-container text-on-primary-container p-4 rounded-xl rounded-tr-sm shadow-[0_2px_0_0_#004a75] text-body-md font-body-md"></div>
+                    </div>`;
+                const bubble = wrapper.querySelector('.bg-primary-container');
+                const p = document.createElement('p');
+                p.textContent = text;
+                bubble.appendChild(p);
+                chatContainer.insertBefore(wrapper, typingIndicator);
+            };
+
+            const appendAiMessage = (text) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex gap-4 max-w-3xl mx-auto w-full';
+                wrapper.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary shadow-sm">
+                        <span class="material-symbols-outlined">school</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="font-label-md text-label-md text-on-surface-variant">WisdomAI</span>
+                        <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl rounded-tl-sm shadow-sm text-body-md font-body-md text-on-surface whitespace-pre-wrap"></div>
+                    </div>`;
+                const bubble = wrapper.querySelector('.bg-surface-container-lowest');
+                const p = document.createElement('p');
+                p.textContent = text;
+                bubble.appendChild(p);
+                chatContainer.insertBefore(wrapper, typingIndicator);
+            };
+
+            const sendMessage = async () => {
+                const text = textarea.value.trim();
+                if (text === '') return;
+
+                textarea.value = '';
+                textarea.style.height = '';
+                appendUserMessage(text);
+                typingIndicator.classList.remove('hidden');
+                scrollToBottom();
+
+                try {
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: USER_ID, department: DEPARTMENT, message: text }),
+                    });
+                    typingIndicator.classList.add('hidden');
+                    if (!res.ok) throw new Error('Request failed');
+                    const data = await res.json();
+                    appendAiMessage(data.reply || '');
+                } catch (err) {
+                    typingIndicator.classList.add('hidden');
+                    appendAiMessage('Sorry, something went wrong. Please try again.');
+                }
+                scrollToBottom();
+            };
+
+            sendBtn.addEventListener('click', sendMessage);
+
+            textarea.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
                 }
             });
         });
     </script>
 <script src="/js/api-client.js"></script>
 <script src="/js/theme-toggle.js"></script>
+<script src="/js/sidebar.js"></script>
 </body></html>

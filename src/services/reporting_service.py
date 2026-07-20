@@ -19,10 +19,8 @@ from src.core.models import (
     KPIPayload, WorkforceMetrics, LearningMetrics,
     AssessmentMetrics, KnowledgeBaseMetrics, RiskIndicators,
 )
-from src.core.config import (
-    DEFAULT_DEPARTMENT, SCHEMA_VERSION, AT_RISK_READINESS_THRESHOLD,
-    AT_RISK_PERCENTAGE_THRESHOLD, PASS_THRESHOLD,
-)
+from src.core.config import DEFAULT_DEPARTMENT, SCHEMA_VERSION
+from src.core.dev_config import get_param
 
 
 # ══════════════════════════════════════════════════════════
@@ -69,7 +67,7 @@ def synthesize_department_kpi(
         all_completed_courses.extend(p.get("completed_courses", []))
 
     courses_completed = len(all_completed_courses)
-    total_possible = total_enrolled * 10  # MAX_COURSES per user
+    total_possible = total_enrolled * get_param("MAX_COURSES")
     avg_completion = (courses_completed / total_possible * 100) if total_possible > 0 else 0.0
 
     # Count learning paths generated (users with a learning_path_id)
@@ -103,9 +101,10 @@ def synthesize_department_kpi(
     pass_rate = (assessments_passed / total_assessments * 100) if total_assessments > 0 else 0.0
 
     # Count luck eliminations
+    luck_failure_threshold = get_param("LUCK_FAILURE_THRESHOLD")
     luck_eliminations = sum(
         1 for p in all_progress
-        if any(v >= 2 for v in p.get("error_retention_matrix", {}).values())
+        if any(v >= luck_failure_threshold for v in p.get("error_retention_matrix", {}).values())
     )
 
     # ── Calculate KB Metrics ──
@@ -117,7 +116,7 @@ def synthesize_department_kpi(
     # ── Calculate Risk Indicators ──
     scores = [p.get("readiness_score", 0.0) for p in all_progress]
     avg_readiness = sum(scores) / len(scores) if scores else 0.0
-    at_risk_count = sum(1 for s in scores if s < AT_RISK_READINESS_THRESHOLD)
+    at_risk_count = sum(1 for s in scores if s < get_param("AT_RISK_READINESS_THRESHOLD"))
     below_threshold_pct = (at_risk_count / total_enrolled * 100) if total_enrolled > 0 else 0.0
 
     # ── Identify Top Gap Areas (no PII — topic names only) ──
@@ -242,6 +241,25 @@ def read_kpi_payloads(
     }
 
 
+def ensure_kpi_payload_for_today(department: str = DEFAULT_DEPARTMENT) -> dict | None:
+    """Return today's KPI payload for a department, generating it if missing.
+
+    Lazy-daily generation: the first caller each day triggers
+    synthesize_department_kpi (which persists via store.write_kpi_payload);
+    every subsequent call that day reads the already-written payload.
+    """
+    today = date.today().isoformat()
+    reader = KPIStoreReader()
+    payloads = reader.read_payloads(today, [department])
+    if payloads:
+        return payloads[0]
+
+    synthesize_department_kpi(department, report_date=today)
+
+    payloads = reader.read_payloads(today, [department])
+    return payloads[0] if payloads else None
+
+
 def generate_executive_email(
     report_date: str = "",
     period: str = "daily",
@@ -295,8 +313,8 @@ def generate_executive_email(
         all_gap_areas.extend(payload.get("top_gap_areas", []))
 
         # Check for high priority
-        if (risk["avg_readiness_score"] < AT_RISK_READINESS_THRESHOLD or
-                risk["employees_below_threshold_pct"] > AT_RISK_PERCENTAGE_THRESHOLD):
+        if (risk["avg_readiness_score"] < get_param("AT_RISK_READINESS_THRESHOLD") or
+                risk["employees_below_threshold_pct"] > get_param("AT_RISK_PERCENTAGE_THRESHOLD")):
             high_priority_depts.append(dept)
 
         dept_summaries.append({
@@ -350,12 +368,12 @@ def _generate_recommendations(
     if high_priority:
         recs.append(
             f"⚠️ HIGH PRIORITY: Department(s) {', '.join(high_priority)} "
-            f"require immediate intervention — readiness is below {AT_RISK_READINESS_THRESHOLD:.0%}."
+            f"require immediate intervention — readiness is below {get_param('AT_RISK_READINESS_THRESHOLD'):.0%}."
         )
 
     if at_risk > 0 and total > 0:
         pct = (at_risk / total) * 100
-        if pct > AT_RISK_PERCENTAGE_THRESHOLD:
+        if pct > get_param("AT_RISK_PERCENTAGE_THRESHOLD"):
             recs.append(
                 f"🔴 {at_risk} employees ({pct:.0f}%) are at risk of not meeting "
                 f"readiness targets. Consider scheduling additional support sessions."
