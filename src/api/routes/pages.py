@@ -68,3 +68,8 @@ async def page_dev_console():
 @router.get("/settings", response_class=HTMLResponse)
 async def page_settings():
     return _serve_page("settings.html")
+
+# NOTE: "/documentation", not "/docs" — FastAPI's built-in Swagger UI owns /docs.
+@router.get("/documentation", response_class=HTMLResponse)
+async def page_documentation():
+    return _serve_page("documentation.html")

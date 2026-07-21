@@ -1,0 +1,94 @@
+# API Reference
+
+All routers are registered in `src/api/main.py`. Interactive Swagger docs for every endpoint: `http://localhost:8000/docs`. Unless noted, endpoints take an optional `department` query param defaulting to `operations`.
+
+## Pages (`src/api/routes/pages.py`, no prefix)
+
+Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (dashboard), `/learning-path`, `/lesson`, `/quiz`, `/knowledge-vault`, `/chat`, `/learning-materials`, `/learning-paths`, `/edit-learning-path`, `/catalog`, `/manager-dashboard`, `/dev-console`, `/settings`, `/documentation`. No server-side auth — role gating happens client-side on each page (see [Auth & Roles](/documentation?page=backend/auth-and-roles)).
+
+## Auth (`/api/auth`)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/auth/login` | Body `{user_id, password}` → `{user_id, display_name, role, manager_id}` or 401. Plaintext comparison against `data/credentials.json` (demo only). |
+
+## Progress (`/api/user`)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/user/{user_id}/progress` | Full progress record + computed summary fields. |
+| `POST /api/user/{user_id}/progress` | Event-based update (`event_type`: `course_started`, `course_completed`, `path_enrolled`, `path_assigned`, `state_changed`, `assessment_passed`, `bypass_locked` …) → `user_service.update_progress`. |
+
+## Learning paths (`src/api/routes/learning_path.py`, mixed paths)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/user/{user_id}/learning-path` | Generate/fetch a path for the user (role-based). |
+| `GET /api/user/{user_id}/daily-agenda?day=N` | Daily agenda breakdown. |
+| `GET /api/user/{user_id}/gap-review` | Current gap-review payload for the user. |
+| `GET /api/learning-path/latest` | Most recent published path. |
+| `GET /api/learning-path/enrolled?user_id=…` | All paths the user is enrolled in (list view; remedial courses are NOT merged here). |
+| `GET /api/learning-path/{path_id}?user_id=…` | One path by id; **merges the user's `remedial_courses`** into `courses` (marked `is_remedial: true`) via `_merge_remedial_courses`. |
+| `GET /api/lesson/{course_id}/{lesson_id}` | Lesson content. |
+| `POST /api/learning-path/{path_id}/enroll` | Enroll a user. |
+| `GET /api/search?q=…` | Global search across paths/lessons for the sidebar search. |
+
+## Quiz (`/api/quiz`)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /generate` | LLM-generate a quiz (falls back to template questions). |
+| `POST /start` | Start/resume a quiz session (persisted server-side). |
+| `POST /evaluate/single` | Grade one answer mid-quiz (drives inline feedback + reflection). |
+| `POST /evaluate` | Grade the full attempt. Consults `decide_remediation`; response includes the `remediation` verdict and acts on it (gap review / remedial course / lockout). |
+| `POST /reflection` | LLM metacognitive reflection prompt for a wrong answer. |
+| `POST /gap-review/retry` | Build a 3-question targeted retry quiz from stored concept diagnoses. |
+| `GET /session/{quiz_id}` | Fetch a stored session (correct answers stripped). |
+| `GET /by-lesson/{course_id}/{lesson_id}` | Get-or-create the short quiz for a lesson. |
+| `GET /by-course/{course_id}?type=final_assessment` | Get-or-create a course-level assessment. |
+
+## Department (`/api/department`)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /readiness` | Aggregate readiness for the department. |
+| `GET /at-risk` | Users below the at-risk threshold with their biggest gap. |
+
+## Knowledge base (`/api/kb`) — manager-facing
+
+Upload & ingestion: `POST /upload` (multipart; async job), `GET /upload/status/{job_id}`, `POST /generate-from-input`, `GET /generate-status/{job_id}`.
+Documents: `GET /documents`, `POST /validate`, `DELETE /documents/{filename}`, `GET /documents/{filename}/versions`, `POST /documents/{filename}/versions/{version}/restore`.
+Conflicts: `GET /conflicts?status=pending`, `POST /conflicts/{conflict_id}/resolve` (approve/reject + `resolved_by`).
+Path authoring: `POST /learning-path/{path_id}/publish`, `PATCH /learning-path/{path_id}`, `DELETE /learning-path/{path_id}`, `GET /learning-path/{path_id}/full`, `PATCH …/course/{course_id}`, `PATCH …/lesson/{lesson_id}`, `PATCH /quiz/{quiz_id}`, `POST /lesson/{lesson_id}/regenerate`, `POST /quiz/{quiz_id}/regenerate`, `GET /catalog/inputs`, `GET /catalog/learning-paths`.
+
+Write endpoints carry a client-supplied `role` and call `_require_manager(role)` — client-trusted gating.
+
+## Manager (`/api/manager`)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /{manager_id}/team-kpis` | Team aggregates for the dashboard cards. |
+| `GET /{manager_id}/reports` | Per-report-row table incl. `current_course_title` (id resolved to a human title via `_resolve_course_title`). |
+| `GET /{manager_id}/reports/export` | Formatted Excel download (openpyxl, in-memory, `Content-Disposition: attachment`). Values pass `_formula_safe` to block formula injection. |
+| `GET /{manager_id}/strategic` | Strategic bucket; lazily ensures today's KPI payload exists. |
+
+All require `role=manager` (query param, client-trusted).
+
+## Chat (`/api/chat`)
+
+`POST /api/chat` — body `{user_id, message}`. Builds a fresh `root_agent`, runs it via ADK `Runner.run_async`, returns `{reply}`.
+
+## Dev console (`/api/dev`) — developer-facing
+
+`GET /graph` (agent topology for the console UI), `GET /config`, `PATCH /config/orchestrator`, `PATCH /config/skill/{skill_id}`, `PATCH /config/tool/{tool_name}` (dry-run validates `{placeholders}`), `PATCH /config/platform-params`, `PATCH /config/logic-params/{category}`. PATCH bodies carry `role` and call `_require_developer(role)`.
+
+## Documentation (`/api/docs`) — developer-facing
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/docs/tree` | The docs manifest (sections → pages) + per-page `updated_at`. |
+| `GET /api/docs/page/{section_id}/{page_id}` | One page: `{title, content (markdown), updated_at}`. |
+| `PUT /api/docs/page/{section_id}/{page_id}` | Save edited markdown. Body `{content, role}`; developer-gated. |
+| `GET /api/docs/export?format=txt|pdf&scope=all|<section>/<page>` | Download one page or the whole set as TXT (raw markdown) or PDF (fpdf2-rendered). |
+
+Page ids are validated against the manifest — they are never used to build filesystem paths directly, so path traversal is structurally impossible.

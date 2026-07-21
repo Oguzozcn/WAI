@@ -10,7 +10,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from src.api.routes import pages, progress, learning_path, quiz, department, knowledge_base, manager, chat, auth, dev_console
+from src.api.routes import pages, progress, learning_path, quiz, department, knowledge_base, manager, chat, auth, dev_console, docs
 
 app = FastAPI(title="WisdomAI MVP", version="0.1.0")
 
@@ -36,3 +36,4 @@ app.include_router(manager.router)
 app.include_router(chat.router)
 app.include_router(auth.router)
 app.include_router(dev_console.router)
+app.include_router(docs.router)

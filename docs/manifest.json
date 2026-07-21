@@ -1,0 +1,77 @@
+{
+  "title": "WisdomAI Developer Documentation",
+  "version": 1,
+  "sections": [
+    {
+      "id": "getting-started",
+      "title": "Getting Started",
+      "icon": "rocket_launch",
+      "pages": [
+        { "id": "introduction", "title": "Introduction", "file": "getting-started/introduction.md" },
+        { "id": "quick-start", "title": "Quick Start", "file": "getting-started/quick-start.md" },
+        { "id": "project-structure", "title": "Project Structure", "file": "getting-started/project-structure.md" }
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "icon": "account_tree",
+      "pages": [
+        { "id": "system-overview", "title": "System Overview", "file": "architecture/system-overview.md" },
+        { "id": "tech-stack", "title": "Tech Stack & Decisions", "file": "architecture/tech-stack.md" },
+        { "id": "data-and-persistence", "title": "Data & Persistence", "file": "architecture/data-and-persistence.md" }
+      ]
+    },
+    {
+      "id": "backend",
+      "title": "Backend",
+      "icon": "dns",
+      "pages": [
+        { "id": "api-reference", "title": "API Reference", "file": "backend/api-reference.md" },
+        { "id": "services", "title": "Services Layer", "file": "backend/services.md" },
+        { "id": "core-modules", "title": "Core Modules", "file": "backend/core-modules.md" },
+        { "id": "auth-and-roles", "title": "Auth & Roles", "file": "backend/auth-and-roles.md" }
+      ]
+    },
+    {
+      "id": "agent-system",
+      "title": "AI Agent System",
+      "icon": "smart_toy",
+      "pages": [
+        { "id": "adk-agent", "title": "ADK Orchestrator Agent", "file": "agent-system/adk-agent.md" },
+        { "id": "skills-and-hooks", "title": "Skills & Hooks", "file": "agent-system/skills-and-hooks.md" },
+        { "id": "dev-console", "title": "Agent Console (Dev)", "file": "agent-system/dev-console.md" }
+      ]
+    },
+    {
+      "id": "learning-engine",
+      "title": "Learning Engine",
+      "icon": "school",
+      "pages": [
+        { "id": "learning-paths", "title": "Learning Paths & Courses", "file": "learning-engine/learning-paths.md" },
+        { "id": "quiz-engine", "title": "Quiz Engine", "file": "learning-engine/quiz-engine.md" },
+        { "id": "remediation", "title": "Remediation System", "file": "learning-engine/remediation.md" },
+        { "id": "readiness-scoring", "title": "Readiness Scoring", "file": "learning-engine/readiness-scoring.md" }
+      ]
+    },
+    {
+      "id": "frontend",
+      "title": "Frontend",
+      "icon": "web",
+      "pages": [
+        { "id": "pages-and-navigation", "title": "Pages & Navigation", "file": "frontend/pages-and-navigation.md" },
+        { "id": "shared-modules", "title": "Shared JS Modules & Theming", "file": "frontend/shared-modules.md" }
+      ]
+    },
+    {
+      "id": "operations",
+      "title": "Operations & Maintenance",
+      "icon": "build_circle",
+      "pages": [
+        { "id": "testing", "title": "Testing & UAT", "file": "operations/testing.md" },
+        { "id": "limitations", "title": "Known Limitations", "file": "operations/limitations.md" },
+        { "id": "doc-maintenance", "title": "Documentation Maintenance", "file": "operations/doc-maintenance.md" }
+      ]
+    }
+  ]
+}

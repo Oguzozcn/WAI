@@ -73,8 +73,9 @@
 
   // Employees and developers never see the manager-only tools. Managers see everything.
   const MANAGER_ONLY_HREFS = ['/manager-dashboard', '/knowledge-vault'];
-  // Developers exclusively get the Agent Console, appended to their nav.
+  // Developers exclusively get the Agent Console and Documentation, appended to their nav.
   const DEV_ONLY_LINK = { href: '/dev-console', icon: 'settings_suggest', label: 'Agent Console' };
+  const DOCS_LINK = { href: '/documentation', icon: 'description', label: 'Documentation' };
 
   function visibleNavLinks() {
     const session = window.WisdomAuth && window.WisdomAuth.getSession();
@@ -84,7 +85,7 @@
       links = links.filter(function (l) { return MANAGER_ONLY_HREFS.indexOf(l.href) === -1; });
     }
     if (role === 'developer') {
-      links = links.concat([DEV_ONLY_LINK]);
+      links = links.concat([DEV_ONLY_LINK, DOCS_LINK]);
     }
     return links;
   }
