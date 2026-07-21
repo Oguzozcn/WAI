@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Manager Dashboard — WisdomAI</title>
@@ -8,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
 <script id="tailwind-config">try{
   tailwind.config = {
     darkMode: "class",
@@ -90,11 +92,17 @@
   .rag-green  { background: #dcfce7; color: #15803d; }
   .rag-amber  { background: #fef3c7; color: #b45309; }
   .rag-red    { background: #fee2e2; color: #b91c1c; }
+  .dark .rag-green  { background: rgba(20,83,45,.4); color: #86efac; }
+  .dark .rag-amber  { background: rgba(120,53,15,.4); color: #fcd34d; }
+  .dark .rag-red    { background: rgba(127,29,29,.4); color: #fca5a5; }
 
   /* Delta chips */
   .delta-pos  { background: #dcfce7; color: #15803d; }
   .delta-neg  { background: #fee2e2; color: #b91c1c; }
   .delta-neu  { background: #f1f5f9; color: #475569; }
+  .dark .delta-pos  { background: rgba(20,83,45,.4); color: #86efac; }
+  .dark .delta-neg  { background: rgba(127,29,29,.4); color: #fca5a5; }
+  .dark .delta-neu  { background: #374151; color: #9ca3af; }
 
   /* Subtle card hover */
   .kpi-card { transition: box-shadow .2s, transform .2s; }
@@ -108,10 +116,15 @@
     animation: shimmer 1.4s infinite;
     border-radius: 6px;
   }
+  .dark .skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 800px 100%;
+  }
 
   /* Progress bar */
   .progress-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
   .progress-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+  .dark .progress-bar { background: #374151; }
 
   /* Table */
   .report-table { border-collapse: separate; border-spacing: 0; }
@@ -121,6 +134,9 @@
   .report-table tr.report-row { transition: background .15s; }
   .report-table tr.report-row:hover td { background: #f0f4f7; }
   .report-table td { padding: .75rem 1rem; border-bottom: 1px solid #e9ecef; font-size: .875rem; }
+  .dark .report-table th { background: #374151; color: #9ca3af; }
+  .dark .report-table tr.report-row:hover td { background: #374151; }
+  .dark .report-table td { border-bottom: 1px solid #374151; }
 
   /* Sidebar nav */
   .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px;
@@ -135,7 +151,7 @@
   .fade-up-3 { animation: fadeUp .4s .2s ease both; }
 </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-background text-on-background">
     <script src="/js/auth.js"></script>
 
 <!-- ── Sidebar (shared component) ───────────────────────────────────────── -->
@@ -145,7 +161,7 @@
 <main class="flex-1 overflow-y-auto sidebar-offset">
 
   <!-- Top bar -->
-  <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between">
+  <header class="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">groups</span>
       <h1 class="font-display font-bold text-xl text-on-surface">Team Dashboard</h1>
@@ -153,7 +169,7 @@
     <div class="flex items-center gap-3">
       <div class="relative">
         <label for="dept-select" class="sr-only">Department</label>
-        <select id="dept-select" class="appearance-none bg-none text-sm h-10 border border-outline-variant rounded-lg pl-4 pr-9 bg-surface focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
+        <select id="dept-select" class="appearance-none bg-none text-sm h-10 border border-outline-variant rounded-lg pl-4 pr-9 bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
           <option value="operations">Operations</option>
         </select>
         <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">expand_more</span>
@@ -210,7 +226,7 @@
         </button>
       </div>
 
-      <div class="bg-white rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
         <!-- Search bar -->
         <div class="px-4 py-3 border-b border-outline-variant flex items-center gap-2">
           <span class="material-symbols-outlined text-outline text-lg">search</span>
@@ -298,7 +314,7 @@ function deltaChip(delta, label) {
 
 function kpiCard(icon, label, value, sub = '') {
   return `
-    <div class="kpi-card bg-white rounded-2xl border border-outline-variant p-4 flex flex-col gap-1 shadow-sm">
+    <div class="kpi-card bg-surface-container-lowest rounded-2xl border border-outline-variant p-4 flex flex-col gap-1 shadow-sm">
       <span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings:'FILL' 1">${icon}</span>
       <div class="font-display font-bold text-2xl text-on-surface">${value}</div>
       <div class="text-xs text-on-surface-variant font-medium">${label}</div>
@@ -403,7 +419,7 @@ function renderReports(rows) {
           </div>
         </td>
         <td>${r.status}${atRiskBadge}</td>
-        <td class="text-on-surface-variant">${r.current_course_id || '<span class="italic opacity-60">—</span>'}</td>
+        <td class="text-on-surface-variant">${r.current_course_title || '<span class="italic opacity-60">—</span>'}</td>
         <td class="text-right min-w-[120px]">
           <div class="flex items-center justify-end gap-2">
             <div class="progress-bar w-20">
@@ -444,7 +460,7 @@ async function loadStrategic(managerId, dept) {
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail?.message ?? d.detail ?? 'Failed to load strategic data');
 
-    dateLabel.textContent = `as of ${d.report_date}`;
+    dateLabel.textContent = d.report_date ? `as of ${d.report_date}` : '';
 
     const compDelta = deltaChip(d.delta?.completion_pct, 'avg');
     const rdeltaLabel = d.delta?.readiness !== undefined
@@ -452,7 +468,7 @@ async function loadStrategic(managerId, dept) {
 
     grid.innerHTML = `
       <!-- Completion comparison -->
-      <div class="bg-white rounded-2xl border border-outline-variant p-5 shadow-sm kpi-card">
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-5 shadow-sm kpi-card">
         <div class="flex items-center gap-2 mb-4">
           <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">task_alt</span>
           <span class="font-semibold text-on-surface">Completion Rate</span>
@@ -472,7 +488,7 @@ async function loadStrategic(managerId, dept) {
       </div>
 
       <!-- Readiness comparison -->
-      <div class="bg-white rounded-2xl border border-outline-variant p-5 shadow-sm kpi-card">
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-5 shadow-sm kpi-card">
         <div class="flex items-center gap-2 mb-4">
           <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">psychology</span>
           <span class="font-semibold text-on-surface">Readiness Score</span>

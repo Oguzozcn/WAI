@@ -135,6 +135,9 @@ The JSON must follow EXACTLY this structure (no extra keys, no markdown, raw JSO
   "course_title": "<short title for the remedial course, e.g. 'Targeted Review: Topic X'>",
   "course_description": "<2-3 sentence description of what this course covers and why>",
   "gap_topics": ["<topic 1>", "<topic 2>"],
+  "diagnoses": [
+    {{"concept_tags": ["<topic>"], "misconception": "<the specific root-cause misconception for THIS wrong answer, in the same order as the wrong answers listed above>"}}
+  ],
   "lesson": {{
     "lesson_title": "<lesson title>",
     "content_summary": "<3-4 paragraph explanation that names the likely misconception directly and corrects it, not just a restatement of the original material>",
@@ -178,6 +181,7 @@ The JSON must follow EXACTLY this structure (no extra keys, no markdown, raw JSO
 
 Generate exactly {short_quiz_question_count} questions for the short quiz and {final_assessment_question_count} questions for the final assessment.
 At least one distractor per question should reflect the specific misconception you diagnosed, not a generic wrong answer.
+The "diagnoses" array must have exactly one entry per wrong answer listed above, in the same order.
 Focus strictly on the gap topics identified. Return ONLY valid JSON.""",
         },
     },
@@ -212,6 +216,15 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON.""",
         },
         "luck_elimination": {
             "core_drift_concept_count": 3,
+            # generate_gap_review only defers a flagged concept to
+            # "scheduled_for_later" (instead of surfacing it immediately) when
+            # BOTH gates pass: HLR-predicted retention is still high (learner
+            # likely still remembers it) AND ability_score is decent (they've
+            # been getting it right lately). A concept just failed has its
+            # ability_score freshly lowered, so it fails the ability gate and
+            # stays immediate regardless of how recently it was "seen".
+            "hlr_retention_threshold": 0.6,
+            "hlr_ability_threshold": 0.5,
         },
         "adaptive_routing": {
             "confidence_threshold": 0.7,
@@ -229,6 +242,10 @@ Focus strictly on the gap topics identified. Return ONLY valid JSON.""",
             # (generate_remedial_course prompt template).
             "remedial_short_quiz_questions": 3,
             "remedial_final_assessment_questions": 5,
+            # Max pending (not-yet-completed) remedial courses per source_course_id
+            # before a new failure merges into the most recent pending one instead
+            # of creating another — see generate_remedial_course's accumulation cap.
+            "remedial_course_cap": 2,
         },
     },
 }

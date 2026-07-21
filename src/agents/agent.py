@@ -55,13 +55,11 @@ from src.services.curriculum_service import (
     generate_daily_agenda,
     identify_content_gaps,
     trigger_curriculum_generation,
-    generate_remedial_course,
 )
 from src.services.quiz_service import (
     generate_quiz,
     evaluate_answers,
     generate_reflection_prompt,
-    generate_gap_review,
 )
 from src.services.user_service import (
     get_user_progress,
@@ -76,11 +74,19 @@ from src.services.reporting_service import (
 )
 from src.services.routing_service import (
     determine_user_entry_path,
-    handle_user_assessment_failure,
     check_bypass_eligibility,
 )
 
 # Concrete function tools grouped by the skill that primarily uses them.
+#
+# NOT exposed here (deliberately): generate_gap_review, generate_remedial_course,
+# handle_user_assessment_failure. Each of those used to also be a directly
+# LLM-callable tool, which meant the model itself decided whether/which
+# remediation mechanism to invoke after a failure — nothing stopped it from
+# calling two or three for the same failure. That decision is now made in one
+# place (src.core.remediation_policy.decide_remediation, consulted inside
+# evaluate_answers) and acted on deterministically; the agent just calls
+# evaluate_answers and reads its `remediation` field back.
 _FUNCTION_TOOLS = [
     # curriculum-builder
     generate_learning_path,
@@ -91,12 +97,9 @@ _FUNCTION_TOOLS = [
     generate_quiz,
     evaluate_answers,
     generate_reflection_prompt,
-    generate_gap_review,
-    generate_remedial_course,
     get_user_progress,
     update_progress,
     determine_user_entry_path,
-    handle_user_assessment_failure,
     check_bypass_eligibility,
     # department-reporter
     synthesize_department_kpi,

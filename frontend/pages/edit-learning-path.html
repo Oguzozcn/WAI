@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en" style="">
+
+<head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WisdomAI | Edit Learning Path</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
+    <script id="tailwind-config">try {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "surface-dim": "#d6dbdd",
+                            "on-secondary-container": "#004966",
+                            "surface": "#f6fafd",
+                            "on-surface": "#171c1f",
+                            "on-error-container": "#93000a",
+                            "inverse-primary": "#95ccff",
+                            "error-container": "#ffdad6",
+                            "secondary-fixed": "#c5e7ff",
+                            "tertiary": "#255f00",
+                            "on-secondary": "#ffffff",
+                            "primary-container": "#0070ad",
+                            "primary": "#005787",
+                            "on-primary": "#ffffff",
+                            "inverse-surface": "#2c3134",
+                            "on-tertiary": "#ffffff",
+                            "surface-bright": "#f6fafd",
+                            "on-primary-fixed": "#001d32",
+                            "secondary-container": "#2abcfd",
+                            "on-primary-fixed-variant": "#004a75",
+                            "surface-container": "#eaeef1",
+                            "surface-container-lowest": "#ffffff",
+                            "on-secondary-fixed": "#001e2d",
+                            "primary-fixed": "#cde5ff",
+                            "tertiary-container": "#327a00",
+                            "on-secondary-fixed-variant": "#004c6a",
+                            "surface-container-low": "#f0f4f7",
+                            "surface-container-high": "#e5e9ec",
+                            "secondary-fixed-dim": "#80d0ff",
+                            "on-tertiary-container": "#bbff92",
+                            "surface-container-highest": "#dfe3e6",
+                            "on-tertiary-fixed-variant": "#1f5100",
+                            "tertiary-fixed-dim": "#6be026",
+                            "on-error": "#ffffff",
+                            "surface-variant": "#dfe3e6",
+                            "primary-fixed-dim": "#95ccff",
+                            "on-background": "#171c1f",
+                            "surface-tint": "#00639a",
+                            "error": "#ba1a1a",
+                            "tertiary-fixed": "#87fe45",
+                            "on-primary-container": "#e0eeff",
+                            "on-tertiary-fixed": "#082100",
+                            "outline": "#707881",
+                            "inverse-on-surface": "#edf1f4",
+                            "secondary": "#00658c",
+                            "background": "#f6fafd",
+                            "on-surface-variant": "#404750",
+                            "outline-variant": "#c0c7d1"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                        },
+                        "spacing": {
+                            "unit": "4px",
+                            "margin-desktop": "40px",
+                            "card-gap": "20px",
+                            "gutter": "24px",
+                            "margin-mobile": "16px"
+                        },
+                        "fontFamily": {
+                            "headline-lg-mobile": ["Hanken Grotesk"],
+                            "stats-number": ["Hanken Grotesk"],
+                            "headline-lg": ["Hanken Grotesk"],
+                            "display-lg": ["Hanken Grotesk"],
+                            "body-md": ["Inter"],
+                            "body-lg": ["Inter"],
+                            "headline-md": ["Hanken Grotesk"],
+                            "label-md": ["JetBrains Mono"]
+                        },
+                        "fontSize": {
+                            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                            "stats-number": ["24px", { "lineHeight": "24px", "fontWeight": "800" }],
+                            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                            "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                        }
+                    }
+                }
+            }
+        } catch (_e) { }</script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .serpentine-path {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding: 40px 0;
+        }
+        .toolbar-btn {
+            width: 34px; height: 34px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid var(--tw-border-opacity, #c0c7d1);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+    <script src="/js/auth.js"></script>
+    <!-- SideNavBar (shared component) -->
+    <div id="sidebar-mount"></div>
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col w-full min-w-0 relative">
+        <!-- TopAppBar -->
+        <header
+            class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
+            <div class="flex items-center gap-4">
+                <button id="mobile-menu-btn" class="md:hidden p-2">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                    <a class="hover:text-primary transition-colors font-body-md" href="/knowledge-vault">Knowledge Vault</a>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    <a class="hover:text-primary transition-colors font-body-md" href="/learning-paths">Learning Paths</a>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    <span class="font-body-md text-on-surface font-medium">Manual Edit</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/learning-paths"
+                    class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-2 px-4 font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-low no-underline whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Learning Paths
+                </a>
+            </div>
+        </header>
+        <!-- Page Content -->
+        <main class="flex-1 w-full max-w-[900px] mx-auto p-margin-mobile md:p-margin-desktop sidebar-offset">
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-primary-container text-on-primary-container text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Manager Tools</span>
+                </div>
+                <h2 id="edit-path-title-heading" class="font-headline-lg text-headline-lg text-on-surface">Loading path…</h2>
+                <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Click the pencil next to any course, lesson, or assessment below to edit it directly.</p>
+            </div>
+
+            <div id="edit-path-container" class="serpentine-path w-full">
+                <div class="text-center py-12 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-4xl mb-2 block animate-spin">sync</span>
+                    Loading learning path…
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ── Lesson Editor Modal ── -->
+    <div id="lesson-editor-modal" class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-surface-container-lowest rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl border border-outline-variant">
+            <div class="flex items-center justify-between px-8 pt-8 pb-4 border-b border-outline-variant">
+                <h3 class="font-headline-sm text-headline-sm text-on-surface">Edit Lesson</h3>
+                <button id="lesson-editor-close-btn" type="button" class="w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-surface-container-high text-on-surface-variant">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="overflow-y-auto px-8 py-6 flex-1">
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Lesson Title</label>
+                <input id="lesson-editor-title-input" type="text"
+                    class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl p-3 mb-5 focus:ring-2 focus:ring-primary outline-none">
+
+                <div class="flex items-center justify-between mb-2">
+                    <label class="font-label-md text-label-md text-on-surface-variant">Body Content</label>
+                    <div class="flex items-center gap-1">
+                        <button type="button" data-format="bold" class="format-btn toolbar-btn border-outline-variant text-on-surface-variant hover:bg-surface-container-high" title="Bold"><span class="material-symbols-outlined text-[18px]">format_bold</span></button>
+                        <button type="button" data-format="h2" class="format-btn toolbar-btn border-outline-variant text-on-surface-variant hover:bg-surface-container-high" title="Bigger text (heading)"><span class="material-symbols-outlined text-[18px]">format_size</span></button>
+                        <button type="button" data-format="h3" class="format-btn toolbar-btn border-outline-variant text-on-surface-variant hover:bg-surface-container-high" title="Smaller heading (subheading)"><span class="material-symbols-outlined text-[16px]">text_fields</span></button>
+                        <button type="button" data-format="bullet" class="format-btn toolbar-btn border-outline-variant text-on-surface-variant hover:bg-surface-container-high" title="Bulleted term"><span class="material-symbols-outlined text-[18px]">format_list_bulleted</span></button>
+                        <button id="lesson-preview-toggle-btn" type="button" class="toolbar-btn border-outline-variant text-on-surface-variant hover:bg-surface-container-high ml-2" title="Preview"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+                    </div>
+                </div>
+                <textarea id="lesson-editor-content-textarea" rows="12"
+                    class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl p-3 font-body-md text-sm focus:ring-2 focus:ring-primary outline-none"></textarea>
+                <article id="lesson-editor-preview" class="hidden prose prose-blue max-w-none bg-surface-container-low border border-outline-variant rounded-xl p-4 mt-1"></article>
+
+                <div class="mt-4 bg-surface-container-low rounded-xl p-4">
+                    <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Instruction for AI (optional)</label>
+                    <div class="flex gap-2">
+                        <input id="lesson-ai-instruction-input" type="text" placeholder="e.g. make it more concise, add a real example…"
+                            class="flex-1 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary outline-none">
+                        <button id="regenerate-lesson-btn" type="button"
+                            class="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary font-label-md text-sm rounded-lg hover:bg-primary transition-colors whitespace-nowrap disabled:opacity-50">
+                            <span class="material-symbols-outlined text-[18px]">auto_awesome</span> Regenerate with AI
+                        </button>
+                    </div>
+                    <p id="lesson-ai-status" class="hidden text-xs text-on-surface-variant mt-2"></p>
+                </div>
+
+                <div id="lesson-editor-quiz-section" class="mt-8 hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-headline-md text-headline-md text-on-surface">Quiz Questions</h4>
+                        <div class="flex items-center gap-2">
+                            <input id="lesson-quiz-ai-instruction-input" type="text" placeholder="Instruction for AI (optional)"
+                                class="bg-surface-container-low border border-outline-variant text-on-surface rounded-lg p-2 text-xs focus:ring-2 focus:ring-primary outline-none w-56">
+                            <button id="regenerate-lesson-quiz-btn" type="button"
+                                class="flex items-center gap-1.5 px-3 py-2 bg-primary-container text-on-primary font-label-md text-xs rounded-lg hover:bg-primary transition-colors whitespace-nowrap disabled:opacity-50">
+                                <span class="material-symbols-outlined text-[16px]">auto_awesome</span> Regenerate Quiz
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lesson-quiz-editor-container"></div>
+                    <button id="lesson-add-question-btn" type="button" class="flex items-center gap-1.5 text-primary font-label-md text-sm hover:underline">
+                        <span class="material-symbols-outlined text-[18px]">add_circle</span> Add Question
+                    </button>
+                </div>
+
+                <div id="lesson-editor-error" class="hidden text-xs text-error mt-4"></div>
+            </div>
+            <div class="flex items-center justify-end gap-3 px-8 py-5 border-t border-outline-variant">
+                <button id="lesson-editor-cancel-btn" type="button" class="px-5 py-2 font-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">Cancel</button>
+                <button id="lesson-editor-save-btn" type="button" class="px-5 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Final Assessment / Quiz-only Editor Modal ── -->
+    <div id="quiz-editor-modal" class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-surface-container-lowest rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl border border-outline-variant">
+            <div class="flex items-center justify-between px-8 pt-8 pb-4 border-b border-outline-variant">
+                <h3 id="quiz-editor-heading" class="font-headline-sm text-headline-sm text-on-surface">Edit Final Assessment</h3>
+                <button id="quiz-editor-close-btn" type="button" class="w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-surface-container-high text-on-surface-variant">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="overflow-y-auto px-8 py-6 flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-label-md text-label-md text-on-surface-variant">Questions</span>
+                    <div class="flex items-center gap-2">
+                        <input id="quiz-only-ai-instruction-input" type="text" placeholder="Instruction for AI (optional)"
+                            class="bg-surface-container-low border border-outline-variant text-on-surface rounded-lg p-2 text-xs focus:ring-2 focus:ring-primary outline-none w-56">
+                        <button id="regenerate-quiz-only-btn" type="button"
+                            class="flex items-center gap-1.5 px-3 py-2 bg-primary-container text-on-primary font-label-md text-xs rounded-lg hover:bg-primary transition-colors whitespace-nowrap disabled:opacity-50">
+                            <span class="material-symbols-outlined text-[16px]">auto_awesome</span> Regenerate Quiz
+                        </button>
+                    </div>
+                </div>
+                <div id="quiz-only-editor-container"></div>
+                <button id="quiz-only-add-question-btn" type="button" class="flex items-center gap-1.5 text-primary font-label-md text-sm hover:underline">
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span> Add Question
+                </button>
+                <div id="quiz-editor-error" class="hidden text-xs text-error mt-4"></div>
+            </div>
+            <div class="flex items-center justify-end gap-3 px-8 py-5 border-t border-outline-variant">
+                <button id="quiz-editor-cancel-btn" type="button" class="px-5 py-2 font-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">Cancel</button>
+                <button id="quiz-editor-save-btn" type="button" class="px-5 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api-client.js"></script>
+    <script src="/js/sidebar.js"></script>
+
+    <script>
+        const wisdomSession = window.WisdomAuth.requireRole('manager');
+        const managerId = wisdomSession ? wisdomSession.user_id : '';
+
+        const params = new URLSearchParams(window.location.search);
+        const pathId = params.get('path_id') || '';
+        const pathType = params.get('path_type') || 'official';
+
+        let pathData = null;
+
+        function toast(msg, type) {
+            if (window.WisdomSidebar) window.WisdomSidebar.toast(msg, type);
+        }
+
+        // ── Load & render ───────────────────────────────────────────────────
+        async function loadPath() {
+            if (!pathId) {
+                document.getElementById('edit-path-container').innerHTML =
+                    '<div class="text-center py-12 text-error">No path_id given.</div>';
+                return;
+            }
+            try {
+                const url = `/api/kb/learning-path/${encodeURIComponent(pathId)}/full` +
+                    `?role=manager&manager_id=${encodeURIComponent(managerId)}&path_type=${encodeURIComponent(pathType)}`;
+                const res = await fetch(url);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Failed to load path.');
+                }
+                pathData = await res.json();
+                renderPath();
+            } catch (err) {
+                document.getElementById('edit-path-container').innerHTML =
+                    `<div class="text-center py-12 text-error">${err.message || 'Failed to load path.'}</div>`;
+            }
+        }
+
+        function findCourse(courseId) {
+            return (pathData.courses || []).find(c => c.course_id === courseId);
+        }
+        function findLesson(courseId, lessonId) {
+            const course = findCourse(courseId);
+            if (!course) return null;
+            return (course.lessons || []).find(l => l.lesson_id === lessonId);
+        }
+
+        function renderPath() {
+            const titleText = pathData.title ||
+                (pathData.courses && pathData.courses[0] && pathData.courses[0].title) || 'Learning Path';
+            document.getElementById('edit-path-title-heading').textContent = 'Edit: ' + titleText;
+
+            const container = document.getElementById('edit-path-container');
+            container.innerHTML = '';
+
+            (pathData.courses || []).forEach((course, idx) => {
+                const courseBlock = document.createElement('div');
+                courseBlock.className = 'w-full max-w-lg mx-auto my-4';
+                courseBlock.innerHTML = `
+                <div class="bg-primary text-on-primary p-6 rounded-2xl border-b-4 border-blue-900 flex justify-between items-center shadow-lg">
+                    <div class="flex-1 min-w-0 mr-4">
+                        <p class="font-label-md text-xs opacity-80 uppercase tracking-widest">Course ${idx + 1}</p>
+                        <div class="course-title-display flex items-center gap-2">
+                            <h3 class="font-headline-md text-white truncate">${course.title}</h3>
+                        </div>
+                        <div class="course-title-edit hidden flex items-center gap-2 mt-1">
+                            <input type="text" class="course-title-input flex-1 bg-surface-container-lowest text-on-surface rounded-lg px-3 py-1.5 text-sm outline-none" value="${course.title.replace(/"/g, '&quot;')}">
+                            <button type="button" class="course-title-save-btn w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-[18px]">check</span></button>
+                            <button type="button" class="course-title-cancel-btn w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-[18px]">close</span></button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button type="button" class="course-edit-btn w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center" title="Edit course title">
+                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                        </button>
+                        <span class="material-symbols-outlined text-3xl">school</span>
+                    </div>
+                </div>`;
+                container.appendChild(courseBlock);
+
+                const titleDisplay = courseBlock.querySelector('.course-title-display');
+                const titleEdit = courseBlock.querySelector('.course-title-edit');
+                const titleInput = courseBlock.querySelector('.course-title-input');
+
+                courseBlock.querySelector('.course-edit-btn').addEventListener('click', () => {
+                    titleDisplay.classList.add('hidden');
+                    titleEdit.classList.remove('hidden');
+                    titleInput.focus();
+                    titleInput.select();
+                });
+                courseBlock.querySelector('.course-title-cancel-btn').addEventListener('click', () => {
+                    titleInput.value = course.title;
+                    titleEdit.classList.add('hidden');
+                    titleDisplay.classList.remove('hidden');
+                });
+                courseBlock.querySelector('.course-title-save-btn').addEventListener('click', async () => {
+                    const newTitle = titleInput.value.trim();
+                    if (!newTitle) return;
+                    try {
+                        const resp = await fetch(`/api/kb/learning-path/${encodeURIComponent(pathId)}/course/${encodeURIComponent(course.course_id)}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: newTitle, manager_id: managerId, role: 'manager', path_type: pathType }),
+                        });
+                        if (!resp.ok) {
+                            const err = await resp.json().catch(() => ({}));
+                            throw new Error(err.detail || 'Failed to update course title.');
+                        }
+                        course.title = newTitle;
+                        titleDisplay.querySelector('h3').textContent = newTitle;
+                        document.getElementById('edit-path-title-heading').textContent =
+                            'Edit: ' + (pathData.title || newTitle);
+                        titleEdit.classList.add('hidden');
+                        titleDisplay.classList.remove('hidden');
+                        toast('Course title updated.');
+                    } catch (err) {
+                        toast(err.message || 'Failed to update course title.', 'warn');
+                    }
+                });
+
+                // Lessons
+                const lessons = course.lessons || [];
+                lessons.forEach((lesson) => {
+                    const node = document.createElement('div');
+                    node.className = 'relative flex flex-col items-center my-4';
+                    node.innerHTML = `
+                    <button type="button" class="lesson-edit-btn absolute -top-2 right-[calc(50%-58px)] z-30 w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant shadow-md flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-on-primary" title="Edit lesson">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                    <div class="w-20 h-20 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center border-4 border-white dark:border-[#111827] shadow">
+                        <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+                    </div>
+                    <span class="mt-2 font-bold text-on-surface text-sm text-center px-2 max-w-[220px]">${lesson.title}</span>
+                    <span class="text-xs text-on-surface-variant">${lesson.estimated_minutes || 15} min${lesson.short_quiz_id ? ' • has quiz' : ''}</span>`;
+                    container.appendChild(node);
+
+                    node.querySelector('.lesson-edit-btn').addEventListener('click', () => {
+                        openLessonEditor(course.course_id, lesson.lesson_id);
+                    });
+                });
+
+                // Final assessment
+                if (course.has_final_assessment !== false && course.final_assessment_id) {
+                    const fa = document.createElement('div');
+                    fa.className = 'relative flex flex-col items-center my-6';
+                    fa.innerHTML = `
+                    <button type="button" class="fa-edit-btn absolute -top-2 right-[calc(50%-66px)] z-30 w-8 h-8 rounded-full bg-surface-container-lowest border border-outline-variant shadow-md flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-on-primary" title="Edit final assessment">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                    <div class="w-24 h-24 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center border-4 border-white dark:border-[#111827] shadow">
+                        <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                    </div>
+                    <span class="mt-3 font-bold text-sm px-3 py-1 rounded-full text-center text-tertiary bg-tertiary-fixed/20">Final Assessment</span>`;
+                    container.appendChild(fa);
+
+                    fa.querySelector('.fa-edit-btn').addEventListener('click', () => {
+                        openQuizOnlyEditor(course.course_id);
+                    });
+                }
+            });
+
+            if (!pathData.courses || pathData.courses.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-on-surface-variant">This path has no courses yet.</div>';
+            }
+        }
+
+        // ── Markdown formatting toolbar (textarea-based, matches lesson.html's renderer) ──
+        function wrapSelection(textarea, before, after) {
+            const start = textarea.selectionStart, end = textarea.selectionEnd;
+            const value = textarea.value;
+            const selected = value.slice(start, end) || 'text';
+            textarea.value = value.slice(0, start) + before + selected + after + value.slice(end);
+            textarea.focus();
+            textarea.selectionStart = start + before.length;
+            textarea.selectionEnd = start + before.length + selected.length;
+        }
+        function prefixLine(textarea, prefix) {
+            const start = textarea.selectionStart;
+            const value = textarea.value;
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+            let lineEnd = value.indexOf('\n', start);
+            if (lineEnd === -1) lineEnd = value.length;
+            const line = value.slice(lineStart, lineEnd);
+            const stripped = line.replace(/^(#{2,3}\s+|- \*\*)/, '');
+            const newLine = prefix === '- **' ? `- **${stripped}**: description` : `${prefix}${stripped}`;
+            textarea.value = value.slice(0, lineStart) + newLine + value.slice(lineEnd);
+            textarea.focus();
+        }
+
+        function wireFormatToolbar(root, textarea) {
+            root.querySelectorAll('.format-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const fmt = btn.dataset.format;
+                    if (fmt === 'bold') wrapSelection(textarea, '**', '**');
+                    else if (fmt === 'h2') prefixLine(textarea, '## ');
+                    else if (fmt === 'h3') prefixLine(textarea, '### ');
+                    else if (fmt === 'bullet') prefixLine(textarea, '- **');
+                });
+            });
+        }
+
+        function renderMarkdownPreview(content) {
+            let formatted = (content || '')
+                .replace(/## (.*)/g, '<h2 class="font-headline-md text-headline-md text-on-surface mb-4 mt-8">$1</h2>')
+                .replace(/### (.*)/g, '<h3 class="font-headline-md text-on-surface mb-3 mt-6">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/```python([\s\S]*?)```/g, '<pre class="bg-surface-container-low p-4 rounded-xl overflow-x-auto my-4 text-sm font-label-md"><code>$1</code></pre>')
+                .replace(/- \*\*(.*?)\*\*: (.*)/g, '<li class="flex gap-3 mb-3"><span class="material-symbols-outlined text-primary mt-1">check_circle</span><span><strong>$1</strong>: $2</span></li>')
+                .replace(/- \*\*(.*?)\*\*/g, '<li class="flex gap-3 mb-3"><span class="material-symbols-outlined text-primary mt-1">check_circle</span><span><strong>$1</strong></span></li>');
+            formatted = formatted.split('\n\n').map(p => {
+                p = p.trim();
+                if (!p) return '';
+                if (p.startsWith('<h') || p.startsWith('<pre') || p.startsWith('<li') || p.startsWith('<ul')) return p;
+                return '<p class="text-body-md text-on-surface-variant mb-4 leading-relaxed">' + p + '</p>';
+            }).join('\n');
+            return formatted;
+        }
+
+        // ── Quiz editor (shared between lesson editor & final-assessment editor) ──
+        function questionCardHtml(q, idx) {
+            const options = q.options || ['', '', '', ''];
+            const correctIdx = typeof q.correct_answer_index === 'number' ? q.correct_answer_index : 0;
+            const rationale = q.rationale || {};
+            const groupName = 'quiz-correct-' + Math.random().toString(36).slice(2);
+            return `
+            <div class="quiz-question-card border border-outline-variant rounded-2xl p-4 mb-4" data-question-id="${q.question_id || ''}" data-group="${groupName}">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Question ${idx + 1}</span>
+                    <button type="button" class="remove-question-btn text-error text-xs flex items-center gap-1 hover:underline">
+                        <span class="material-symbols-outlined text-[16px]">delete</span> Remove
+                    </button>
+                </div>
+                <textarea class="q-text w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 mb-3 text-sm focus:ring-2 focus:ring-primary outline-none" rows="2">${(q.text || '').replace(/</g, '&lt;')}</textarea>
+                <div class="space-y-2 mb-3">
+                    ${options.map((opt, oi) => `
+                    <div class="flex items-center gap-2">
+                        <input type="radio" name="${groupName}" class="q-correct-radio w-4 h-4 accent-primary flex-shrink-0" value="${oi}" ${oi === correctIdx ? 'checked' : ''}>
+                        <input type="text" class="q-option flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary outline-none" value="${(opt || '').replace(/"/g, '&quot;')}">
+                    </div>`).join('')}
+                </div>
+                <details class="text-xs">
+                    <summary class="cursor-pointer text-on-surface-variant mb-2">Rationale (shown after answering)</summary>
+                    ${options.map((_, oi) => `
+                    <textarea class="q-rationale w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 mb-1 text-xs focus:ring-2 focus:ring-primary outline-none" rows="1" data-option-index="${oi}" placeholder="Why option ${oi + 1} is right/wrong">${(rationale[String(oi)] || '').replace(/</g, '&lt;')}</textarea>`).join('')}
+                </details>
+            </div>`;
+        }
+
+        function renderQuizEditor(container, questions) {
+            container.innerHTML = (questions || []).map((q, i) => questionCardHtml(q, i)).join('');
+            wireQuizCardRemovals(container);
+        }
+        function wireQuizCardRemovals(container) {
+            container.querySelectorAll('.remove-question-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.quiz-question-card').remove();
+                    renumberQuestions(container);
+                });
+            });
+        }
+        function renumberQuestions(container) {
+            container.querySelectorAll('.quiz-question-card').forEach((card, i) => {
+                card.querySelector('span.font-label-md').textContent = 'Question ' + (i + 1);
+            });
+        }
+        function addBlankQuestion(container) {
+            const div = document.createElement('div');
+            div.innerHTML = questionCardHtml({ text: '', options: ['', '', '', ''], correct_answer_index: 0, rationale: {} }, container.querySelectorAll('.quiz-question-card').length);
+            const card = div.firstElementChild;
+            container.appendChild(card);
+            wireQuizCardRemovals(container);
+        }
+        function collectQuizEditorData(container) {
+            const questions = [];
+            container.querySelectorAll('.quiz-question-card').forEach(card => {
+                const text = card.querySelector('.q-text').value.trim();
+                const optionInputs = Array.from(card.querySelectorAll('.q-option'));
+                const options = optionInputs.map(i => i.value.trim());
+                const checkedRadio = card.querySelector('.q-correct-radio:checked');
+                const correctIdx = checkedRadio ? parseInt(checkedRadio.value, 10) : 0;
+                const rationale = {};
+                card.querySelectorAll('.q-rationale').forEach(ta => {
+                    if (ta.value.trim()) rationale[ta.dataset.optionIndex] = ta.value.trim();
+                });
+                if (!text || options.some(o => !o)) return; // skip incomplete rows
+                questions.push({
+                    question_id: card.dataset.questionId || '',
+                    text, options, correct_answer_index: correctIdx, rationale, concept_tags: [],
+                });
+            });
+            return questions;
+        }
+
+        // ── Lesson editor ───────────────────────────────────────────────────
+        let editingCourseId = '', editingLessonId = '';
+        const lessonModal = document.getElementById('lesson-editor-modal');
+        const lessonTitleInput = document.getElementById('lesson-editor-title-input');
+        const lessonContentTextarea = document.getElementById('lesson-editor-content-textarea');
+        const lessonPreview = document.getElementById('lesson-editor-preview');
+        const lessonQuizSection = document.getElementById('lesson-editor-quiz-section');
+        const lessonQuizContainer = document.getElementById('lesson-quiz-editor-container');
+        const lessonErrorEl = document.getElementById('lesson-editor-error');
+
+        wireFormatToolbar(lessonModal, lessonContentTextarea);
+
+        function lessonEditorError(message) {
+            if (!message) { lessonErrorEl.classList.add('hidden'); lessonErrorEl.textContent = ''; return; }
+            lessonErrorEl.textContent = message;
+            lessonErrorEl.classList.remove('hidden');
+        }
+
+        function openLessonEditor(courseId, lessonId) {
+            editingCourseId = courseId;
+            editingLessonId = lessonId;
+            const lesson = findLesson(courseId, lessonId);
+            if (!lesson) return;
+            lessonTitleInput.value = lesson.title || '';
+            lessonContentTextarea.value = lesson.content || '';
+            lessonPreview.classList.add('hidden');
+            lessonContentTextarea.classList.remove('hidden');
+            document.getElementById('lesson-ai-instruction-input').value = '';
+            document.getElementById('lesson-ai-status').classList.add('hidden');
+            lessonEditorError('');
+
+            if (lesson.quiz && Array.isArray(lesson.quiz.questions)) {
+                lessonQuizSection.classList.remove('hidden');
+                renderQuizEditor(lessonQuizContainer, lesson.quiz.questions);
+            } else {
+                lessonQuizSection.classList.add('hidden');
+                lessonQuizContainer.innerHTML = '';
+            }
+
+            lessonModal.classList.remove('hidden');
+        }
+
+        document.getElementById('lesson-editor-close-btn').addEventListener('click', () => lessonModal.classList.add('hidden'));
+        document.getElementById('lesson-editor-cancel-btn').addEventListener('click', () => lessonModal.classList.add('hidden'));
+
+        document.getElementById('lesson-preview-toggle-btn').addEventListener('click', () => {
+            const showing = !lessonPreview.classList.contains('hidden');
+            if (showing) {
+                lessonPreview.classList.add('hidden');
+                lessonContentTextarea.classList.remove('hidden');
+            } else {
+                lessonPreview.innerHTML = renderMarkdownPreview(lessonContentTextarea.value);
+                lessonPreview.classList.remove('hidden');
+                lessonContentTextarea.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('lesson-add-question-btn').addEventListener('click', () => addBlankQuestion(lessonQuizContainer));
+
+        document.getElementById('regenerate-lesson-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('regenerate-lesson-btn');
+            const statusEl = document.getElementById('lesson-ai-status');
+            btn.disabled = true;
+            statusEl.textContent = 'Asking Gemini to rewrite this lesson…';
+            statusEl.classList.remove('hidden');
+            try {
+                const resp = await fetch(`/api/kb/lesson/${encodeURIComponent(editingLessonId)}/regenerate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lesson_title: lessonTitleInput.value,
+                        lesson_content: lessonContentTextarea.value,
+                        instruction: document.getElementById('lesson-ai-instruction-input').value,
+                        role: 'manager',
+                    }),
+                });
+                const data = await resp.json();
+                if (data.status === 'error') {
+                    statusEl.textContent = 'Regeneration failed — original content kept: ' + (data.message || '');
+                } else {
+                    lessonTitleInput.value = data.title;
+                    lessonContentTextarea.value = data.content;
+                    if (!lessonPreview.classList.contains('hidden')) {
+                        lessonPreview.innerHTML = renderMarkdownPreview(lessonContentTextarea.value);
+                    }
+                    statusEl.textContent = 'Draft ready below — review, then hit Save to keep it.';
+                }
+            } catch (err) {
+                statusEl.textContent = 'Regeneration failed: ' + (err.message || 'network error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('regenerate-lesson-quiz-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('regenerate-lesson-quiz-btn');
+            const lesson = findLesson(editingCourseId, editingLessonId);
+            if (!lesson || !lesson.quiz) return;
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`/api/kb/quiz/${encodeURIComponent(lesson.short_quiz_id)}/regenerate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: lesson.quiz.topic || lessonTitleInput.value,
+                        difficulty: lesson.quiz.difficulty || 'medium',
+                        question_count: (lesson.quiz.questions || []).length || 5,
+                        quiz_type: lesson.quiz.quiz_type || 'short_quiz',
+                        instruction: document.getElementById('lesson-quiz-ai-instruction-input').value,
+                        role: 'manager',
+                    }),
+                });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    renderQuizEditor(lessonQuizContainer, data.questions);
+                    toast('Quiz draft regenerated — review, then Save.');
+                } else {
+                    toast('Quiz regeneration failed.', 'warn');
+                }
+            } catch (err) {
+                toast('Quiz regeneration failed: ' + (err.message || 'network error'), 'warn');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('lesson-editor-save-btn').addEventListener('click', async () => {
+            const saveBtn = document.getElementById('lesson-editor-save-btn');
+            const title = lessonTitleInput.value.trim();
+            const content = lessonContentTextarea.value;
+            if (!title || !content.trim()) { lessonEditorError('Title and content cannot be empty.'); return; }
+            lessonEditorError('');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving…';
+            try {
+                const resp = await fetch(`/api/kb/learning-path/${encodeURIComponent(pathId)}/lesson/${encodeURIComponent(editingLessonId)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content, manager_id: managerId, role: 'manager', path_type: pathType }),
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Failed to save lesson.');
+                }
+                const lesson = findLesson(editingCourseId, editingLessonId);
+                lesson.title = title;
+                lesson.content = content;
+
+                if (lesson.quiz && !lessonQuizSection.classList.contains('hidden')) {
+                    const questions = collectQuizEditorData(lessonQuizContainer);
+                    if (questions.length === 0) {
+                        throw new Error('Lesson saved, but the quiz needs at least one complete question — quiz not saved.');
+                    }
+                    const quizResp = await fetch(`/api/kb/quiz/${encodeURIComponent(lesson.short_quiz_id)}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ questions, role: 'manager' }),
+                    });
+                    if (!quizResp.ok) {
+                        const err = await quizResp.json().catch(() => ({}));
+                        throw new Error(err.detail || 'Lesson saved, but quiz failed to save.');
+                    }
+                    lesson.quiz.questions = questions;
+                }
+
+                lessonModal.classList.add('hidden');
+                renderPath();
+                toast('Lesson updated.');
+            } catch (err) {
+                lessonEditorError(err.message || 'Failed to save lesson.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        });
+
+        // ── Final assessment (quiz-only) editor ─────────────────────────────
+        let editingQuizCourseId = '';
+        const quizModal = document.getElementById('quiz-editor-modal');
+        const quizOnlyContainer = document.getElementById('quiz-only-editor-container');
+        const quizEditorErrorEl = document.getElementById('quiz-editor-error');
+
+        function quizEditorError(message) {
+            if (!message) { quizEditorErrorEl.classList.add('hidden'); quizEditorErrorEl.textContent = ''; return; }
+            quizEditorErrorEl.textContent = message;
+            quizEditorErrorEl.classList.remove('hidden');
+        }
+
+        function openQuizOnlyEditor(courseId) {
+            editingQuizCourseId = courseId;
+            const course = findCourse(courseId);
+            if (!course || !course.final_assessment) return;
+            document.getElementById('quiz-editor-heading').textContent = 'Edit Final Assessment: ' + course.title;
+            document.getElementById('quiz-only-ai-instruction-input').value = '';
+            quizEditorError('');
+            renderQuizEditor(quizOnlyContainer, course.final_assessment.questions || []);
+            quizModal.classList.remove('hidden');
+        }
+
+        document.getElementById('quiz-editor-close-btn').addEventListener('click', () => quizModal.classList.add('hidden'));
+        document.getElementById('quiz-editor-cancel-btn').addEventListener('click', () => quizModal.classList.add('hidden'));
+        document.getElementById('quiz-only-add-question-btn').addEventListener('click', () => addBlankQuestion(quizOnlyContainer));
+
+        document.getElementById('regenerate-quiz-only-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('regenerate-quiz-only-btn');
+            const course = findCourse(editingQuizCourseId);
+            if (!course || !course.final_assessment) return;
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`/api/kb/quiz/${encodeURIComponent(course.final_assessment_id)}/regenerate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: course.final_assessment.topic || course.title,
+                        difficulty: course.final_assessment.difficulty || 'medium',
+                        question_count: (course.final_assessment.questions || []).length || 8,
+                        quiz_type: course.final_assessment.quiz_type || 'final_assessment',
+                        instruction: document.getElementById('quiz-only-ai-instruction-input').value,
+                        role: 'manager',
+                    }),
+                });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    renderQuizEditor(quizOnlyContainer, data.questions);
+                    toast('Quiz draft regenerated — review, then Save.');
+                } else {
+                    toast('Quiz regeneration failed.', 'warn');
+                }
+            } catch (err) {
+                toast('Quiz regeneration failed: ' + (err.message || 'network error'), 'warn');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('quiz-editor-save-btn').addEventListener('click', async () => {
+            const saveBtn = document.getElementById('quiz-editor-save-btn');
+            const course = findCourse(editingQuizCourseId);
+            if (!course || !course.final_assessment) return;
+            const questions = collectQuizEditorData(quizOnlyContainer);
+            if (questions.length === 0) { quizEditorError('Add at least one complete question.'); return; }
+            quizEditorError('');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving…';
+            try {
+                const resp = await fetch(`/api/kb/quiz/${encodeURIComponent(course.final_assessment_id)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ questions, role: 'manager' }),
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Failed to save quiz.');
+                }
+                course.final_assessment.questions = questions;
+                quizModal.classList.add('hidden');
+                toast('Final assessment updated.');
+            } catch (err) {
+                quizEditorError(err.message || 'Failed to save quiz.');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        });
+
+        loadPath();
+    </script>
+</body>
+
+</html>

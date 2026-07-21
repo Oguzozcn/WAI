@@ -2,10 +2,12 @@
 <html class="light" lang="en">
 
 <head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>WisdomAI | Learning Materials</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
         rel="stylesheet">
@@ -185,9 +187,8 @@
                             class="bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg py-2 px-4 font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-low whitespace-nowrap">
                             <span class="material-symbols-outlined text-[18px]">add</span> Create a Learning Path
                         </button>
-                        <button
-                            class="bg-primary-container text-on-primary rounded-lg py-2 px-4 font-label-md text-label-md flex items-center gap-2 hover:bg-primary whitespace-nowrap"
-                            onclick="window.location.href='/knowledge-vault'">
+                        <button id="upload-materials-btn"
+                            class="bg-primary-container text-on-primary rounded-lg py-2 px-4 font-label-md text-label-md flex items-center gap-2 hover:bg-primary whitespace-nowrap">
                             <span class="material-symbols-outlined text-[18px]">cloud_upload</span> Upload
                         </button>
                     </div>
@@ -231,7 +232,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="border-b border-outline-variant bg-surface-container-low/50">
+                                <tr class="border-b border-outline-variant bg-surface-container-low/50 dark:bg-white/5">
                                     <th
                                         class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-semibold">
                                         Name</th>
@@ -319,11 +320,16 @@
 
                     tbody.innerHTML = files.map(f => {
                         const ext = f.filename.split('.').pop().toLowerCase();
+                        const category = f.content_category || 'text';
                         let icon = 'description';
                         let iconColor = 'text-blue-500';
-                        if (ext === 'md') { icon = 'article'; iconColor = 'text-purple-500'; }
-                        if (ext === 'txt') { icon = 'text_snippet'; iconColor = 'text-teal-500'; }
-                        if (ext === 'json') { icon = 'data_object'; iconColor = 'text-orange-500'; }
+                        if (category === 'image') { icon = 'image'; iconColor = 'text-pink-500'; }
+                        else if (category === 'audio') { icon = 'audiotrack'; iconColor = 'text-amber-500'; }
+                        else if (category === 'video') { icon = 'movie'; iconColor = 'text-red-500'; }
+                        else if (category === 'pdf') { icon = 'picture_as_pdf'; iconColor = 'text-rose-500'; }
+                        else if (ext === 'md') { icon = 'article'; iconColor = 'text-purple-500'; }
+                        else if (ext === 'txt') { icon = 'text_snippet'; iconColor = 'text-teal-500'; }
+                        else if (ext === 'json') { icon = 'data_object'; iconColor = 'text-orange-500'; }
 
                         const sizeStr = f.size_bytes > 1048576
                             ? `${(f.size_bytes / 1048576).toFixed(1)} MB`
@@ -344,6 +350,9 @@
                         <td class="py-4 px-6 text-on-surface-variant">${sizeStr}</td>
                         <td class="py-4 px-6 text-on-surface-variant">${dateStr}</td>
                         <td class="py-4 px-6 text-right">
+                            <button class="history-file-btn text-on-surface-variant hover:text-primary p-1 rounded-full hover:bg-primary-container/20" data-filename="${f.filename}" title="Version history" aria-label="Version history">
+                                <span class="material-symbols-outlined">history</span>
+                            </button>
                             <button class="delete-file-btn text-on-surface-variant hover:text-error p-1 rounded-full hover:bg-error-container" data-filename="${f.filename}" title="Delete document" aria-label="Delete document">
                                 <span class="material-symbols-outlined">delete</span>
                             </button>
@@ -353,6 +362,9 @@
 
                     tbody.querySelectorAll('.delete-file-btn').forEach((btn) => {
                         btn.addEventListener('click', () => deleteDocument(btn.dataset.filename, btn));
+                    });
+                    tbody.querySelectorAll('.history-file-btn').forEach((btn) => {
+                        btn.addEventListener('click', () => openHistoryModal(btn.dataset.filename));
                     });
                 } catch (e) {
                     document.getElementById('files-table-body').innerHTML = `
@@ -530,11 +542,12 @@
         selectionModal.innerHTML = `
         <div class="bg-surface-container-lowest rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl border border-outline-variant">
             <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Create Learning Path</h3>
-            <p class="font-body-md text-on-surface-variant mb-6">Select an existing learning material to generate a curriculum from.</p>
-            
-            <select id="file-select" class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl p-3 focus:ring-2 focus:ring-primary outline-none">
-                <option value="">Loading files...</option>
-            </select>
+            <p class="font-body-md text-on-surface-variant mb-1">Select one or more learning materials to generate a single combined curriculum from.</p>
+            <p id="file-select-count" class="font-label-md text-xs text-primary font-semibold mb-4">0 selected</p>
+
+            <div id="file-select-list" class="w-full max-h-64 overflow-y-auto bg-surface-container-low border border-outline-variant rounded-xl divide-y divide-outline-variant">
+                <div class="p-4 text-sm text-on-surface-variant">Loading files...</div>
+            </div>
 
             <label class="flex items-center gap-2 mt-4 mb-8 cursor-pointer">
                 <input type="checkbox" id="append-toggle" class="w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary">
@@ -543,7 +556,7 @@
 
             <div class="flex justify-end gap-3">
                 <button id="cancel-selection-btn" class="px-5 py-2 font-label-md text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">Cancel</button>
-                <button id="confirm-selection-btn" class="px-5 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50">Generate</button>
+                <button id="confirm-selection-btn" disabled class="px-5 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Generate</button>
             </div>
         </div>
     `;
@@ -577,30 +590,50 @@
             showToast('Generating in the background — we\'ll let you know when your draft is ready.');
         });
 
+        // ── File selection (checkbox list, multi-select) ──
+        function updateSelectionCount() {
+            const checked = document.querySelectorAll('#file-select-list input[type="checkbox"]:checked');
+            const countEl = document.getElementById('file-select-count');
+            const confirmBtn = document.getElementById('confirm-selection-btn');
+            countEl.textContent = checked.length === 1 ? '1 selected' : `${checked.length} selected`;
+            confirmBtn.disabled = checked.length === 0;
+        }
+
+        function renderFileList(files, preselectOverride) {
+            const list = document.getElementById('file-select-list');
+            if (!files || files.length === 0) {
+                list.innerHTML = '<div class="p-4 text-sm text-on-surface-variant">No files available</div>';
+                return;
+            }
+            const preselect = preselectOverride || new URLSearchParams(window.location.search).get('file');
+            list.innerHTML = files.map(f => `
+                <label class="flex items-center gap-3 p-3 hover:bg-surface-container cursor-pointer">
+                    <input type="checkbox" value="${f.filename}" class="file-select-checkbox w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary flex-shrink-0" ${f.filename === preselect ? 'checked' : ''}>
+                    <span class="font-body-md text-sm text-on-surface truncate">${f.filename}</span>
+                </label>
+            `).join('');
+            list.querySelectorAll('.file-select-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateSelectionCount);
+            });
+            updateSelectionCount();
+        }
+
         // Button triggers selection modal
         if (createBtn) {
             createBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 selectionModal.classList.remove('hidden');
 
-                const select = document.getElementById('file-select');
-                select.innerHTML = '<option value="">Loading files...</option>';
+                const list = document.getElementById('file-select-list');
+                list.innerHTML = '<div class="p-4 text-sm text-on-surface-variant">Loading files...</div>';
 
                 try {
                     const res = await fetch('/api/kb/catalog/inputs');
                     const data = await res.json();
-
-                    if (data.inputs && data.inputs.length > 0) {
-                        select.innerHTML = data.inputs.map(f => `<option value="${f.filename}">${f.filename}</option>`).join('');
-                        const preselect = new URLSearchParams(window.location.search).get('file');
-                        if (preselect && data.inputs.some(f => f.filename === preselect)) {
-                            select.value = preselect;
-                        }
-                    } else {
-                        select.innerHTML = '<option value="">No files available</option>';
-                    }
+                    renderFileList(data.inputs || [], window.__pendingPreselectFilename);
+                    window.__pendingPreselectFilename = null;
                 } catch (err) {
-                    select.innerHTML = '<option value="">Failed to load files</option>';
+                    list.innerHTML = '<div class="p-4 text-sm text-error">Failed to load files</div>';
                 }
             });
         }
@@ -610,10 +643,11 @@
         });
 
         document.getElementById('confirm-selection-btn').addEventListener('click', () => {
-            const select = document.getElementById('file-select');
-            if (select.value) {
+            const checked = Array.from(document.querySelectorAll('#file-select-list input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            if (checked.length > 0) {
                 selectionModal.classList.add('hidden');
-                generateFromInput(select.value);
+                generateFromInput(checked);
             }
         });
 
@@ -628,10 +662,10 @@
             return 'Working...';
         }
 
-        async function generateFromInput(filename) {
+        async function generateFromInput(filenames) {
             // Show loading overlay
             overlay.classList.remove('hidden');
-            resetOverlay();
+            resetOverlay(filenames.length);
 
             const appendChecked = document.getElementById('append-toggle')?.checked || false;
 
@@ -642,7 +676,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        filename: filename,
+                        filenames: filenames,
                         append_to_latest: appendChecked,
                         manager_id: wisdomSession.user_id,
                         role: wisdomSession.role,
@@ -772,16 +806,19 @@
             }, 3000);
         }
 
-        function resetOverlay() {
+        function resetOverlay(fileCount) {
             const icon = overlay.querySelector('.material-symbols-outlined');
             if (icon) {
                 icon.textContent = 'sync';
                 icon.className = 'material-symbols-outlined text-4xl text-primary animate-spin';
             }
+            const multi = fileCount > 1;
             const h3 = overlay.querySelector('h3');
-            if (h3) h3.textContent = 'Analyzing Document';
+            if (h3) h3.textContent = multi ? 'Analyzing Documents' : 'Analyzing Document';
             const p = overlay.querySelector('p');
-            if (p) p.textContent = 'Splitting content into curriculum, generating lessons and quizzes...';
+            if (p) p.textContent = multi
+                ? `Combining ${fileCount} files into one curriculum, generating lessons and quizzes...`
+                : 'Splitting content into curriculum, generating lessons and quizzes...';
             const pulse = overlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
             if (pulse) {
                 pulse.style.width = '';
@@ -804,6 +841,367 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
+        // ── In-page file upload (no redirect — opens the native file picker directly) ──
+        // Supported extensions mirror SUPPORTED_MIME_TYPES in src/api/routes/knowledge_base.py —
+        // every data type Gemini can natively understand (documents, images, audio, video).
+        const SUPPORTED_UPLOAD_EXTENSIONS = [
+            'pdf', 'txt', 'md', 'html', 'htm', 'xml', 'csv',
+            'png', 'jpg', 'jpeg', 'webp', 'heic', 'heif',
+            'wav', 'mp3', 'aiff', 'aac', 'ogg', 'flac',
+            'mp4', 'mpeg', 'mpg', 'mov', 'avi', 'webm', 'wmv', '3gp', 'flv',
+        ];
+        const MAX_UPLOAD_BYTES = 20 * 1024 * 1024; // Gemini's inline-request limit (~20MB)
+
+        const fileUploadInput = document.createElement('input');
+        fileUploadInput.type = 'file';
+        fileUploadInput.accept = SUPPORTED_UPLOAD_EXTENSIONS.map(e => `.${e}`).join(',');
+        fileUploadInput.style.display = 'none';
+        document.body.appendChild(fileUploadInput);
+
+        const fileUploadOverlay = document.createElement('div');
+        fileUploadOverlay.id = 'file-upload-overlay';
+        fileUploadOverlay.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden';
+        fileUploadOverlay.innerHTML = `
+        <div class="bg-surface-container-lowest rounded-3xl p-10 max-w-md w-full mx-4 text-center shadow-2xl border border-outline-variant">
+            <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-primary-container/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-primary animate-spin">sync</span>
+            </div>
+            <h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Uploading Document</h3>
+            <p class="font-body-md text-on-surface-variant mb-6">Preparing your document...</p>
+            <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                <div class="bg-primary h-full rounded-full animate-pulse transition-all duration-300" style="width: 10%"></div>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(fileUploadOverlay);
+
+        // ── Version History modal ──
+        const VERSION_ACTION_LABELS = { initial: 'Uploaded', overwrite: 'Overwritten', new_version: 'Saved as new version', restore: 'Restored' };
+
+        const historyModal = document.createElement('div');
+        historyModal.id = 'history-modal';
+        historyModal.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden';
+        historyModal.innerHTML = `
+        <div class="bg-surface-container-lowest rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl border border-outline-variant max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="font-headline-lg text-headline-lg text-on-surface">Version History</h3>
+                <button id="history-modal-close" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container-high" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <p id="history-modal-filename" class="font-body-sm text-on-surface-variant mb-4 truncate"></p>
+            <div id="history-modal-list" class="space-y-2 overflow-y-auto flex-1"></div>
+        </div>
+    `;
+        document.body.appendChild(historyModal);
+        historyModal.querySelector('#history-modal-close').addEventListener('click', () => historyModal.classList.add('hidden'));
+        historyModal.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.classList.add('hidden'); });
+
+        function formatRelativeTime(isoString) {
+            const diffMs = Date.now() - new Date(isoString).getTime();
+            const mins = Math.round(diffMs / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return `${mins}m ago`;
+            const hours = Math.round(mins / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.round(hours / 24);
+            if (days < 30) return `${days}d ago`;
+            return new Date(isoString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        async function openHistoryModal(filename) {
+            historyModal.querySelector('#history-modal-filename').textContent = filename;
+            const list = historyModal.querySelector('#history-modal-list');
+            list.innerHTML = `<p class="text-on-surface-variant text-center py-8">Loading...</p>`;
+            historyModal.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`/api/kb/documents/${encodeURIComponent(filename)}/versions`);
+                const data = await res.json();
+                const versions = (data.versions || []).slice().reverse(); // newest first
+
+                if (versions.length <= 1) {
+                    list.innerHTML = `<p class="text-on-surface-variant text-center py-8">No changes yet — this is the original upload.</p>`;
+                    return;
+                }
+
+                list.innerHTML = versions.map(v => {
+                    const sizeStr = v.size_bytes > 1048576 ? `${(v.size_bytes / 1048576).toFixed(1)} MB` : `${(v.size_bytes / 1024).toFixed(1)} KB`;
+                    const label = VERSION_ACTION_LABELS[v.action] || v.action;
+                    const who = v.uploaded_by ? ` by ${v.uploaded_by}` : '';
+                    const currentBadge = v.is_current ? '<span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm">Current</span>' : '';
+                    const canRestore = v.kind === 'archived' && !v.pruned;
+                    const prunedNote = v.pruned ? '<span class="text-on-surface-variant opacity-70 italic">(older content no longer retained)</span>' : '';
+                    return `
+                    <div class="flex items-center justify-between gap-3 p-3 rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-medium text-on-surface">v${v.version} · ${label}${who}</span>
+                                ${currentBadge}
+                            </div>
+                            <p class="font-body-sm text-on-surface-variant">${formatRelativeTime(v.timestamp)} · ${sizeStr} ${prunedNote}</p>
+                        </div>
+                        ${canRestore ? `<button class="restore-version-btn shrink-0 px-3 py-1.5 border-2 border-outline-variant text-on-surface font-label-md rounded-lg hover:bg-surface-container transition-colors" data-filename="${filename}" data-version="${v.version}">Restore</button>` : ''}
+                    </div>`;
+                }).join('');
+
+                list.querySelectorAll('.restore-version-btn').forEach(btn => {
+                    btn.addEventListener('click', () => restoreVersion(btn.dataset.filename, btn.dataset.version));
+                });
+            } catch (e) {
+                list.innerHTML = `<p class="text-error text-center py-8">Failed to load version history.</p>`;
+            }
+        }
+
+        async function restoreVersion(filename, version) {
+            if (!confirm(`Restore version ${version} of "${filename}"? The current content will be archived, not lost.`)) return;
+            try {
+                const res = await fetch(`/api/kb/documents/${encodeURIComponent(filename)}/versions/${version}/restore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        role: wisdomSession ? wisdomSession.role : '',
+                        uploaded_by: wisdomSession ? (wisdomSession.display_name || wisdomSession.role) : '',
+                    }),
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.detail || 'Restore failed');
+                }
+                showToast(`Restored version ${version} of "${filename}".`);
+                historyModal.classList.add('hidden');
+                loadMaterials();
+            } catch (e) {
+                showToast(e.message || 'Restore failed', 'error');
+            }
+        }
+
+        const uploadBtn = document.getElementById('upload-materials-btn');
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', () => fileUploadInput.click());
+        }
+
+        fileUploadInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                uploadDocumentFile(e.target.files[0]);
+            }
+            fileUploadInput.value = '';
+        });
+
+        const UPLOAD_STAGE_LABELS = {
+            queued: 'Queued for processing...',
+            validating: 'Validating document...',
+            chunking: 'Splitting into chunks...',
+            analyzing: 'Analyzing media with Gemini...',
+            saving: 'Saving to knowledge base...',
+            completed: 'Done!',
+            failed: 'Upload failed',
+        };
+        const UPLOAD_STAGE_WIDTHS = {
+            queued: '10%',
+            validating: '35%',
+            chunking: '60%',
+            analyzing: '60%',
+            saving: '85%',
+            completed: '100%',
+            failed: '100%',
+        };
+
+        let uploadPollTimer = null;
+
+        function setUploadStageUI(stage) {
+            const p = fileUploadOverlay.querySelector('p');
+            if (p && UPLOAD_STAGE_LABELS[stage]) p.textContent = UPLOAD_STAGE_LABELS[stage];
+            const bar = fileUploadOverlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (bar && UPLOAD_STAGE_WIDTHS[stage]) bar.style.width = UPLOAD_STAGE_WIDTHS[stage];
+        }
+
+        async function uploadDocumentFile(file, versionAction = '') {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!SUPPORTED_UPLOAD_EXTENSIONS.includes(ext)) {
+                showToast(`Unsupported file type '.${ext}'.`, 'error');
+                return;
+            }
+            if (file.size > MAX_UPLOAD_BYTES) {
+                showToast('File exceeds the 20MB upload limit.', 'error');
+                return;
+            }
+
+            resetUploadOverlay();
+            fileUploadOverlay.classList.remove('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                if (versionAction) formData.append('version_action', versionAction);
+                formData.append('role', wisdomSession ? wisdomSession.role : '');
+                formData.append('uploaded_by', wisdomSession ? (wisdomSession.display_name || wisdomSession.role) : '');
+
+                const res = await fetch('/api/kb/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+                    throw new Error(err.detail || 'Upload failed');
+                }
+
+                const result = await res.json();
+
+                if (result.status === 'duplicate') {
+                    showUploadDuplicateChoice(file, result.existing_filename);
+                    return;
+                }
+
+                if (result.status === 'processing' && result.job_id) {
+                    pollUploadJob(result.job_id);
+                    return;
+                }
+
+                throw new Error('Unexpected server response.');
+            } catch (err) {
+                showUploadError(err.message);
+            }
+        }
+
+        function pollUploadJob(jobId) {
+            if (uploadPollTimer) clearInterval(uploadPollTimer);
+            uploadPollTimer = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/kb/upload/status/${jobId}`);
+                    if (!res.ok) return;
+                    const job = await res.json();
+                    setUploadStageUI(job.stage);
+
+                    if (job.status === 'completed') {
+                        clearInterval(uploadPollTimer);
+                        showUploadSuccess('Upload Successful!', 'Opening course setup...');
+                        loadMaterials();
+                        setTimeout(() => {
+                            fileUploadOverlay.classList.add('hidden');
+                            resetUploadOverlay();
+                            if (job.filename) {
+                                window.__pendingPreselectFilename = job.filename;
+                                const createBtn = document.getElementById('create-path-btn');
+                                if (createBtn) createBtn.click();
+                            }
+                        }, 900);
+                    } else if (job.status === 'flagged') {
+                        clearInterval(uploadPollTimer);
+                        loadMaterials();
+                        showUploadFlagged();
+                        setTimeout(() => {
+                            fileUploadOverlay.classList.add('hidden');
+                            resetUploadOverlay();
+                        }, 2000);
+                    } else if (job.status === 'error') {
+                        clearInterval(uploadPollTimer);
+                        showUploadError(job.message || 'Processing failed.');
+                    }
+                } catch (e) {
+                    // transient error — keep polling
+                }
+            }, 250);
+        }
+
+        function showUploadDuplicateChoice(file, existingFilename) {
+            if (uploadPollTimer) clearInterval(uploadPollTimer);
+            const icon = fileUploadOverlay.querySelector('.material-symbols-outlined');
+            icon.textContent = 'file_copy';
+            icon.classList.remove('animate-spin', 'text-tertiary', 'text-error');
+            icon.classList.add('text-primary');
+            fileUploadOverlay.querySelector('h3').textContent = 'File Already Exists';
+            fileUploadOverlay.querySelector('p').textContent = `A file named "${existingFilename}" already exists. How would you like to proceed?`;
+            const bar = fileUploadOverlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (bar && bar.parentElement) bar.parentElement.style.display = 'none';
+
+            let btnContainer = fileUploadOverlay.querySelector('.mt-6.flex');
+            if (btnContainer) btnContainer.remove();
+            btnContainer = document.createElement('div');
+            btnContainer.className = 'mt-6 flex gap-3 justify-center';
+            const overwriteBtn = document.createElement('button');
+            overwriteBtn.className = 'px-5 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary/90 transition-colors';
+            overwriteBtn.textContent = 'Overwrite';
+            overwriteBtn.addEventListener('click', () => uploadDocumentFile(file, 'overwrite'));
+            const newVersionBtn = document.createElement('button');
+            newVersionBtn.className = 'px-5 py-2 border-2 border-outline-variant text-on-surface font-label-md rounded-lg hover:bg-surface-container transition-colors';
+            newVersionBtn.textContent = 'Save as New Version';
+            newVersionBtn.addEventListener('click', () => uploadDocumentFile(file, 'new_version'));
+            btnContainer.appendChild(overwriteBtn);
+            btnContainer.appendChild(newVersionBtn);
+            fileUploadOverlay.querySelector('.bg-surface-container-lowest').appendChild(btnContainer);
+        }
+
+        function showUploadSuccess(title, message) {
+            const icon = fileUploadOverlay.querySelector('.material-symbols-outlined');
+            icon.textContent = 'check_circle';
+            icon.classList.remove('animate-spin');
+            icon.classList.add('text-tertiary');
+            fileUploadOverlay.querySelector('h3').textContent = title;
+            fileUploadOverlay.querySelector('p').textContent = message;
+            const bar = fileUploadOverlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (bar) {
+                bar.style.width = '100%';
+                bar.classList.remove('animate-pulse', 'bg-primary', 'bg-error');
+                bar.classList.add('bg-tertiary');
+            }
+        }
+
+        function showUploadFlagged() {
+            const icon = fileUploadOverlay.querySelector('.material-symbols-outlined');
+            icon.textContent = 'flag';
+            icon.classList.remove('animate-spin');
+            icon.classList.add('text-primary');
+            fileUploadOverlay.querySelector('h3').textContent = 'Uploaded — Flagged for Review';
+            fileUploadOverlay.querySelector('p').textContent = 'The document was saved, but a possible conflict was queued for a manager to review.';
+            const bar = fileUploadOverlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (bar) {
+                bar.style.width = '100%';
+                bar.classList.remove('animate-pulse');
+            }
+        }
+
+        function showUploadError(message) {
+            if (uploadPollTimer) clearInterval(uploadPollTimer);
+            const icon = fileUploadOverlay.querySelector('.material-symbols-outlined');
+            icon.textContent = 'error';
+            icon.classList.remove('animate-spin');
+            icon.classList.add('text-error');
+            fileUploadOverlay.querySelector('h3').textContent = 'Upload Failed';
+            fileUploadOverlay.querySelector('p').textContent = message;
+            const bar = fileUploadOverlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (bar) {
+                bar.classList.remove('animate-pulse', 'bg-primary', 'bg-tertiary');
+                bar.classList.add('bg-error');
+            }
+            setTimeout(() => {
+                fileUploadOverlay.classList.add('hidden');
+                resetUploadOverlay();
+            }, 3000);
+        }
+
+        function resetUploadOverlay() {
+            if (uploadPollTimer) { clearInterval(uploadPollTimer); uploadPollTimer = null; }
+            const icon = fileUploadOverlay.querySelector('.material-symbols-outlined');
+            if (icon) {
+                icon.textContent = 'sync';
+                icon.className = 'material-symbols-outlined text-4xl text-primary animate-spin';
+            }
+            const h3 = fileUploadOverlay.querySelector('h3');
+            if (h3) h3.textContent = 'Uploading Document';
+            const p = fileUploadOverlay.querySelector('p');
+            if (p) p.textContent = 'Preparing your document...';
+            const bar = fileUploadOverlay.querySelector('.bg-primary, .bg-tertiary, .bg-error');
+            if (bar) {
+                bar.style.width = '10%';
+                bar.className = 'bg-primary h-full rounded-full animate-pulse transition-all duration-300';
+                if (bar.parentElement) bar.parentElement.style.display = '';
+            }
+            const btns = fileUploadOverlay.querySelector('.mt-6.flex');
+            if (btns) btns.remove();
+        }
+
         // Check if we need to auto-open the create path modal
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -818,7 +1216,6 @@
     </script>
 
     <script src="/js/api-client.js"></script>
-    <script src="/js/theme-toggle.js"></script>
     <script src="/js/sidebar.js"></script>
     <script src="/js/global-search.js"></script>
 </body>

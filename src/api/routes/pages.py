@@ -21,10 +21,6 @@ async def page_login():
 async def page_dashboard():
     return _serve_page("dashboard.html")
 
-@router.get("/dashboard-chat", response_class=HTMLResponse)
-async def page_dashboard_chat():
-    return _serve_page("dashboard-chat.html")
-
 @router.get("/learning-path", response_class=HTMLResponse)
 async def page_learning_path():
     return _serve_page("learning-path.html")
@@ -36,14 +32,6 @@ async def page_lesson():
 @router.get("/quiz", response_class=HTMLResponse)
 async def page_quiz():
     return _serve_page("quiz.html")
-
-@router.get("/quiz-passed", response_class=HTMLResponse)
-async def page_quiz_passed():
-    return _serve_page("quiz-passed.html")
-
-@router.get("/quiz-retake", response_class=HTMLResponse)
-async def page_quiz_retake():
-    return _serve_page("quiz-retake.html")
 
 @router.get("/knowledge-vault", response_class=HTMLResponse)
 async def page_knowledge_vault():
@@ -61,6 +49,10 @@ async def page_learning_materials():
 async def page_learning_paths():
     return _serve_page("learning-paths.html")
 
+@router.get("/edit-learning-path", response_class=HTMLResponse)
+async def page_edit_learning_path():
+    return _serve_page("edit-learning-path.html")
+
 @router.get("/catalog", response_class=HTMLResponse)
 async def page_catalog():
     return _serve_page("catalog.html")
@@ -72,3 +64,7 @@ async def page_manager_dashboard():
 @router.get("/dev-console", response_class=HTMLResponse)
 async def page_dev_console():
     return _serve_page("dev-console.html")
+
+@router.get("/settings", response_class=HTMLResponse)
+async def page_settings():
+    return _serve_page("settings.html")

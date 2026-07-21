@@ -10,13 +10,56 @@ from src.services.curriculum_service import (
     identify_content_gaps,
     process_kb_upload_job,
     process_generate_job,
+    regenerate_lesson_content,
+    restore_document_version,
 )
+from src.services.quiz_service import generate_quiz
 from src.core.database import DepartmentScopedStore
 from src.core.config import DEFAULT_DEPARTMENT
 
 router = APIRouter(prefix="/api/kb", tags=["knowledge_base"])
 
-ALLOWED_EXTENSIONS = {".txt", ".md"}
+# Extension → (mime_type, content_category). content_category drives which
+# processing branch a file takes: "text" keeps the original chunk/gap-analysis
+# pipeline; "pdf"/"image"/"audio"/"video" are handed to Gemini as native binary
+# media (Part.from_bytes) instead of being parsed with Python libraries.
+SUPPORTED_MIME_TYPES: dict[str, tuple[str, str]] = {
+    # Documents (text-family)
+    ".txt": ("text/plain", "text"),
+    ".md": ("text/plain", "text"),
+    ".html": ("text/html", "text"),
+    ".htm": ("text/html", "text"),
+    ".xml": ("text/xml", "text"),
+    ".csv": ("text/csv", "text"),
+    # Documents (native binary — Gemini reads it directly)
+    ".pdf": ("application/pdf", "pdf"),
+    # Images
+    ".png": ("image/png", "image"),
+    ".jpg": ("image/jpeg", "image"),
+    ".jpeg": ("image/jpeg", "image"),
+    ".webp": ("image/webp", "image"),
+    ".heic": ("image/heic", "image"),
+    ".heif": ("image/heif", "image"),
+    # Audio
+    ".wav": ("audio/wav", "audio"),
+    ".mp3": ("audio/mp3", "audio"),
+    ".aiff": ("audio/aiff", "audio"),
+    ".aac": ("audio/aac", "audio"),
+    ".ogg": ("audio/ogg", "audio"),
+    ".flac": ("audio/flac", "audio"),
+    # Video
+    ".mp4": ("video/mp4", "video"),
+    ".mpeg": ("video/mpeg", "video"),
+    ".mpg": ("video/mpeg", "video"),
+    ".mov": ("video/mov", "video"),
+    ".avi": ("video/avi", "video"),
+    ".webm": ("video/webm", "video"),
+    ".wmv": ("video/wmv", "video"),
+    ".3gp": ("video/3gpp", "video"),
+    ".flv": ("video/x-flv", "video"),
+}
+
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # Gemini's inline-request limit (~20MB)
 
 @router.get("/documents")
 async def api_kb_documents(department: str = DEFAULT_DEPARTMENT):
@@ -58,11 +101,41 @@ async def api_delete_kb_document(filename: str, req: DeleteDocumentRequest):
     store.delete_catalog_input(filename)
     chunks_doc_id = f"{Path(filename).stem}_chunks"
     store.delete_knowledge_document(chunks_doc_id)
+    store.delete_version_history(filename)
 
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Document '{filename}' not found.")
 
     return {"status": "deleted", "filename": filename}
+
+
+@router.get("/documents/{filename}/versions")
+async def api_kb_document_versions(filename: str, department: str = DEFAULT_DEPARTMENT):
+    """List the version history for a document (live + archived entries)."""
+    store = DepartmentScopedStore(department)
+    entries = store.read_version_history(filename)
+    return {"filename": filename, "versions": entries, "count": len(entries)}
+
+
+class RestoreVersionRequest(BaseModel):
+    role: str = ""
+    department: str = DEFAULT_DEPARTMENT
+    uploaded_by: str = ""
+
+
+@router.post("/documents/{filename}/versions/{version}/restore")
+async def api_kb_restore_version(filename: str, version: int, req: RestoreVersionRequest):
+    """Restore an archived version of a document back to current.
+
+    Non-destructive: the content being replaced is itself archived first, so
+    restoring never permanently discards whatever was current beforehand.
+    """
+    _require_manager(req.role)
+    try:
+        result = restore_document_version(filename, version, req.department, req.uploaded_by)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return result
 
 
 @router.post("/upload")
@@ -72,6 +145,7 @@ async def api_kb_upload(
     department: str = Form(DEFAULT_DEPARTMENT),
     version_action: str = Form(""),
     role: str = Form(""),
+    uploaded_by: str = Form(""),
 ):
     """Accept a document and process it asynchronously.
 
@@ -91,20 +165,35 @@ async def api_kb_upload(
     filename: str = file.filename
 
     ext = Path(filename).suffix.lower()
-    if ext not in ALLOWED_EXTENSIONS:
+    if ext not in SUPPORTED_MIME_TYPES:
+        supported_list = ", ".join(sorted(SUPPORTED_MIME_TYPES))
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file type '{ext}'. Only .txt and .md files are supported in the MVP."
+            detail=f"Unsupported file type '{ext}'. Supported types: {supported_list}"
         )
+    mime_type, content_category = SUPPORTED_MIME_TYPES[ext]
 
     content_bytes = await file.read()
-    try:
-        content = content_bytes.decode("utf-8")
-    except UnicodeDecodeError:
-        raise HTTPException(status_code=400, detail="File could not be read as UTF-8 text.")
-
-    if not content.strip():
+    if len(content_bytes) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File exceeds the {MAX_UPLOAD_BYTES // (1024 * 1024)}MB upload limit."
+        )
+    if not content_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    # Text-family documents are decoded to str and keep the original chunking
+    # pipeline; everything else (PDF/image/audio/video) stays as raw bytes and
+    # is handed to Gemini natively as binary media.
+    if content_category == "text":
+        try:
+            content = content_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            raise HTTPException(status_code=400, detail="File could not be read as UTF-8 text.")
+        if not content.strip():
+            raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    else:
+        content = content_bytes
 
     # ── Duplicate check ──────────────────────────────────────────────────────
     store = DepartmentScopedStore(department)
@@ -125,9 +214,11 @@ async def api_kb_upload(
         "status": "pending",
         "stage": "queued",
         "filename": filename,
+        "content_category": content_category,
     })
     background_tasks.add_task(
-        process_kb_upload_job, job_id, filename, content, department, version_action
+        process_kb_upload_job, job_id, filename, content, department, version_action,
+        mime_type, content_category, uploaded_by,
     )
     return {"status": "processing", "job_id": job_id}
 
@@ -205,7 +296,8 @@ async def api_kb_resolve_conflict(conflict_id: str, req: ConflictResolutionReque
 
 
 class GenerateFromInputRequest(BaseModel):
-    filename: str
+    filename: str = ""
+    filenames: list[str] = []
     department: str = DEFAULT_DEPARTMENT
     append_to_latest: bool = False
     manager_id: str = ""
@@ -214,7 +306,8 @@ class GenerateFromInputRequest(BaseModel):
 @router.post("/generate-from-input")
 async def api_generate_from_input(req: GenerateFromInputRequest, background_tasks: BackgroundTasks):
     """Queue background generation of a curriculum (lessons + short quizzes +
-    final assessment) from an existing file in the catalog/inputs directory.
+    final assessment) from one or more existing files in the catalog/inputs
+    directory. Multiple files (req.filenames) are combined into a single course.
 
     The generated path is saved as the manager's private draft (unofficial path),
     not the department-wide catalog — it only becomes visible to employees once
@@ -228,19 +321,24 @@ async def api_generate_from_input(req: GenerateFromInputRequest, background_task
     _require_manager(req.role)
     store = DepartmentScopedStore(req.department)
 
-    inputs = store.list_catalog_inputs()
-    if not any(f["filename"] == req.filename for f in inputs):
-        raise HTTPException(status_code=404, detail=f"File {req.filename} not found in catalog inputs.")
+    files = req.filenames if req.filenames else ([req.filename] if req.filename else [])
+    if not files:
+        raise HTTPException(status_code=400, detail="At least one filename is required.")
+
+    catalog_filenames = {f["filename"] for f in store.list_catalog_inputs()}
+    missing = [fn for fn in files if fn not in catalog_filenames]
+    if missing:
+        raise HTTPException(status_code=404, detail=f"File(s) not found in catalog inputs: {', '.join(missing)}.")
 
     job_id = f"genjob_{uuid.uuid4().hex[:8]}"
     store.write_kb_job(job_id, {
         "job_id": job_id,
         "status": "pending",
         "stage": "queued",
-        "filename": req.filename,
+        "filename": ", ".join(files),
     })
     background_tasks.add_task(
-        process_generate_job, job_id, req.filename, req.department, req.append_to_latest, req.manager_id
+        process_generate_job, job_id, "", req.department, req.append_to_latest, req.manager_id, files
     )
     return {"status": "processing", "job_id": job_id}
 
@@ -366,3 +464,208 @@ async def api_catalog_learning_paths(
         "official_count": len(official),
         "unofficial_count": len(unofficial),
     }
+
+
+# ── Manual Path Editing (course titles, lesson content, quiz questions) ──
+
+def _read_catalog_path(store: DepartmentScopedStore, path_id: str, path_type: str, manager_id: str) -> dict | None:
+    if path_type == "unofficial":
+        return store.read_unofficial_path(manager_id, path_id)
+    return store.read_standard_path(path_id)
+
+
+def _write_catalog_path(store: DepartmentScopedStore, path_id: str, path_type: str, manager_id: str, data: dict) -> None:
+    if path_type == "unofficial":
+        store.write_unofficial_path(manager_id, path_id, data)
+    else:
+        store.write_standard_path(path_id, data)
+
+
+def _find_lesson(data: dict, lesson_id: str) -> dict | None:
+    for course in data.get("courses", []):
+        for lesson in course.get("lessons", []):
+            if lesson.get("lesson_id") == lesson_id:
+                return lesson
+    return None
+
+
+@router.get("/learning-path/{path_id}/full")
+async def api_get_learning_path_full(
+    path_id: str,
+    role: str = "",
+    manager_id: str = "",
+    path_type: str = "official",
+    department: str = DEFAULT_DEPARTMENT,
+):
+    """Return a learning path's full editable structure (courses, lessons,
+    and each lesson/course's quiz resolved inline) for the manual-edit page.
+    Reads from the catalog copy — the same source api_update_learning_path
+    already treats as canonical for edits."""
+    _require_manager(role)
+    store = DepartmentScopedStore(department)
+    data = _read_catalog_path(store, path_id, path_type, manager_id)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Learning path '{path_id}' not found.")
+
+    for course in data.get("courses", []):
+        for lesson in course.get("lessons", []):
+            if lesson.get("short_quiz_id"):
+                lesson["quiz"] = store.read_quiz(lesson["short_quiz_id"])
+        if course.get("final_assessment_id"):
+            course["final_assessment"] = store.read_quiz(course["final_assessment_id"])
+
+    return data
+
+
+class UpdateCourseTitleRequest(BaseModel):
+    title: str
+    manager_id: str = ""
+    role: str = ""
+    path_type: str = "official"
+    department: str = DEFAULT_DEPARTMENT
+
+
+@router.patch("/learning-path/{path_id}/course/{course_id}")
+async def api_update_course_title(path_id: str, course_id: str, req: UpdateCourseTitleRequest):
+    """Rename a single course within a learning path."""
+    _require_manager(req.role)
+    store = DepartmentScopedStore(req.department)
+    data = _read_catalog_path(store, path_id, req.path_type, req.manager_id)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Learning path '{path_id}' not found.")
+
+    course = next((c for c in data.get("courses", []) if c.get("course_id") == course_id), None)
+    if not course:
+        raise HTTPException(status_code=404, detail=f"Course '{course_id}' not found in path '{path_id}'.")
+    course["title"] = req.title
+    _write_catalog_path(store, path_id, req.path_type, req.manager_id, data)
+
+    activated = store.read_learning_path(path_id)
+    if activated:
+        act_course = next((c for c in activated.get("courses", []) if c.get("course_id") == course_id), None)
+        if act_course:
+            act_course["title"] = req.title
+            store.write_learning_path(path_id, activated)
+
+    return {"status": "updated", "path_id": path_id, "course_id": course_id, "title": req.title}
+
+
+class UpdateLessonRequest(BaseModel):
+    title: str
+    content: str
+    manager_id: str = ""
+    role: str = ""
+    path_type: str = "official"
+    department: str = DEFAULT_DEPARTMENT
+
+
+@router.patch("/learning-path/{path_id}/lesson/{lesson_id}")
+async def api_update_lesson(path_id: str, lesson_id: str, req: UpdateLessonRequest):
+    """Update a single lesson's title and body content within a learning path."""
+    _require_manager(req.role)
+    store = DepartmentScopedStore(req.department)
+    data = _read_catalog_path(store, path_id, req.path_type, req.manager_id)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Learning path '{path_id}' not found.")
+
+    lesson = _find_lesson(data, lesson_id)
+    if not lesson:
+        raise HTTPException(status_code=404, detail=f"Lesson '{lesson_id}' not found in path '{path_id}'.")
+    lesson["title"] = req.title
+    lesson["content"] = req.content
+    _write_catalog_path(store, path_id, req.path_type, req.manager_id, data)
+
+    activated = store.read_learning_path(path_id)
+    if activated:
+        act_lesson = _find_lesson(activated, lesson_id)
+        if act_lesson:
+            act_lesson["title"] = req.title
+            act_lesson["content"] = req.content
+            store.write_learning_path(path_id, activated)
+
+    return {"status": "updated", "path_id": path_id, "lesson_id": lesson_id}
+
+
+class QuizQuestionUpdate(BaseModel):
+    question_id: str = ""
+    text: str
+    options: list[str]
+    correct_answer_index: int
+    rationale: dict[str, str] = {}
+    concept_tags: list[str] = []
+
+
+class UpdateQuizRequest(BaseModel):
+    questions: list[QuizQuestionUpdate]
+    role: str = ""
+    department: str = DEFAULT_DEPARTMENT
+
+
+@router.patch("/quiz/{quiz_id}")
+async def api_update_quiz(quiz_id: str, req: UpdateQuizRequest):
+    """Overwrite a persisted quiz's question set (manager manual edit)."""
+    _require_manager(req.role)
+    store = DepartmentScopedStore(req.department)
+    quiz = store.read_quiz(quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail=f"Quiz '{quiz_id}' not found.")
+
+    new_questions = []
+    for i, q in enumerate(req.questions):
+        qd = q.model_dump()
+        if not (0 <= qd["correct_answer_index"] < len(qd["options"])):
+            raise HTTPException(status_code=400, detail=f"correct_answer_index out of range for question {i + 1}.")
+        if not qd.get("question_id"):
+            qd["question_id"] = f"q_{uuid.uuid4().hex[:6]}"
+        new_questions.append(qd)
+
+    quiz["questions"] = new_questions
+    quiz["question_count"] = len(new_questions)
+    store.write_quiz(quiz_id, quiz)
+    return {"status": "updated", "quiz_id": quiz_id}
+
+
+class RegenerateLessonRequest(BaseModel):
+    lesson_title: str
+    lesson_content: str
+    instruction: str = ""
+    role: str = ""
+    department: str = DEFAULT_DEPARTMENT
+
+
+@router.post("/lesson/{lesson_id}/regenerate")
+async def api_regenerate_lesson(lesson_id: str, req: RegenerateLessonRequest):
+    """Ask Gemini to rewrite a lesson's title/content for manager review.
+    Returns a draft only — the manager must still hit Save to persist it."""
+    _require_manager(req.role)
+    return regenerate_lesson_content(
+        lesson_title=req.lesson_title,
+        lesson_content=req.lesson_content,
+        instruction=req.instruction,
+    )
+
+
+class RegenerateQuizRequest(BaseModel):
+    topic: str
+    difficulty: str = "medium"
+    question_count: int = 5
+    quiz_type: str = "short_quiz"
+    instruction: str = ""
+    role: str = ""
+    department: str = DEFAULT_DEPARTMENT
+
+
+@router.post("/quiz/{quiz_id}/regenerate")
+async def api_regenerate_quiz(quiz_id: str, req: RegenerateQuizRequest):
+    """Ask Gemini to generate a fresh question set for manager review.
+    Returns a draft only — the manager must still hit Save (PATCH /quiz/{id}) to persist it."""
+    _require_manager(req.role)
+    topic = f"{req.topic} — {req.instruction.strip()}" if req.instruction.strip() else req.topic
+    draft = generate_quiz(
+        topic=topic,
+        difficulty=req.difficulty,
+        question_count=req.question_count,
+        quiz_type=req.quiz_type,
+        department=req.department,
+    )
+    return {"status": "success", "questions": draft["questions"]}

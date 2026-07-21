@@ -6,7 +6,7 @@ and department-level reporting.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.core.database import DepartmentScopedStore
 from src.core.config import DEFAULT_DEPARTMENT
@@ -95,11 +95,11 @@ def update_progress(
             "bypass_locked": False,
             "bypass_attempts": 0,
             "readiness_score": 0.0,
-            "enrolled_at": datetime.utcnow().isoformat(),
+            "enrolled_at": datetime.now(timezone.utc).isoformat(),
         }
 
     # Apply event
-    progress["last_activity_at"] = datetime.utcnow().isoformat()
+    progress["last_activity_at"] = datetime.now(timezone.utc).isoformat()
 
     if event_type == "course_completed":
         course_id = event_data.get("course_id", "")
@@ -139,7 +139,7 @@ def update_progress(
         audit_result = DataComplianceGate.audit_state_transition(user_id, proposed_state, event_data.get("context", {}))
         progress["current_state"] = audit_result["enforced_state"]
         progress["readiness_score"] = 1.0
-        progress["completed_at"] = datetime.utcnow().isoformat()
+        progress["completed_at"] = datetime.now(timezone.utc).isoformat()
 
     elif event_type == "assessment_failed":
         score = event_data.get("score", 0.0)

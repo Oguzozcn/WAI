@@ -54,10 +54,35 @@ def _rag_color(readiness_score: float) -> str:
     return "red"
 
 
-def _build_report_rows(reports: list[dict]) -> list[dict]:
+def _resolve_course_title(store: DepartmentScopedStore, progress: dict, path_cache: dict) -> str:
+    """Turn an opaque current_course_id (e.g. "course_03", "remedial_a1b2c3d4")
+    into the human-readable title a manager can actually recognize."""
+    course_id = progress.get("current_course_id", "")
+    if not course_id:
+        return ""
+
+    for remedial in progress.get("remedial_courses", []):
+        if remedial.get("course_id") == course_id:
+            return remedial.get("title") or course_id
+
+    for path_id in progress.get("enrolled_path_ids", []):
+        if path_id not in path_cache:
+            path_cache[path_id] = store.read_learning_path(path_id)
+        path = path_cache[path_id]
+        if not path:
+            continue
+        for course in path.get("courses", []):
+            if course.get("course_id") == course_id:
+                return course.get("title") or course_id
+
+    return course_id
+
+
+def _build_report_rows(store: DepartmentScopedStore, reports: list[dict]) -> list[dict]:
     """Shared row-building logic for the /reports JSON endpoint and the CSV
     export, so the two can never drift apart in what a "row" means."""
     max_courses = get_param("MAX_COURSES")
+    path_cache: dict = {}
     rows = []
     for p in reports:
         completed_courses = p.get("completed_courses", [])
@@ -68,6 +93,7 @@ def _build_report_rows(reports: list[dict]) -> list[dict]:
             "display_name": p.get("display_name", p.get("user_id", "")),
             "status": _status_label(p),
             "current_course_id": p.get("current_course_id", ""),
+            "current_course_title": _resolve_course_title(store, p, path_cache),
             "courses_completed": len(completed_courses),
             "completion_rate_pct": completion_rate,
             "readiness_score": round(readiness, 2),
@@ -193,7 +219,7 @@ async def manager_direct_reports(manager_id: str, department: str = DEFAULT_DEPA
             detail=f"No direct reports found for manager '{manager_id}' in department '{department}'.",
         )
 
-    rows = _build_report_rows(reports)
+    rows = _build_report_rows(store, reports)
 
     return {
         "manager_id": manager_id,
@@ -216,7 +242,7 @@ async def manager_export_reports_excel(manager_id: str, department: str = DEFAUL
             detail=f"No direct reports found for manager '{manager_id}' in department '{department}'.",
         )
 
-    rows = _build_report_rows(reports)
+    rows = _build_report_rows(store, reports)
 
     wb = Workbook()
     ws = wb.active
@@ -242,7 +268,7 @@ async def manager_export_reports_excel(manager_id: str, department: str = DEFAUL
             _formula_safe(r["display_name"]),
             _formula_safe(r["user_id"]),
             _formula_safe(r["status"]),
-            _formula_safe(r["current_course_id"]),
+            _formula_safe(r["current_course_title"]),
             r["courses_completed"],
             r["completion_rate_pct"] / 100,
             r["readiness_score"],

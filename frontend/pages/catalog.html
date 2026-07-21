@@ -2,6 +2,7 @@
 <html lang="en" style="">
 
 <head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WisdomAI | Catalog</title>
@@ -9,6 +10,7 @@
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
     <script id="tailwind-config">try {
             tailwind.config = {
                 darkMode: "class",
@@ -159,7 +161,7 @@
             'ai': { icon: 'architecture', color: 'text-primary', bg: 'bg-primary/10', tag: 'AI & ML', tagColor: 'text-primary' },
             'ml': { icon: 'psychology', color: 'text-primary', bg: 'bg-primary/10', tag: 'AI & ML', tagColor: 'text-primary' },
             'cloud': { icon: 'cloud_sync', color: 'text-secondary', bg: 'bg-secondary/10', tag: 'Cloud', tagColor: 'text-secondary' },
-            'data': { icon: 'database', color: 'text-on-surface-variant', bg: 'bg-surface-variant/30', tag: 'Data', tagColor: 'text-on-surface-variant' },
+            'data': { icon: 'database', color: 'text-on-surface-variant', bg: 'bg-surface-variant/30 dark:bg-white/5', tag: 'Data', tagColor: 'text-on-surface-variant' },
             'vertex': { icon: 'model_training', color: 'text-primary', bg: 'bg-primary/10', tag: 'Vertex AI', tagColor: 'text-primary' },
             'gemini': { icon: 'auto_awesome', color: 'text-secondary', bg: 'bg-secondary/10', tag: 'Gemini', tagColor: 'text-secondary' },
             'default': { icon: 'school', color: 'text-primary', bg: 'bg-primary/10', tag: 'Course', tagColor: 'text-primary' },
@@ -220,8 +222,9 @@
                     const courseCount = p.total_courses || 0;
 
                     return `
-                <a href="/learning-path" data-path-id="${p.path_id}" data-path-type="official" class="path-card bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col group hover:shadow-[0_4px_0_0_#0070ad] hover:-translate-y-1 transition-all duration-200 cursor-pointer no-underline">
-                    <div class="h-32 ${iconConfig.bg} relative flex items-center justify-center border-b border-outline-variant">
+                <a href="/learning-path" data-path-id="${p.path_id}" data-path-type="official" class="path-card bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col group hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer no-underline">
+                    <div class="h-28 ${iconConfig.bg} relative flex items-center justify-center border-b border-outline-variant overflow-hidden">
+                        <div class="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(255,255,255,0.35),transparent_70%)] dark:bg-[radial-gradient(120%_100%_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none"></div>
                         <span class="material-symbols-outlined text-5xl ${iconConfig.color}">${iconConfig.icon}</span>
                         ${badge}
                     </div>
@@ -232,7 +235,7 @@
                             ${p.source_document ? ` • Source: ${p.source_document}` : ''}
                         </p>
                         <div class="mt-auto">
-                            <div class="flex justify-between items-end mb-2">
+                            <div class="flex justify-between items-end mb-1.5">
                                 <div class="flex flex-col">
                                     <span class="text-xs font-label-md text-on-surface-variant uppercase tracking-wider">${statusLabel}</span>
                                     <span class="js-status-label font-stats-number text-stats-number ${progressColor}">${progressLabel}</span>
@@ -246,7 +249,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
                                 <div class="${barColor} h-full rounded-full transition-all duration-500" style="width: ${progress}%;"></div>
                             </div>
                         </div>
@@ -294,7 +297,6 @@
     </script>
 
     <script src="/js/api-client.js"></script>
-    <script src="/js/theme-toggle.js"></script>
     <script src="/js/sidebar.js"></script>
     <script src="/js/global-search.js"></script>
 </body>

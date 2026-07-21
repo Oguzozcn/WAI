@@ -6,7 +6,6 @@ from src.services.quiz_service import (
     evaluate_answers,
     generate_reflection_prompt,
 )
-from src.services.curriculum_service import generate_remedial_course
 from src.core.database import DepartmentScopedStore
 from src.core.config import DEFAULT_DEPARTMENT
 from src.core.dev_config import get_param
@@ -176,6 +175,8 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
         quiz_id=body.quiz_id,
         user_id=body.user_id,
         answers=enriched_answers,
+        quiz_type=body.quiz_type,
+        course_id=body.course_id,
         department=department,
     )
 
@@ -192,31 +193,42 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
         q = q_lookup.get(q_id)
         if not q:
             continue
-        token_id = q.get("tested_concept_token") or (q.get("concept_tags") or [""])[0]
-        if not token_id:
+        # Keyed on ALL of the question's concept_tags — matching how
+        # error_retention_matrix is built in evaluate_answers (all-tags-per-
+        # question) — not just the first tag. Previously this used a single
+        # tag while error_retention_matrix used all of them, so a question's
+        # 2nd/3rd concept tag would silently never accumulate mastery data,
+        # and generate_gap_review's HLR due-filtering (below) would never
+        # find a vector for those tags at all.
+        tags = list(q.get("concept_tags") or [])
+        legacy_token = q.get("tested_concept_token")
+        if legacy_token and legacy_token not in tags:
+            tags.append(legacy_token)
+        if not tags:
             continue
 
         is_correct = (user_ans.get("selected_index") == q["correct_answer_index"])
-        vec = mastery_vectors.get(token_id, {
-            "concept_id": token_id,
-            "ability_score": 0.5,
-            "last_seen": now_iso,
-            "half_life_days": 7.0,
-            "historical_attempts": 0,
-            "correct_count": 0,
-        })
+        for token_id in tags:
+            vec = mastery_vectors.get(token_id, {
+                "concept_id": token_id,
+                "ability_score": 0.5,
+                "last_seen": now_iso,
+                "half_life_days": 7.0,
+                "historical_attempts": 0,
+                "correct_count": 0,
+            })
 
-        vec["historical_attempts"] = vec.get("historical_attempts", 0) + 1
-        vec["last_seen"] = now_iso
+            vec["historical_attempts"] = vec.get("historical_attempts", 0) + 1
+            vec["last_seen"] = now_iso
 
-        if is_correct:
-            vec["correct_count"] = vec.get("correct_count", 0) + 1
-            vec["ability_score"] = min(1.0, vec.get("ability_score", 0.5) + 0.15)
-        else:
-            vec["ability_score"] = max(0.0, vec.get("ability_score", 0.5) - 0.20)
-            luck_failures[token_id] = luck_failures.get(token_id, 0) + 1
+            if is_correct:
+                vec["correct_count"] = vec.get("correct_count", 0) + 1
+                vec["ability_score"] = min(1.0, vec.get("ability_score", 0.5) + 0.15)
+            else:
+                vec["ability_score"] = max(0.0, vec.get("ability_score", 0.5) - 0.20)
+                luck_failures[token_id] = luck_failures.get(token_id, 0) + 1
 
-        mastery_vectors[token_id] = vec
+            mastery_vectors[token_id] = vec
 
     progress["mastery_vectors"] = mastery_vectors
     progress["luck_failures"] = luck_failures
@@ -227,54 +239,38 @@ async def api_evaluate_quiz(body: QuizEvaluateRequest, department: str = DEFAULT
     result["attempts_remaining"] = max(0, get_param("MAX_QUIZ_ATTEMPTS") - previous_attempts)
     result["max_attempts"] = get_param("MAX_QUIZ_ATTEMPTS")
 
-    if body.quiz_type == "final_assessment":
-        if not result.get("passed", True):
-            incorrect = [a for a in enriched_answers if not a.get("is_correct", False)]
-            if incorrect:
-                cached_quiz = store.read_quiz(body.quiz_id) or {}
-                q_lookup = {q["question_id"]: q for q in cached_quiz.get("questions", [])}
-                for ans in incorrect:
-                    q = q_lookup.get(ans.get("question_id", ""))
-                    if q:
-                        ans["question_text"] = q.get("text", "")
+    # Gap review / remedial course generation (when the single remediation
+    # decision calls for it) already happened inside evaluate_answers — the
+    # same code path a chat-invoked evaluation goes through, so this route
+    # doesn't re-decide or re-generate anything.
+    remediation = result.get("remediation", {})
 
-                try:
-                    remedial = generate_remedial_course(
-                        incorrect_answers=incorrect,
-                        user_id=body.user_id,
-                        source_course_id=body.course_id,
-                        department=department,
-                    )
-                    result["remedial_course_generated"] = True
-                    result["remedial_course_id"] = remedial.get("course_id")
-                    result["remedial_message"] = (
-                        f"A personalized remedial course \"{ remedial.get('title') }\" has been "
-                        "added to your learning path based on your gap analysis."
-                    )
-                except Exception as e:
-                    print(f"[/api/quiz/evaluate] Remedial course generation failed: {e}")
-                    result["remedial_course_generated"] = False
-        elif body.course_id.startswith("remedial_"):
-            completed = progress.get("completed_courses", [])
-            if body.course_id not in completed:
-                completed.append(body.course_id)
-                progress["completed_courses"] = completed
-                
-            for rc in progress.get("remedial_courses", []):
-                if rc.get("course_id") == body.course_id:
-                    src_id = rc.get("source_course_id")
-                    if src_id and src_id not in completed:
-                        completed.append(src_id)
-                        progress["completed_courses"] = completed
-                    break
-                    
-            path = store.read_latest_learning_path()
-            if path:
-                path_course_ids = set(c["course_id"] for c in path.get("courses", []))
-                if path_course_ids.issubset(set(completed)):
-                    progress["current_state"] = "completed"
-                    
-            store.write_user_progress(body.user_id, progress)
+    if not remediation.get("spawn_remedial_course") and (
+        body.quiz_type == "final_assessment" and result.get("passed") and body.course_id.startswith("remedial_")
+    ):
+        # Learner just passed a remedial course's own final assessment —
+        # mark it (and its source course) completed, independent of whether
+        # any NEW remediation was triggered by this same attempt.
+        completed = progress.get("completed_courses", [])
+        if body.course_id not in completed:
+            completed.append(body.course_id)
+            progress["completed_courses"] = completed
+
+        for rc in progress.get("remedial_courses", []):
+            if rc.get("course_id") == body.course_id:
+                src_id = rc.get("source_course_id")
+                if src_id and src_id not in completed:
+                    completed.append(src_id)
+                    progress["completed_courses"] = completed
+                break
+
+        path = store.read_latest_learning_path()
+        if path:
+            path_course_ids = set(c["course_id"] for c in path.get("courses", []))
+            if path_course_ids.issubset(set(completed)):
+                progress["current_state"] = "completed"
+
+        store.write_user_progress(body.user_id, progress)
 
     return result
 
@@ -295,6 +291,76 @@ async def api_reflection(body: ReflectionRequest):
         concept_tags=body.concept_tags,
     )
     return result
+
+class GapReviewRetryRequest(BaseModel):
+    user_id: str
+    concept_tags: list[str]
+
+@router.post("/gap-review/retry")
+async def api_gap_review_retry(body: GapReviewRetryRequest, department: str = DEFAULT_DEPARTMENT):
+    """Turn a gap-review exercise into an actual, startable quiz.
+
+    generate_gap_review only ever produced instructions text ("review this
+    concept") with nothing to click — this generates a short targeted quiz
+    for the given concept tag(s), seeded with the learner's stored
+    misconceptions (concept_diagnoses) as extra grounding when available, so
+    the questions target the actual reason they got it wrong last time.
+    """
+    if not body.concept_tags:
+        raise HTTPException(status_code=400, detail="concept_tags must not be empty.")
+
+    store = DepartmentScopedStore(department)
+    progress = store.read_user_progress(body.user_id) or {}
+    concept_diagnoses = progress.get("concept_diagnoses", {})
+
+    diagnosis_lines = []
+    for tag in body.concept_tags:
+        entries = concept_diagnoses.get(tag, [])
+        if entries and entries[-1].get("misconception"):
+            diagnosis_lines.append(f"Concept '{tag}': known misconception — {entries[-1]['misconception']}")
+    extra_context = "\n".join(diagnosis_lines)
+
+    topic = ", ".join(body.concept_tags)
+    quiz = generate_quiz(
+        topic=topic,
+        difficulty="medium",
+        question_count=3,
+        quiz_type="gap_review",
+        department=department,
+        extra_context=extra_context,
+    )
+    store.write_quiz(quiz["quiz_id"], quiz)
+
+    import copy as _copy
+    sanitized = _copy.deepcopy(quiz)
+    for q in sanitized.get("questions", []):
+        q.pop("correct_answer_index", None)
+
+    sanitized["concept_tags"] = body.concept_tags
+    sanitized["attempts_remaining"] = get_param("MAX_QUIZ_ATTEMPTS")
+    sanitized["max_attempts"] = get_param("MAX_QUIZ_ATTEMPTS")
+    sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
+    return sanitized
+
+@router.get("/session/{quiz_id}")
+async def api_quiz_session(quiz_id: str, department: str = DEFAULT_DEPARTMENT):
+    """Fetch a previously-generated, still-cached quiz by ID — used to load
+    a gap-review retry quiz (or any other on-demand quiz) after redirecting
+    to the quiz page with just its quiz_id, without regenerating it."""
+    store = DepartmentScopedStore(department)
+    quiz = store.read_quiz(quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz session expired or not found.")
+
+    import copy as _copy
+    sanitized = _copy.deepcopy(quiz)
+    for q in sanitized.get("questions", []):
+        q.pop("correct_answer_index", None)
+
+    sanitized["attempts_remaining"] = get_param("MAX_QUIZ_ATTEMPTS")
+    sanitized["max_attempts"] = get_param("MAX_QUIZ_ATTEMPTS")
+    sanitized["pass_threshold"] = get_param("PASS_THRESHOLD")
+    return sanitized
 
 @router.get("/by-lesson/{course_id}/{lesson_id}")
 async def api_quiz_by_lesson(course_id: str, lesson_id: str, user_id: str = "emp_001", department: str = DEFAULT_DEPARTMENT):

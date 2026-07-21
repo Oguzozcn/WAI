@@ -1,4 +1,6 @@
-<!DOCTYPE html><html class="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+<!DOCTYPE html><html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet"><script id="tailwind-config">try{
   tailwind.config = {
     darkMode: "class",
     theme: {
@@ -149,8 +151,7 @@ Start <span class="material-symbols-outlined">chevron_right</span>
 </div>
 </div>
 </div>
-<!-- Tabs -->
-<!-- TODO: Paths tab currently duplicates Courses' data; needs real multi-path support before it can show something distinct (see Phase 3) -->
+<!-- Tabs: Courses = per-lesson cards across every enrolled path; Paths = one card per enrolled path -->
 <div class="flex items-center gap-6 border-b border-outline-variant px-2 md:flex-1">
 <button id="tab-activities" class="pb-3 text-primary font-bold border-b-2 border-primary text-sm px-1">Courses</button>
 <button id="tab-paths" class="pb-3 text-on-surface-variant hover:text-on-surface font-medium text-sm px-1">Paths</button>
@@ -165,7 +166,10 @@ Start <span class="material-symbols-outlined">chevron_right</span>
   <!-- Populated by JS -->
 </div>
 <div class="pt-2 pb-8">
-<button id="view-all-btn" class="text-primary font-bold text-sm hover:underline bg-transparent border-none cursor-pointer p-0">View all courses</button>
+<button id="view-all-btn" class="inline-flex items-center gap-1.5 text-primary font-bold text-sm bg-surface-container-low hover:bg-surface-container-high border border-outline-variant rounded-full pl-4 pr-3 py-2 transition-colors cursor-pointer">
+<span id="view-all-btn-text">View all courses</span>
+<span id="view-all-btn-icon" class="material-symbols-outlined text-[18px] transition-transform">arrow_forward</span>
+</button>
 </div>
 </div>
 <!-- Right Sidebar -->
@@ -254,7 +258,7 @@ document.querySelectorAll('.squishy-button').forEach(button => {
 
 const profileAvatar = document.getElementById('profile-avatar');
 if (profileAvatar) {
-    profileAvatar.addEventListener('click', () => showToast('Profile — Feature coming soon!'));
+    profileAvatar.addEventListener('click', () => { window.location.href = '/settings'; });
 }
 
 // ─── Tab Switcher ─────────────────────────────────────────────────────────────
@@ -285,9 +289,15 @@ function activateTab(tabName) {
         panelActivities.classList.add('hidden');
     }
     
-    if (viewAllBtn) {
-        viewAllBtn.textContent = isExpanded ? 'Show less' : (tabName === 'activities' ? 'View all courses' : 'View all paths');
-    }
+    updateViewAllLabel();
+}
+
+function updateViewAllLabel() {
+    const textEl = document.getElementById('view-all-btn-text');
+    const iconEl = document.getElementById('view-all-btn-icon');
+    if (!textEl) return;
+    textEl.textContent = isExpanded ? 'Show less' : (activeTab === 'activities' ? 'View all courses' : 'View all paths');
+    if (iconEl) iconEl.textContent = isExpanded ? 'expand_less' : 'arrow_forward';
 }
 document.getElementById('tab-activities').addEventListener('click', () => activateTab('activities'));
 document.getElementById('tab-paths').addEventListener('click', () => activateTab('paths'));
@@ -365,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let enrolledPaths = [];
         if (enrolledSummaries.length > 0) {
             const fullPaths = await Promise.all(enrolledSummaries.map(s =>
-                fetch('/api/learning-path/' + encodeURIComponent(s.path_id))
+                fetch('/api/learning-path/' + encodeURIComponent(s.path_id) + '?user_id=' + encodeURIComponent(userId))
                     .then(r => r.ok ? r.json() : null)
                     .catch(() => null)
             ));
@@ -476,7 +486,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const displayStyle = (idx >= 4 && !isExpanded) ? 'display: none;' : '';
 
                 grid.innerHTML += `
-                <a href="${lessonUrl}" class="group bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-md hover:border-primary/40 transition-all no-underline cursor-pointer ${extraClass}" style="${displayStyle}">
+                <a href="${lessonUrl}" class="group bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all no-underline cursor-pointer ${extraClass}" style="${displayStyle}">
                     <div class="flex items-center gap-2 mb-4">${badgeHtml}</div>
                     <h3 class="font-headline-md text-xl text-on-surface mb-3 flex-1">${cardTitle}</h3>
                     <p class="text-sm text-on-surface-variant mb-6 line-clamp-3">${cardDesc}</p>
@@ -510,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     + (lessonTotal > 0 ? ` • ${lessonTotal} lesson${lessonTotal !== 1 ? 's' : ''}` : '') + '.';
 
                 pathsPanel.innerHTML += `
-                <a href="${pathUrl}" class="group bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-md hover:border-primary/40 transition-all no-underline cursor-pointer ${extraClass}" style="${displayStyle}">
+                <a href="${pathUrl}" class="group bg-surface-container-lowest border border-outline-variant rounded-lg p-6 pb-8 shadow-sm flex flex-col h-full hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all no-underline cursor-pointer ${extraClass}" style="${displayStyle}">
                     <div class="flex items-center gap-2 mb-4">${badgeHtml}</div>
                     <h3 class="font-headline-md text-xl text-on-surface mb-3 flex-1">${p.title}</h3>
                     <p class="text-sm text-on-surface-variant mb-6 line-clamp-3">${summaryText}</p>
@@ -524,7 +534,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (viewAllBtn) {
             viewAllBtn.addEventListener('click', () => {
                 isExpanded = !isExpanded;
-                viewAllBtn.textContent = isExpanded ? 'Show less' : (activeTab === 'activities' ? 'View all courses' : 'View all paths');
+                updateViewAllLabel();
                 document.querySelectorAll('.dashboard-extra-card').forEach(el => {
                     el.style.display = isExpanded ? 'flex' : 'none';
                 });

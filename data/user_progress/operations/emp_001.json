@@ -3,7 +3,7 @@
   "department": "operations",
   "display_name": "Alex Chen",
   "entry_path": "veteran",
-  "current_state": "enrolled",
+  "current_state": "course_in_progress",
   "learning_path_id": "",
   "enrolled_path_ids": [
     "lp_013c7e1e",
@@ -32,6 +32,48 @@
       "total_questions": 3,
       "correct_answers": 1,
       "attempted_at": "2026-07-19T11:19:23.504276"
+    },
+    {
+      "quiz_id": "quiz_c3444293",
+      "score": 0.0,
+      "total_questions": 1,
+      "correct_answers": 0,
+      "attempted_at": "2026-07-21T07:37:26.882342"
+    },
+    {
+      "quiz_id": "quiz_cf633132",
+      "score": 0.0,
+      "total_questions": 1,
+      "correct_answers": 0,
+      "attempted_at": "2026-07-21T07:37:56.717603"
+    },
+    {
+      "quiz_id": "quiz_9d1ea11f",
+      "score": 0.0,
+      "total_questions": 1,
+      "correct_answers": 0,
+      "attempted_at": "2026-07-21T07:39:24.965444+00:00"
+    },
+    {
+      "quiz_id": "quiz_57b3a9cf",
+      "score": 0.0,
+      "total_questions": 1,
+      "correct_answers": 0,
+      "attempted_at": "2026-07-21T07:40:00.324858+00:00"
+    },
+    {
+      "quiz_id": "quiz_37860ce0",
+      "score": 0.2,
+      "total_questions": 5,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-21T07:42:15.453079+00:00"
+    },
+    {
+      "quiz_id": "quiz_527bbb7a",
+      "score": 0.2,
+      "total_questions": 5,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-21T07:43:12.269582+00:00"
     }
   ],
   "assessment_scores": [
@@ -49,6 +91,36 @@
       "quiz_id": "quiz_039e4c68",
       "score": 0.3333333333333333,
       "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_c3444293",
+      "score": 0.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_cf633132",
+      "score": 0.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_9d1ea11f",
+      "score": 0.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_57b3a9cf",
+      "score": 0.0,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_37860ce0",
+      "score": 0.2,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_527bbb7a",
+      "score": 0.2,
+      "type": "quiz"
     }
   ],
   "best_assessment_score": 0.3333333333333333,
@@ -56,15 +128,23 @@
     "Google Models": 3,
     "Generative AI": 3,
     "Vertex AI Studio": 3,
-    "Cloud Development": 3
+    "Cloud Development": 3,
+    "ui_verify_concept": 4,
+    "concept_1": 6,
+    "ui_browser_verify": 8,
+    "concept_3": 2,
+    "concept_4": 2,
+    "concept_5": 2
   },
   "luck_failures": {
     "Google Models": 3,
-    "Vertex AI Studio": 3
+    "Vertex AI Studio": 3,
+    "ui_verify_concept": 4,
+    "ui_browser_verify": 8
   },
   "bypass_locked": false,
   "bypass_attempts": 0,
-  "readiness_score": 0.0,
+  "readiness_score": 0.15,
   "is_at_risk": true,
   "blocked_by": "",
   "manager_id": "manager",
@@ -93,10 +173,1101 @@
       "half_life_days": 7.0,
       "historical_attempts": 3,
       "correct_count": 0
+    },
+    "ui_verify_concept": {
+      "concept_id": "ui_verify_concept",
+      "ability_score": 0.0,
+      "last_seen": "2026-07-21T07:40:38.534033+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 4,
+      "correct_count": 0
+    },
+    "ui_browser_verify": {
+      "concept_id": "ui_browser_verify",
+      "ability_score": 0.0,
+      "last_seen": "2026-07-21T07:43:59.429747+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 10,
+      "correct_count": 2
     }
   },
   "enrolled_at": "2026-06-25T09:00:00Z",
-  "last_activity_at": "2026-07-19T11:18:50.976809",
-  "last_updated": "2026-07-19T11:19:23.505103+00:00",
-  "psychometric_ability": -1.5300041684774404
+  "last_activity_at": "2026-07-20T06:46:37.300151",
+  "last_updated": "2026-07-21T07:43:59.429822+00:00",
+  "psychometric_ability": -4.0,
+  "remedial_courses": [
+    {
+      "course_id": "remedial_bfbfbd92",
+      "title": "Targeted Review: Structuring ui_verify_concept Part 1",
+      "description": "This targeted remedial course addresses the critical distinction between structural UI assertions and dynamic behavioral validation. It clarifies why verifying static visual foundations (Part 1) must structurally precede interactive testing (Part 2) within the ui_verify_concept framework.",
+      "topics": [
+        "ui_verify_concept",
+        "concept_1"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "source_course_id": "course_ui_verify",
+      "gap_topics": [
+        "ui_verify_concept",
+        "concept_1"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_c623c7d2",
+      "final_assessment_id": "quiz_c59db009",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Separating Structure from Behavior in ui_verify_concept",
+          "content_summary": "A common point of failure in UI automation and testing methodologies is the premature verification of dynamic state changes before confirming the structural integrity of the interface. In the ui_verify_concept framework, Part 1 is strictly dedicated to establishing a reliable, static structural baseline (Statement A). This means verifying that DOM elements, critical layout nodes, and visual boundaries exist and are correctly initialized before any interactive simulation takes place.\n\nThe misconception lies in treating behavioral validation\u2014such as how a component reacts to clicks or state updates (Statement B)\u2014as part of this initial structural phase. Attempting to verify dynamic behaviors during Part 1 leads to fragile, high-maintenance tests. If the underlying DOM structure is missing or broken, behavioral checks will fail catastrophically without providing clear diagnostic feedback on whether the issue is structural or behavioral.\n\nTo correct this, always enforce a sequential boundary: Part 1 (Concept 1) must verify 'what exists and where it is positioned' (structural assertion), while Part 2 handles 'how it responds and changes state' (behavioral assertion). By isolating the structural identity verification to Part 1, you ensure that test failures are immediately actionable and precisely localized.",
+          "key_points": [
+            "ui_verify_concept Part 1 is exclusively reserved for static, structural verification (visual identity and layout presence) rather than dynamic interactive behavior.",
+            "Conflating Part 1 structural checks with Part 2 behavioral assertions introduces test flakiness and obscures the root cause of interface rendering errors.",
+            "A structural baseline (Statement A) must always be fully validated and confirmed before initiating any interactive or event-driven state assertions (Statement B)."
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_c623c7d2",
+          "short_quiz": {
+            "quiz_id": "quiz_c623c7d2",
+            "topic": "Targeted Review: Structuring ui_verify_concept Part 1",
+            "quiz_type": "short_quiz",
+            "question_count": 3,
+            "questions": [
+              {
+                "text": "Which of the following activities strictly falls under the scope of ui_verify_concept Part 1?",
+                "options": [
+                  "Verifying that the main dashboard container exists in the DOM and renders within visual boundaries.",
+                  "Verifying that clicking the dropdown menu populates the list with active database records.",
+                  "Asserting that the form submission triggers an asynchronous success toast message.",
+                  "Testing if hover states dynamically alter the opacity of the primary action button."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Verifying existence and rendering in the DOM is a static, structural verification belonging to Part 1.",
+                  "1": "Incorrect. This involves simulated interaction and dynamic data fetching, which belong to Part 2 behavioral testing.",
+                  "2": "Incorrect. This asserts an interactive, asynchronous event sequence, which is a Part 2 concern.",
+                  "3": "Incorrect. Testing visual state changes in response to user interaction (hovering) is a dynamic behavioral check."
+                },
+                "concept_tags": [
+                  "ui_verify_concept",
+                  "concept_1"
+                ],
+                "question_id": "q_babdb6"
+              },
+              {
+                "text": "Why must Statement A (structural layout verification) be completed before Statement B (dynamic interaction checks)?",
+                "options": [
+                  "Because behavioral assertions are completely invalid if the target elements do not structurally exist or have not fully rendered first.",
+                  "Because structural verification is slower to execute than behavioral verification.",
+                  "Because Part 1 testing is optional and only used for debugging purposes.",
+                  "Because UI frameworks always run CSS styles before initializing DOM components."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. You cannot reliably test how an element behaves if it does not yet exist or render in the layout.",
+                  "1": "Incorrect. Speed of execution is not the primary architectural reason for the sequencing of ui_verify_concept phases.",
+                  "2": "Incorrect. Part 1 is a mandatory foundational step, not an optional debugging tool.",
+                  "3": "Incorrect. DOM initialization precedes CSS styling, and this does not address the architectural logic of ui_verify_concept."
+                },
+                "concept_tags": [
+                  "ui_verify_concept"
+                ],
+                "question_id": "q_179336"
+              },
+              {
+                "text": "A test suite fails because a button cannot be clicked, even though the dynamic response code is flawless. Which phase of ui_verify_concept was neglected?",
+                "options": [
+                  "Part 1: Structural Verification (determining if the button actually rendered in the viewport).",
+                  "Part 2: Behavioral Verification (checking the onClick handler execution).",
+                  "Part 3: Performance Optimization (analyzing network payload speeds).",
+                  "Part 4: Clean-up Operations (tearing down the simulated environment)."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. If an element cannot be interacted with, the test must first confirm whether the element rendered structurally (Part 1).",
+                  "1": "Incorrect. The scenario states the dynamic response code is flawless; the failure lies in the button's physical rendering or presence.",
+                  "2": "Incorrect. Performance optimization is unrelated to physical rendering and clickability failures.",
+                  "3": "Incorrect. Clean-up operations take place after tests run and are not responsible for rendering verification."
+                },
+                "concept_tags": [
+                  "ui_verify_concept",
+                  "concept_1"
+                ],
+                "question_id": "q_ef8cfe"
+              }
+            ],
+            "created_at": "2026-07-21T07:37:55.692398+00:00"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_c59db009",
+        "topic": "Targeted Review: Structuring ui_verify_concept Part 1",
+        "quiz_type": "final_assessment",
+        "question_count": 5,
+        "questions": [
+          {
+            "text": "What is the primary risk of mixing behavioral assertions into the initial ui_verify_concept Part 1 phase?",
+            "options": [
+              "Masking structural rendering bugs behind complex, flaky behavioral failure messages.",
+              "Slowing down the execution of subsequent backend service unit tests.",
+              "Disabling browser caching mechanism during the test execution process.",
+              "Over-allocating memory during initial visual rendering processes."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. If an element fails to render, a behavioral test will fail with a generic interaction error, masking the simple structural bug.",
+              "1": "Incorrect. Backend unit tests are isolated and are not directly impacted by UI testing phase boundaries.",
+              "2": "Incorrect. Browser caching is managed by browser configurations, not by the structuring of UI assertion phases.",
+              "3": "Incorrect. UI testing methodology design does not physically alter browser memory allocation for rendering."
+            },
+            "concept_tags": [
+              "ui_verify_concept"
+            ],
+            "question_id": "q_370139"
+          },
+          {
+            "text": "Which of the following scenarios represents a direct violation of the ui_verify_concept Part 1 protocol?",
+            "options": [
+              "Asserting that a submit button executes a network fetch request before validating that the form fields exist.",
+              "Asserting that a login card is visible in the center of the screen upon initial application load.",
+              "Checking that the navigation bar contains exactly four anchor tags with correct href attributes.",
+              "Verifying that the company logo image contains the correct alt-text attribute on rendering."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Asserting network fetches (behavior) before validating field existence (structure) violates the sequence by skipping Part 1 validation.",
+              "1": "Incorrect. This is a standard Part 1 check verifying visual positioning and layout existence.",
+              "2": "Incorrect. Verifying static HTML structures and attributes is the core function of Part 1.",
+              "3": "Incorrect. Image rendering and static attribute validation (like alt-text) fall squarely under Part 1."
+            },
+            "concept_tags": [
+              "ui_verify_concept",
+              "concept_1"
+            ],
+            "question_id": "q_3ed2a4"
+          },
+          {
+            "text": "In ui_verify_concept, what does 'Concept 1' explicitly establish?",
+            "options": [
+              "The static, visual, and DOM-level baseline of the user interface.",
+              "The event-driven state machines governing user interactions.",
+              "The integration layers connecting the UI with external web services.",
+              "The automated rollout and deployment configurations of the interface."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Concept 1 strictly refers to establishing the static layout and DOM-level baseline of the interface.",
+              "1": "Incorrect. Event-driven state machines belong to Part 2 (interactive behavior).",
+              "2": "Incorrect. Integration layers relate to API and backend verification, not static UI structure.",
+              "3": "Incorrect. Rollout and deployment configurations belong to CI/CD pipelines, not UI testing verification phases."
+            },
+            "concept_tags": [
+              "concept_1"
+            ],
+            "question_id": "q_f8b4d3"
+          },
+          {
+            "text": "How should a developer proceed when a UI test fails during ui_verify_concept Part 1 verification?",
+            "options": [
+              "Stop the test run immediately, fix the visual rendering or layout structure, and re-run.",
+              "Ignore the failure and proceed to verify if the element\u2019s click handlers are working.",
+              "Write a fallback script to simulate the click event even if the element is not visible.",
+              "Re-route the test to verify database outputs rather than frontend elements."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. If Part 1 fails, the structural baseline is compromised, meaning further tests are invalid until the rendering/layout is fixed.",
+              "1": "Incorrect. Proceeding to behavioral checks when the element has failed structural verification results in meaningless, flaky failures.",
+              "2": "Incorrect. Simulating interactions on non-visible elements bypasses realistic user behavior and invalidates the UI test.",
+              "3": "Incorrect. Re-routing to database verification avoids fixing the identified frontend structural failure."
+            },
+            "concept_tags": [
+              "ui_verify_concept"
+            ],
+            "question_id": "q_2d7069"
+          },
+          {
+            "text": "Which attribute verification is categorized under ui_verify_concept Part 1?",
+            "options": [
+              "Checking the `id` and `class` attributes of a static component upon initial mount.",
+              "Checking the dynamically generated session token inside browser local storage after login.",
+              "Measuring the execution speed of a dynamic calculation function upon text input.",
+              "Confirming the websocket status code changes when the network connection drops."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Static component identity and attribute checks (such as id and class) are foundational Part 1 structural assertions.",
+              "1": "Incorrect. Local storage mutations resulting from user login are dynamic, behavioral outcomes (Part 2).",
+              "2": "Incorrect. Function execution speed measurements are part of performance and dynamic profiling, not static structure.",
+              "3": "Incorrect. WebSocket status code transitions in response to network events are reactive behaviors (Part 2)."
+            },
+            "concept_tags": [
+              "ui_verify_concept",
+              "concept_1"
+            ],
+            "question_id": "q_d7d9a9"
+          }
+        ],
+        "created_at": "2026-07-21T07:37:55.692439+00:00"
+      },
+      "created_at": "2026-07-21T07:37:55.692477+00:00"
+    },
+    {
+      "course_id": "remedial_24729e99",
+      "title": "Targeted Review: Visual vs. Functional UI Verification",
+      "description": "This remedial course clarifies the critical distinction between visual UI verification (checking how elements look and render) and functional UI verification (checking how elements behave). It directly resolves misconceptions regarding visual regression baselines and interactive state testing.",
+      "topics": [
+        "ui_verify_concept",
+        "concept_1",
+        "functional_vs_visual_verification"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "source_course_id": "course_ui_verify",
+      "gap_topics": [
+        "ui_verify_concept",
+        "concept_1",
+        "functional_vs_visual_verification"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_0e4a0e08",
+      "final_assessment_id": "quiz_7778c502",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Demystifying UI Verification: Separating Aesthetics from Behavior",
+          "content_summary": "In UI automation and testing, a frequent failure point is the conflation of functional and visual verification. Functional verification evaluates whether a user interface behaves correctly when interacted with\u2014such as verifying that clicking a submit button triggers a form submission or transitions the application's state. In contrast, visual verification (the core of 'ui_verify_concept' Part 1) focuses strictly on how the interface renders. It checks if the layout, spacing, alignment, colors, and typography match the target design specifications, independent of underlying interactive code execution.\n\nThis misconception typically surfaces when a learner assumes that because a test successfully located, clicked, and verified the functional state change of a UI element, its visual layout must also be correct. This is a false assumption. A button can be functionally perfect\u2014submitting correct payloads to an API\u2014while being visually broken, such as being rendered off-screen, overlapping other text elements, or displaying with completely unreadable contrast.\n\nTo remediate this gap, you must treat visual and functional checks as complementary but distinct testing paradigms. Visual verification relies on pixel-differential analysis or visual snapshot regression testing to compare rendered pages against baseline image mockups. Functional testing utilizes unit and integration testing frameworks to validate DOM assertions, event loops, and data integrity. Mixing these concepts results in missed visual bugs and bloated, fragile test suites.",
+          "key_points": [
+            "Visual verification (ui_verify_concept Part 1) validates the layout, styling, alignment, and rendering fidelity against visual design baselines.",
+            "Functional verification validates the behavioral correctness, state transitions, API payloads, and event handling of UI components.",
+            "An element can pass functional verification while failing visual verification (and vice-versa), meaning both must be tested using distinct, specialized assertions."
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_0e4a0e08",
+          "short_quiz": {
+            "quiz_id": "quiz_0e4a0e08",
+            "topic": "Targeted Review: Visual vs. Functional UI Verification",
+            "quiz_type": "short_quiz",
+            "question_count": 3,
+            "questions": [
+              {
+                "text": "Under the concept of 'ui_verify_concept' Part 1, what is the primary focus of visual verification?",
+                "options": [
+                  "Verifying that the UI elements render correctly with accurate layout, positioning, and CSS styling compared to a visual baseline.",
+                  "Asserting that clicking a form button triggers the correct backend API request and database transaction.",
+                  "Validating that helper text inputs only accept alphanumeric characters through regex validation.",
+                  "Measuring the rendering speed and server response time of interactive UI elements under high traffic."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Visual verification is exclusively concerned with layout, rendering, and aesthetic fidelity against a baseline.",
+                  "1": "Incorrect. This describes functional verification, which checks interactive behaviors and API integrations, not visual presentation.",
+                  "2": "Incorrect. Input sanitization and regex validation represent functional validation of the form's logic, not visual rendering.",
+                  "3": "Incorrect. Performance and load testing measure responsiveness and speed, not the visual correctness of the layout."
+                },
+                "concept_tags": [
+                  "ui_verify_concept",
+                  "concept_1"
+                ],
+                "question_id": "q_d70aa1"
+              },
+              {
+                "text": "A test script asserts that a modal popup successfully changes its open state variable to 'true' upon click, but fails to check if the popup renders partially hidden behind a navigation bar. What mistake has been made?",
+                "options": [
+                  "The tester performed functional verification but neglected visual verification.",
+                  "The tester performed visual verification but neglected functional validation.",
+                  "The tester should have verified the state transitions via a database unit test.",
+                  "The tester focused too heavily on pixel-perfect alignment and missed the functional error."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Verifying the state variable 'true' is a functional check, while failing to detect clipping or layout overlap represents a failure to perform visual verification.",
+                  "1": "Incorrect. The tester did not perform visual verification; they only verified the logical state variable change.",
+                  "2": "Incorrect. Database testing is irrelevant to UI layout issues such as navigation bar overlapping.",
+                  "3": "Incorrect. The tester completely missed the visual layout issue, showing they did not focus on pixel-perfect alignment."
+                },
+                "concept_tags": [
+                  "functional_vs_visual_verification"
+                ],
+                "question_id": "q_3729f6"
+              },
+              {
+                "text": "Which testing methodology is uniquely suited for 'ui_verify_concept' Part 1 (visual verification)?",
+                "options": [
+                  "Pixel-differential snapshot testing to identify visual regressions.",
+                  "Simulated user interaction tests to verify state change logic in the DOM.",
+                  "Integration tests verifying JSON schemas returned by the API.",
+                  "End-to-end testing of data processing logic across backend microservices."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Snapshot testing compares image pixels of the rendered UI against baselines to find visual changes.",
+                  "1": "Incorrect. This is a functional testing methodology focusing on DOM states and interactive logic.",
+                  "2": "Incorrect. Schema testing is a backend or API functional test.",
+                  "3": "Incorrect. Microservice data processing is a purely non-visual, functional integration test."
+                },
+                "concept_tags": [
+                  "ui_verify_concept",
+                  "functional_vs_visual_verification"
+                ],
+                "question_id": "q_7b6270"
+              }
+            ],
+            "created_at": "2026-07-21T07:40:38.531067+00:00"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_7778c502",
+        "topic": "Targeted Review: Visual vs. Functional UI Verification",
+        "quiz_type": "final_assessment",
+        "question_count": 5,
+        "questions": [
+          {
+            "text": "Which of the following describes a scenario where 'ui_verify_concept' (Part 1) is successfully applied?",
+            "options": [
+              "An automated script compares a screenshot of the checkout screen against a baseline image to ensure the payment icon is not cropped.",
+              "A script simulates typing text into an input field and checks if the character limit counter decreases properly.",
+              "An assertion verifies that an error message banner displays when a network timeout (HTTP 504) occurs.",
+              "A tester writes a unit test to verify that the CSS file exists on the server and returns a 200 OK status."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Comparing screenshots against baseline images to check for rendering defects like cropping is visual verification.",
+              "1": "Incorrect. Checking character counters is a functional test validating application logic.",
+              "2": "Incorrect. Verifying that a banner displays in response to an API error is a functional state assertion, not visual rendering fidelity.",
+              "3": "Incorrect. Checking file existence via HTTP codes is server-side infrastructure testing, not visual UI rendering verification."
+            },
+            "concept_tags": [
+              "ui_verify_concept",
+              "concept_1"
+            ],
+            "question_id": "q_3a5054"
+          },
+          {
+            "text": "If a UI button is rendered off-screen due to a CSS layout error, but is still programmatically clickable by an automation tool like Selenium, how does this impact the test outcome?",
+            "options": [
+              "It passes functional verification but fails visual verification.",
+              "It passes visual verification because the element exists in the DOM, but fails functional verification.",
+              "It fails both verifications because Selenium cannot click off-screen elements programmatically.",
+              "It passes both because existence in the DOM automatically guarantees visual rendering correctness."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Because the element is clickable in the DOM, the functional flow succeeds, but the off-screen layout means it visually fails.",
+              "1": "Incorrect. It fails visual verification because it is rendered off-screen where users cannot see it.",
+              "2": "Incorrect. Automation tools can often interact with elements in the DOM even if they are visually clipped or shifted off-screen, depending on settings.",
+              "3": "Incorrect. DOM existence does not guarantee visual correctness, which is the core misconception corrected in this course."
+            },
+            "concept_tags": [
+              "functional_vs_visual_verification"
+            ],
+            "question_id": "q_819b20"
+          },
+          {
+            "text": "A developer claims: 'Since our Cypress test suite asserts that all navigation menu items exist in the DOM and are interactive, we do not need visual regression testing.' What is the flaw in this statement?",
+            "options": [
+              "DOM assertions verify presence and interactivity, but cannot detect visual anomalies such as overlapping text or incorrect background colors.",
+              "Cypress is incapable of functional verification, so the assertion itself is invalid.",
+              "Interactivity automatically tests visual layout, making visual testing completely redundant.",
+              "Visual regression testing is only useful for testing localized language translations, not layouts."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. DOM presence does not translate to visual aesthetics. Overlapping texts, color clashes, and misalignment bypass DOM-based functional tests.",
+              "1": "Incorrect. Cypress is excellent for functional testing; the issue is that it cannot natively assert overall visual perfection without specific visual plugins.",
+              "2": "Incorrect. Interactivity does not guarantee layout correctness, which is the core misconception.",
+              "3": "Incorrect. Visual regression testing is designed precisely for checking layout, styling, and rendering changes across viewports."
+            },
+            "concept_tags": [
+              "functional_vs_visual_verification",
+              "ui_verify_concept"
+            ],
+            "question_id": "q_661c43"
+          },
+          {
+            "text": "In the context of 'concept_1', what type of check is performed during visual regression testing?",
+            "options": [
+              "Comparing pixel arrangements between a baseline screenshot and a runtime screenshot.",
+              "Tracing data flows between frontend components and state management containers.",
+              "Asserting that click handler callbacks are registered on the global window object.",
+              "Ensuring that the HTML document structure conforms to strict W3C validation rules."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Pixel arrangement comparison is the foundation of automated visual regression testing (ui_verify_concept).",
+              "1": "Incorrect. This is functional architecture tracing, unrelated to visual rendering.",
+              "2": "Incorrect. Asserting click callback registration is a functional unit check.",
+              "3": "Incorrect. W3C structure validation checks code compliance, not how pixels are painted on the screen."
+            },
+            "concept_tags": [
+              "concept_1",
+              "ui_verify_concept"
+            ],
+            "question_id": "q_32731a"
+          },
+          {
+            "text": "Which of the following correctly pairs a testing task with its correct UI verification category?",
+            "options": [
+              "Visual: Checking if CSS alignment matches the style guide; Functional: Checking if form fields show validation errors for invalid email addresses.",
+              "Visual: Checking if the login button submits credentials; Functional: Checking if the login button is the correct shade of blue.",
+              "Visual: Checking if the database receives user records; Functional: Checking if layout elements are pixel-perfect.",
+              "Visual: Checking DOM child elements; Functional: Running pixel-differential checks on standard viewports."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. CSS alignment is a visual concern, while email validation logic is a functional behavior check.",
+              "1": "Incorrect. This reverses the definitions (button submission is functional; button color is visual).",
+              "2": "Incorrect. Database operations are backend functional logic, and pixel-perfection is a visual testing concern.",
+              "3": "Incorrect. DOM inspection is generally functional/structural, whereas pixel-differential checks are strictly visual."
+            },
+            "concept_tags": [
+              "functional_vs_visual_verification"
+            ],
+            "question_id": "q_795e43"
+          }
+        ],
+        "created_at": "2026-07-21T07:40:38.531111+00:00"
+      },
+      "created_at": "2026-07-21T07:38:28.551937+00:00",
+      "updated_at": "2026-07-21T07:40:38.531141+00:00",
+      "regenerated_count": 2
+    },
+    {
+      "course_id": "remedial_9d278728",
+      "title": "Targeted Review: Mastering the ui_browser_verify Lifecycle",
+      "description": "This course corrects the systematic error of treating all UI verification stages as generic functional element assertions. It walks you through the five unique phases of the browser test lifecycle to ensure accurate initialization, stabilization, geometry, and teardown validation.",
+      "topics": [
+        "ui_browser_verify",
+        "Lifecycle State Verification",
+        "DOM Stabilization vs Element Assertion"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "source_course_id": "",
+      "gap_topics": [
+        "ui_browser_verify",
+        "Lifecycle State Verification",
+        "DOM Stabilization vs Element Assertion"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_468e7b43",
+      "final_assessment_id": "quiz_0c7bb50f",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Differentiating the Phases of ui_browser_verify",
+          "content_summary": "A common mistake in browser automation is treating every verification step as a generic assertion on an active UI element. This 'one-size-fits-all' approach ignores the fact that a robust browser test has a strict chronological lifecycle. When using 'ui_browser_verify', you cannot apply the same logic to initialization that you apply to active-state interaction or post-run cleanup. Failing to differentiate these stages leads to unstable tests, memory leaks, and false positives.\n\nIn Part 1, the system verifies environment and driver readiness before any page elements exist. Attempting to check active page elements here will fail because the browser context is still initializing. In Part 3, the focus shifts to DOM and network stabilization (such as checking document.readyState and resolving background API requests). This stabilization phase is distinct from verifying an interactive click's outcome; it ensures the canvas is ready for subsequent functional steps.\n\nPart 4 addresses spatial layout and viewport geometry. It verifies that elements fit their structural boundaries and responsive dimensions, rather than simply checking if a button is functional. Finally, Part 5 handles teardown cleanup. It confirms that the browser instance has closed, cookies are purged, and ports are freed. Treating cleanup as another opportunity to check active page elements is impossible, as the session should be actively terminating.",
+          "key_points": [
+            "Part 1 verifies initial environment configuration and driver hook readiness, not active web page elements.",
+            "Part 3 focuses on rendering stability and network idle states to prevent interactions on unrendered targets.",
+            "Part 4 checks viewport alignment, responsiveness, and structural geometry boundaries.",
+            "Part 5 ensures complete session destruction, cookie clearance, and port liberation during teardown."
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_468e7b43",
+          "short_quiz": {
+            "quiz_id": "quiz_468e7b43",
+            "topic": "Targeted Review: Mastering the ui_browser_verify Lifecycle",
+            "quiz_type": "short_quiz",
+            "question_count": 3,
+            "questions": [
+              {
+                "text": "Before any page elements are rendered, what is the primary objective of ui_browser_verify Part 1?",
+                "options": [
+                  "To verify that the browser driver is initialized and the baseline blank window has spawned successfully.",
+                  "To assert that the main interactive buttons on the target page have completed their post-click behavior.",
+                  "To stabilize the network loader by waiting for the DOM document readyState.",
+                  "To clear session cookies and close background threads to clean up the environment."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Part 1 strictly verifies environment and driver readiness before elements exist.",
+                  "1": "Incorrect. This describes functional element assertions, a common misconception for Part 1.",
+                  "2": "Incorrect. This describes Part 3's stabilization responsibilities.",
+                  "3": "Incorrect. This describes Part 5's teardown responsibilities."
+                },
+                "concept_tags": [
+                  "concept_1"
+                ],
+                "question_id": "q_ebdfa6"
+              },
+              {
+                "text": "During script execution, why does ui_browser_verify Part 3 check document.readyState rather than target element responses?",
+                "options": [
+                  "To guarantee that the DOM is fully stable and network requests are idle before interaction begins.",
+                  "To verify that a specific button click successfully altered the application state.",
+                  "To establish the initial handshake between the test runner and the web driver.",
+                  "To enforce CSS boundary layout calculations on responsive containers."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Part 3 manages DOM and network stabilization.",
+                  "1": "Incorrect. This confuses stabilization with post-action functional verification.",
+                  "2": "Incorrect. This describes driver initialization (Part 1).",
+                  "3": "Incorrect. This describes visual layout verification (Part 4)."
+                },
+                "concept_tags": [
+                  "concept_3"
+                ],
+                "question_id": "q_38cd9b"
+              },
+              {
+                "text": "Which aspect of a UI element does ui_browser_verify Part 4 inspect?",
+                "options": [
+                  "Spatial alignment, viewport margins, and structural container boundaries.",
+                  "The interactive click handler's execution response under high load.",
+                  "The clean closure of background browser threads and process termination.",
+                  "The initial browser driver configuration settings before loading a URL."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Part 4 is dedicated to layout geometry and viewport verification.",
+                  "1": "Incorrect. This confuses layout geometry with active behavioral checks.",
+                  "2": "Incorrect. This describes session cleanup (Part 5).",
+                  "3": "Incorrect. This describes driver initialization (Part 1)."
+                },
+                "concept_tags": [
+                  "concept_4"
+                ],
+                "question_id": "q_d45611"
+              }
+            ],
+            "created_at": "2026-07-21T07:42:51.513496+00:00"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_0c7bb50f",
+        "topic": "Targeted Review: Mastering the ui_browser_verify Lifecycle",
+        "quiz_type": "final_assessment",
+        "question_count": 5,
+        "questions": [
+          {
+            "text": "If a test script fails because the local browser executable could not be launched, which verification phase failed to catch the issue?",
+            "options": [
+              "Part 1 (Environment Initialization)",
+              "Part 2 (Interactive Behavior)",
+              "Part 3 (DOM Stabilization)",
+              "Part 5 (Session Teardown)"
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Inability to launch the executable is an environment/driver setup issue caught in Part 1.",
+              "1": "Incorrect. Interactive behavior checks assume the browser is already successfully running.",
+              "2": "Incorrect. DOM stabilization cannot occur if the browser has not launched.",
+              "3": "Incorrect. Session teardown occurs at the very end of the test execution lifecycle."
+            },
+            "concept_tags": [
+              "concept_1"
+            ],
+            "question_id": "q_08c320"
+          },
+          {
+            "text": "What is the primary danger of assuming Part 3 validation is complete as soon as a target element is clickable?",
+            "options": [
+              "The rest of the page DOM and network threads may still be unstable, leading to downstream test flakiness.",
+              "The driver connection will automatically terminate and throw a socket timeout exception.",
+              "Responsive CSS styles will be permanently disabled for the remainder of the session.",
+              "The initial driver handshake will fail, requiring a complete script restart."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Part 3 ensures entire DOM/network stabilization, not just isolated element clickability.",
+              "1": "Incorrect. Stabilization failures do not automatically terminate driver socket connections.",
+              "2": "Incorrect. Stabilization checks do not alter or disable CSS styles.",
+              "3": "Incorrect. The driver handshake occurs during initialization (Part 1), before Part 3 runs."
+            },
+            "concept_tags": [
+              "concept_3"
+            ],
+            "question_id": "q_bbc4c5"
+          },
+          {
+            "text": "A test must confirm that a popup menu does not overlap with adjacent navigation buttons. This check belongs to:",
+            "options": [
+              "Part 4 (Visual Layout and Viewport Geometry)",
+              "Part 2 (Active Element State Response)",
+              "Part 3 (Network and Loader Stabilization)",
+              "Part 1 (Driver and Port Bindings)"
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Non-overlapping visual layout constraints are checked during Part 4.",
+              "1": "Incorrect. This confuses layout geometry checks with behavioral state responses.",
+              "2": "Incorrect. Overlapping elements are structural issues, not timing or loading issues.",
+              "3": "Incorrect. Driver and port bindings are checked during setup (Part 1)."
+            },
+            "concept_tags": [
+              "concept_4"
+            ],
+            "question_id": "q_1b8aa5"
+          },
+          {
+            "text": "To prevent zombie browser processes from consuming CPU across multiple concurrent test runs, which phase must be correctly implemented?",
+            "options": [
+              "Part 5 (Session Teardown and Cleanup Verification)",
+              "Part 2 (Active Interaction Verification)",
+              "Part 3 (DOM Stabilization Verification)",
+              "Part 1 (Browser Hook Initialization)"
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Part 5 ensures background processes are cleanly terminated and ports are freed.",
+              "1": "Incorrect. Active interaction checks do not handle process termination.",
+              "2": "Incorrect. Stabilization deals with active pages, not closing down running processes.",
+              "3": "Incorrect. Initialization spawns processes but does not close or clean them up."
+            },
+            "concept_tags": [
+              "concept_5"
+            ],
+            "question_id": "q_55c1ec"
+          },
+          {
+            "text": "Why must you avoid using a generic element-interaction check (like verifying button-click responses) across all ui_browser_verify steps?",
+            "options": [
+              "Because different lifecycle phases have completely unique targets, such as driver creation (Part 1), network states (Part 3), visual boundaries (Part 4), and process termination (Part 5).",
+              "Because element-interaction checks are deprecated and no longer supported by modern drivers.",
+              "Because checking interactive elements causes the browser viewport to automatically resize to zero.",
+              "Because DOM stabilization (Part 3) must always execute before driver initialization (Part 1) starts."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Each phase has a distinct and essential purpose that generic element checks cannot satisfy.",
+              "1": "Incorrect. Interactive element checks are not deprecated; they are simply being misused here.",
+              "2": "Incorrect. Interactive checks do not collapse the viewport size.",
+              "3": "Incorrect. Driver initialization (Part 1) must always execute before DOM stabilization (Part 3)."
+            },
+            "concept_tags": [
+              "concept_1",
+              "concept_3",
+              "concept_4",
+              "concept_5"
+            ],
+            "question_id": "q_bfd162"
+          }
+        ],
+        "created_at": "2026-07-21T07:42:51.513551+00:00"
+      },
+      "created_at": "2026-07-21T07:42:51.513580+00:00",
+      "updated_at": "2026-07-21T07:42:51.513591+00:00",
+      "regenerated_count": 0
+    },
+    {
+      "course_id": "remedial_56bec8e7",
+      "title": "Targeted Review: Demystifying the Five Phases of ui_browser_verify",
+      "description": "This course addresses the critical misconception of treating all browser automation steps as simple element-locating actions. Learners will gain a deep understanding of the functional boundaries between setup, location, assertion, interaction, and teardown.",
+      "topics": [
+        "ui_browser_verify",
+        "test_lifecycle_differentiation"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_001",
+      "source_course_id": "",
+      "gap_topics": [
+        "ui_browser_verify",
+        "test_lifecycle_differentiation"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_36b409bf",
+      "final_assessment_id": "quiz_fb48ee79",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Separating Concerns in ui_browser_verify Lifecycles",
+          "content_summary": "A common pitfall in UI automated testing is treating every single instruction as an 'element-finding' task. In ui_browser_verify, the script execution is divided into five highly discrete phases. Part 1 is solely dedicated to establishing the context\u2014initializing WebDrivers, setting viewports, and authenticating configurations. It contains no element-specific logic. Attempting to select elements during this phase, or assuming locating elements handles setup, causes silent execution environment errors.\n\nOnce setup is complete, finding elements is strictly the job of Part 2. However, simply locating an element does not mean it is active, correct, or interacted with. Part 3 is dedicated to Assertions\u2014testing state rules, validation strings, and properties. Many developers write scripts that pass simply because an element was 'found,' ignoring the critical step of asserting its actual attributes. Similarly, Part 4 manages physical Interactions\u2014simulating clicks, keyboard entries, and gestures. Finding an input field (Part 2) is a prerequisite, but the explicit execution of user events (Part 4) must follow as a distinct step.\n\nFinally, test execution requires strict hygiene. Part 5 handles Session Teardown and Resource Cleanup. Assuming that browser sessions cleanly terminate themselves once the final element is located is a critical error. Without an explicit teardown trigger, headless browser instances will remain orphaned in the background, resulting in catastrophic server-side memory leaks over cumulative test runs.",
+          "key_points": [
+            "Part 1 configurations set up the execution environment and do not handle or possess element selection mechanisms.",
+            "Finding an element (Part 2) is structurally separate from asserting its state (Part 3) and executing user input events (Part 4).",
+            "Explicitly invoking Part 5 session closure is mandatory to prevent orphaned driver processes, even if your functional assertions have already completed."
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_36b409bf",
+          "short_quiz": {
+            "quiz_id": "quiz_36b409bf",
+            "topic": "Targeted Review: Demystifying the Five Phases of ui_browser_verify",
+            "quiz_type": "short_quiz",
+            "question_count": 3,
+            "questions": [
+              {
+                "text": "Before you can run any locator queries or select elements on a page, you need to configure the window dimensions and default timeouts. Which phase of ui_browser_verify does this fall under?",
+                "options": [
+                  "Part 1: Browser Session Initialization",
+                  "Part 2: Element Location and Selection",
+                  "Part 3: State Assertion and Validation",
+                  "Part 5: Session Teardown and Cleanup"
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct! Configuring global browser behaviors and driver instances belongs exclusively to Part 1 (Initialization).",
+                  "1": "Incorrect. This reflects the misconception of trying to locate or assign locator logic before the browser session is initialized.",
+                  "2": "Incorrect. State assertion handles post-load validation, not execution parameters.",
+                  "3": "Incorrect. Teardown handles cleaning up the test environment at the very end of execution."
+                },
+                "concept_tags": [
+                  "ui_browser_verify",
+                  "concept_1"
+                ],
+                "question_id": "q_f6d8fc"
+              },
+              {
+                "text": "Your automation script needs to check if an alert box is showing red text. Why is simply locating the alert box element in Part 2 insufficient?",
+                "options": [
+                  "Part 2 only finds the element in the DOM; you must use Part 3 (State Assertion) to verify visual properties such as color.",
+                  "Locating the element automatically executes the validation, making Part 3 redundant.",
+                  "Part 2 executes the click event on the alert box to reveal the text color.",
+                  "Part 2 is only responsible for closing the browser session once the alert is found."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct! Locating an element is separate from verifying its visual or textual properties, which requires an explicit state assertion in Part 3.",
+                  "1": "Incorrect. This is the exact misconception that finding an element is functionally equivalent to asserting its state attributes.",
+                  "2": "Incorrect. Simulating actions on elements is the responsibility of Part 4, not Part 2.",
+                  "3": "Incorrect. Closing the browser session is the responsibility of Part 5."
+                },
+                "concept_tags": [
+                  "ui_browser_verify",
+                  "concept_3"
+                ],
+                "question_id": "q_18d053"
+              },
+              {
+                "text": "After establishing that a text box is present on the page, you want to simulate typing a user's password. How should this be handled?",
+                "options": [
+                  "Locate the text box again with a more specific XPath locator (Part 2).",
+                  "Configure the keyboard layout parameters in global settings (Part 1).",
+                  "Execute an interaction command to send keystrokes to the located element (Part 4).",
+                  "Assert that the input element is empty (Part 3)."
+                ],
+                "correct_answer_index": 2,
+                "rationale": {
+                  "0": "Incorrect. This represents the misconception that repeating a locating task somehow produces a user interaction.",
+                  "1": "Incorrect. Keyboard configurations in initialization do not execute keystroke operations.",
+                  "2": "Correct! Simulating actions like typing, clicking, or dragging belongs exclusively to Part 4 (Interaction Simulation).",
+                  "3": "Incorrect. While validating state is important, Part 3 does not perform the interactive task of entering text."
+                },
+                "concept_tags": [
+                  "ui_browser_verify",
+                  "concept_4"
+                ],
+                "question_id": "q_327c0f"
+              }
+            ],
+            "created_at": "2026-07-21T07:43:59.424946+00:00"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_fb48ee79",
+        "topic": "Targeted Review: Demystifying the Five Phases of ui_browser_verify",
+        "quiz_type": "final_assessment",
+        "question_count": 5,
+        "questions": [
+          {
+            "text": "To prevent memory leaks and orphaned WebDriver background processes on automated execution workers, which action is mandatory?",
+            "options": [
+              "Triggering the explicit teardown and session closure methods defined in Part 5.",
+              "Relying on successful Part 2 locator evaluations to automatically terminate the execution process.",
+              "Running an assertion check in Part 3 to confirm the page has stopped rendering.",
+              "Creating a secondary initialization session in Part 1 to clear system memory."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct! Dedicated session teardown and garbage collection of testing assets must be explicitly called in Part 5.",
+              "1": "Incorrect. This reflects the misconception that completing a locator check automatically ends the backend process.",
+              "2": "Incorrect. Assertions evaluate values; they do not control application lifecycle or handle memory footprint termination.",
+              "3": "Incorrect. Running another initialization will open even more processes, exacerbating memory issues."
+            },
+            "concept_tags": [
+              "ui_browser_verify",
+              "concept_5"
+            ],
+            "question_id": "q_c7374c"
+          },
+          {
+            "text": "A developer states: 'If my script successfully uses XPath to locate a button, I have confirmed that the user can click it.' How should you correct this statement?",
+            "options": [
+              "Finding an element (Part 2) does not verify its state (Part 3), such as whether the button is currently hidden or disabled.",
+              "Finding an element (Part 2) automatically triggers session termination (Part 5).",
+              "XPath selection represents Part 1 (Initialization), meaning the browser session has not yet started.",
+              "Locating an element is only possible if you have already clicked it in Part 4."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct! Finding an element (Part 2) only verifies its presence in the DOM. Asserting that it is interactive and visual requires Part 3.",
+              "1": "Incorrect. Part 2 does not manage session termination; that is strictly Part 5's role.",
+              "2": "Incorrect. Locators belong to Part 2, not Part 1.",
+              "3": "Incorrect. You must locate an element before you can click it, not the other way around."
+            },
+            "concept_tags": [
+              "ui_browser_verify",
+              "concept_3"
+            ],
+            "question_id": "q_b9c141"
+          },
+          {
+            "text": "If a UI script executes successfully but leaves several headless Chrome runner environments consuming server RAM, which phase was omitted?",
+            "options": [
+              "Part 5: Session Teardown and Cleanup",
+              "Part 2: Element Location and Tracking",
+              "Part 1: Initial Context Initialization",
+              "Part 4: Action Sequence Execution"
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct! If Part 5 is omitted, the physical browser execution engine remains active in the host memory.",
+              "1": "Incorrect. Part 2 cannot shut down processes; it only locates elements.",
+              "2": "Incorrect. If Part 1 were omitted, the Chrome process would never have started in the first place.",
+              "3": "Incorrect. Part 4 executes simulated actions but does not manage session lifecycles."
+            },
+            "concept_tags": [
+              "ui_browser_verify",
+              "concept_5"
+            ],
+            "question_id": "q_a5bae9"
+          },
+          {
+            "text": "Which of the following scenarios describes a script failing to transition from Part 2 (Locating) to Part 4 (Interaction)?",
+            "options": [
+              "The script locates the 'Submit' button but exits the test without ever clicking it.",
+              "The script fails to launch the browser because the executable path is incorrect.",
+              "The script crashes because the button's ID was changed in the application source code.",
+              "The script validates that the button turns green when hovered over."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct! Finding the button is Part 2, but simulating the physical click is Part 4. Failing to do the click means the transition failed.",
+              "1": "Incorrect. This is a Part 1 setup failure.",
+              "2": "Incorrect. This is a Part 2 locating failure (element not found).",
+              "3": "Incorrect. This describes a successful transition involving validation (Part 3) or interaction (Part 4)."
+            },
+            "concept_tags": [
+              "ui_browser_verify",
+              "concept_4"
+            ],
+            "question_id": "q_e53337"
+          },
+          {
+            "text": "During automated UI testing, what is the correct and logical execution sequence for verifying a login form?",
+            "options": [
+              "Initialize WebDriver (Part 1) -> Locate username input (Part 2) -> Type username string (Part 4) -> Confirm value matches (Part 3) -> Close driver session (Part 5)",
+              "Locate username input (Part 2) -> Type username string (Part 4) -> Initialize WebDriver (Part 1) -> Close driver session (Part 5)",
+              "Initialize WebDriver (Part 1) -> Assert value is correct (Part 3) -> Close driver session (Part 5) -> Locate username input (Part 2)",
+              "Locate username input (Part 2) -> Confirm value matches (Part 3) -> Type username string (Part 4) -> Recycle session resources (Part 2)"
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct! This represents the logical order of initialization, locating, interacting, validating, and tearing down resources.",
+              "1": "Incorrect. You cannot locate inputs or interact with elements before the browser has been initialized (Part 1).",
+              "2": "Incorrect. You cannot run assertions before elements are located, and you cannot locate elements after the session is closed.",
+              "3": "Incorrect. This misses critical initialization/teardown phases and mischaracterizes recycling resources as Part 2 locator logic."
+            },
+            "concept_tags": [
+              "ui_browser_verify",
+              "concept_1"
+            ],
+            "question_id": "q_d46428"
+          }
+        ],
+        "created_at": "2026-07-21T07:43:59.425003+00:00"
+      },
+      "created_at": "2026-07-21T07:43:59.425040+00:00",
+      "updated_at": "2026-07-21T07:43:59.425049+00:00",
+      "regenerated_count": 0
+    }
+  ],
+  "concept_diagnoses": {
+    "ui_verify_concept": [
+      {
+        "concept_tag": "ui_verify_concept",
+        "misconception": "Confusing functional behavior (e.g., whether an interactive UI element works or changes state) with visual rendering verification (e.g., whether the UI element conforms to layout, CSS, and aesthetic design baselines).",
+        "question_text": "Regarding 'ui_verify_concept', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_verify_concept, part 1.",
+        "correct_answer": "Statement A: a description related to ui_verify_concept, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_7778c502",
+        "course_id": "remedial_24729e99",
+        "recorded_at": "2026-07-21T07:40:38.531154+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_1": [
+      {
+        "concept_tag": "concept_1",
+        "misconception": "Confusing functional behavior (e.g., whether an interactive UI element works or changes state) with visual rendering verification (e.g., whether the UI element conforms to layout, CSS, and aesthetic design baselines).",
+        "question_text": "Regarding 'ui_verify_concept', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_verify_concept, part 1.",
+        "correct_answer": "Statement A: a description related to ui_verify_concept, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_7778c502",
+        "course_id": "remedial_24729e99",
+        "recorded_at": "2026-07-21T07:40:38.531154+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_1",
+        "misconception": "Conflating baseline driver/environment initialization (Part 1) with active functional element assertions.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 1.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_0c7bb50f",
+        "course_id": "remedial_9d278728",
+        "recorded_at": "2026-07-21T07:42:51.513600+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_1",
+        "misconception": "Confused initial browser session establishment (Part 1) with active element locating (Part 2), assuming browser initialization automatically handles element targeting.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 1.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_3": [
+      {
+        "concept_tag": "concept_3",
+        "misconception": "Conflating mid-execution DOM and network stabilization checks (Part 3) with post-action active element assertions.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 3?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 3.",
+        "correct_answer": "Statement C: a description related to ui_browser_verify, part 3.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_0c7bb50f",
+        "course_id": "remedial_9d278728",
+        "recorded_at": "2026-07-21T07:42:51.513600+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_3",
+        "misconception": "Confused visual/state assertions (Part 3) with active element locating (Part 2), believing that successfully finding an element guarantees it is in the correct functional or visible state.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 3?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 3.",
+        "correct_answer": "Statement C: a description related to ui_browser_verify, part 3.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_4": [
+      {
+        "concept_tag": "concept_4",
+        "misconception": "Conflating spatial visual layout and viewport boundary assertions (Part 4) with functional element behavior checks.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 4?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 4.",
+        "correct_answer": "Statement D: a description related to ui_browser_verify, part 4.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_0c7bb50f",
+        "course_id": "remedial_9d278728",
+        "recorded_at": "2026-07-21T07:42:51.513600+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_4",
+        "misconception": "Confused interactive event simulation (Part 4) with basic element locating (Part 2), failing to recognize that locating an element does not execute subsequent click or keyboard actions.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 4?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 4.",
+        "correct_answer": "Statement D: a description related to ui_browser_verify, part 4.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_5": [
+      {
+        "concept_tag": "concept_5",
+        "misconception": "Conflating active-session element state validation with terminal session teardown and resource cleanup verification (Part 5).",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 5?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 5.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify, part 5.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_0c7bb50f",
+        "course_id": "remedial_9d278728",
+        "recorded_at": "2026-07-21T07:42:51.513600+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_5",
+        "misconception": "Confused browser session teardown and resource cleanup (Part 5) with mid-test element locating (Part 2), assuming that the completion of locator evaluations automatically terminates browser processes.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 5?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 5.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify, part 5.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      }
+    ],
+    "ui_browser_verify": [
+      {
+        "concept_tag": "ui_browser_verify",
+        "misconception": "Confused initial browser session establishment (Part 1) with active element locating (Part 2), assuming browser initialization automatically handles element targeting.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 1.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "ui_browser_verify",
+        "misconception": "Confused visual/state assertions (Part 3) with active element locating (Part 2), believing that successfully finding an element guarantees it is in the correct functional or visible state.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 3?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 3.",
+        "correct_answer": "Statement C: a description related to ui_browser_verify, part 3.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "ui_browser_verify",
+        "misconception": "Confused interactive event simulation (Part 4) with basic element locating (Part 2), failing to recognize that locating an element does not execute subsequent click or keyboard actions.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 4?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 4.",
+        "correct_answer": "Statement D: a description related to ui_browser_verify, part 4.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "ui_browser_verify",
+        "misconception": "Confused browser session teardown and resource cleanup (Part 5) with mid-test element locating (Part 2), assuming that the completion of locator evaluations automatically terminates browser processes.",
+        "question_text": "Regarding 'ui_browser_verify', which of the following represents the core concept for part 5?",
+        "user_answer": "Statement B: a description related to ui_browser_verify, part 5.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify, part 5.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_fb48ee79",
+        "course_id": "remedial_56bec8e7",
+        "recorded_at": "2026-07-21T07:43:59.425055+00:00",
+        "resolved": false
+      }
+    ]
+  }
 }

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from src.services.curriculum_service import generate_learning_path, generate_daily_agenda
+from src.services.curriculum_service import generate_learning_path, generate_daily_agenda, get_pending_remedial_courses
 from src.services.quiz_service import generate_gap_review
 from src.services.user_service import update_progress
 from src.core.database import DepartmentScopedStore
@@ -29,6 +29,39 @@ async def api_gap_review(user_id: str, department: str = DEFAULT_DEPARTMENT):
     result = generate_gap_review(user_id=user_id, department=department)
     return result
 
+def _merge_remedial_courses(path: dict, progress: dict) -> dict:
+    """Inject a user's pending remedial courses into a path's course list,
+    each placed right after the source course it targets. Shared by every
+    route that renders a learning path, so a remedial course is visible
+    wherever a learner actually looks — not just from one code path."""
+    if not progress.get("remedial_courses"):
+        return path
+
+    pending_remedial = get_pending_remedial_courses(progress)
+    if not pending_remedial:
+        return path
+
+    remedial_map = {}
+    unanchored = []
+    for rc in pending_remedial:
+        src = rc.get("source_course_id", "")
+        if src:
+            remedial_map.setdefault(src, []).append(rc)
+        else:
+            unanchored.append(rc)
+
+    new_courses = []
+    for c in path.get("courses", []):
+        new_courses.append(c)
+        for rc in remedial_map.get(c["course_id"], []):
+            new_courses.append(rc)
+    new_courses.extend(unanchored)
+
+    path = dict(path)
+    path["courses"] = new_courses
+    return path
+
+
 @router.get("/api/learning-path/latest")
 async def api_latest_learning_path(user_id: str = None, department: str = DEFAULT_DEPARTMENT):
     """Get the most recently generated learning path, injecting any remedial courses for the user."""
@@ -40,32 +73,7 @@ async def api_latest_learning_path(user_id: str = None, department: str = DEFAUL
     if user_id:
         progress = store.read_user_progress(user_id)
         if progress:
-            remedial_courses = progress.get("remedial_courses", [])
-            if remedial_courses:
-                completed = set(progress.get("completed_courses", []))
-                pending_remedial = [
-                    c for c in remedial_courses
-                    if c.get("course_id") not in completed
-                ]
-                if pending_remedial:
-                    remedial_map = {}
-                    unanchored = []
-                    for rc in pending_remedial:
-                        src = rc.get("source_course_id", "")
-                        if src:
-                            remedial_map.setdefault(src, []).append(rc)
-                        else:
-                            unanchored.append(rc)
-
-                    new_courses = []
-                    for c in path.get("courses", []):
-                        new_courses.append(c)
-                        for rc in remedial_map.get(c["course_id"], []):
-                            new_courses.append(rc)
-                    new_courses.extend(unanchored)
-
-                    path = dict(path)
-                    path["courses"] = new_courses
+            path = _merge_remedial_courses(path, progress)
 
     return path
 
@@ -103,12 +111,19 @@ async def api_enrolled_learning_paths(user_id: str, department: str = DEFAULT_DE
     return {"enrolled_paths": results, "count": len(results)}
 
 @router.get("/api/learning-path/{path_id}")
-async def api_get_learning_path_by_id(path_id: str, department: str = DEFAULT_DEPARTMENT):
-    """Fetch one specific enrolled/activated path by id."""
+async def api_get_learning_path_by_id(path_id: str, user_id: str = None, department: str = DEFAULT_DEPARTMENT):
+    """Fetch one specific enrolled/activated path by id, injecting any
+    pending remedial courses for user_id if given."""
     store = DepartmentScopedStore(department)
     path = store.read_learning_path(path_id)
     if not path:
         raise HTTPException(status_code=404, detail=f"Path '{path_id}' not found.")
+
+    if user_id:
+        progress = store.read_user_progress(user_id)
+        if progress:
+            path = _merge_remedial_courses(path, progress)
+
     return path
 
 @router.get("/api/lesson/{course_id}/{lesson_id}")

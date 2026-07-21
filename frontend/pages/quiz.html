@@ -1,4 +1,5 @@
 <!DOCTYPE html><html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>WisdomAI - Final Assessment</title>
@@ -8,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -181,7 +183,7 @@
 </button>
 <div class="relative hidden sm:block">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search..." type="text">
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-48 lg:w-64 focus:ring-2 focus:ring-primary text-sm h-10" placeholder="Search courses, paths..." type="text">
 </div>
 </div>
 <div class="flex items-center gap-3">
@@ -239,7 +241,7 @@
 
 <!-- Actions -->
 <div class="flex items-center justify-end pt-6 border-t border-outline-variant">
-<button class="px-10 py-3 bg-[#58cc02] text-on-tertiary rounded-xl font-bold squishy-success transition-all flex items-center gap-2" data-quiz="next-btn">
+<button class="px-10 py-3 bg-tertiary text-on-tertiary rounded-xl font-bold squishy-success transition-all flex items-center gap-2" data-quiz="next-btn">
                                 Next Question
                                 <span class="material-symbols-outlined">arrow_forward</span>
 </button>
@@ -306,6 +308,5 @@
 <!-- Scripts -->
 <script src="/js/api-client.js"></script>
 <script src="/js/quiz-controller.js"></script>
-<script src="/js/theme-toggle.js"></script>
 <script src="/js/sidebar.js"></script>
 </body></html>

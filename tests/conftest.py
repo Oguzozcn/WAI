@@ -46,11 +46,15 @@ def client(test_data_dir):
 
 @pytest.fixture
 def mock_gemini(monkeypatch):
-    """Monkeypatch ``get_gemini_client`` everywhere it was imported directly.
+    """Monkeypatch ``get_gemini_client`` everywhere it's used.
 
-    Both ``quiz_service`` and ``curriculum_service`` do
-    ``from src.services.llm_client import get_gemini_client`` so we patch the
-    name bound in each module.
+    Most LLM call sites (``generate_quiz``, ``generate_remedial_course``,
+    ``process_document_to_curriculum``, ``regenerate_lesson_content``) go
+    through the shared ``call_gemini_json`` helper in ``src.services.llm_client``,
+    which calls the ``get_gemini_client`` bound in *that* module. A couple of
+    multimodal call sites in ``curriculum_service`` (media upload analysis,
+    media-only section generation) still call ``get_gemini_client`` directly,
+    so that name is patched too.
 
     Returns a callable ``patch(response_text="{}")`` that installs a fake client.
     Pass a string to have ``generate_content`` return that text, or pass an
@@ -78,7 +82,7 @@ def mock_gemini(monkeypatch):
         fake_client = _FakeClient(response_text)
         fake_factory = lambda: fake_client
         monkeypatch.setattr(
-            "src.services.quiz_service.get_gemini_client", fake_factory
+            "src.services.llm_client.get_gemini_client", fake_factory
         )
         monkeypatch.setattr(
             "src.services.curriculum_service.get_gemini_client", fake_factory

@@ -35,11 +35,11 @@
   "enrolled_at": "2026-06-25T09:00:00Z",
   "manager_id": "manager",
   "job_level": "individual_contributor",
-  "last_activity_at": "2026-07-19T18:30:58.509279",
+  "last_activity_at": "2026-07-20T14:25:01.716264",
   "enrolled_path_ids": [
     "lp_ff5b91ff"
   ],
-  "last_updated": "2026-07-19T18:30:58.514461+00:00",
+  "last_updated": "2026-07-20T14:25:01.717916+00:00",
   "psychometric_ability": -1.7142857142857142,
   "mastery_vectors": {
     "Foundation Models": {

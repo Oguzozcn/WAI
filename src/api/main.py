@@ -17,11 +17,14 @@ app = FastAPI(title="WisdomAI MVP", version="0.1.0")
 # Ensure static directories exist to prevent RuntimeError on new environments
 js_dir = PROJECT_ROOT / "frontend" / "js"
 assets_dir = PROJECT_ROOT / "frontend" / "assets"
+css_dir = PROJECT_ROOT / "frontend" / "css"
 js_dir.mkdir(parents=True, exist_ok=True)
 assets_dir.mkdir(parents=True, exist_ok=True)
+css_dir.mkdir(parents=True, exist_ok=True)
 
 app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
 app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
 
 app.include_router(pages.router)
 app.include_router(progress.router)

@@ -8,11 +8,14 @@ Determines entry paths, handles assessment failures, and manages bypass eligibil
 from src.core.database import DepartmentScopedStore
 from src.core.state_machine import (
     determine_entry_path,
-    handle_assessment_result,
     get_mandatory_courses,
     get_state_description,
 )
-from src.core.config import DEFAULT_DEPARTMENT, ENTRY_PATH_VETERAN, ENTRY_PATH_INTERMEDIATE, ENTRY_PATH_STANDARD
+from src.core.remediation_policy import decide_remediation
+from src.core.config import (
+    DEFAULT_DEPARTMENT, ENTRY_PATH_VETERAN, ENTRY_PATH_INTERMEDIATE, ENTRY_PATH_STANDARD,
+    STATE_PASSED,
+)
 from src.core.dev_config import get_param, get_logic_param
 
 class AdaptiveMetacognitiveRouter:
@@ -147,17 +150,29 @@ def handle_user_assessment_failure(
             "message": f"No progress record found for user '{user_id}'.",
         }
 
-    bypass_already_locked = progress.get("bypass_locked", False)
-
-    # Get state machine decision
-    result = handle_assessment_result(
+    # Thin wrapper around the single remediation decision point — this is the
+    # bypass-lockout entry point (chat-only; the quiz UI's own /api/quiz/evaluate
+    # calls the same decide_remediation via evaluate_answers, so the two can
+    # never disagree about whether a given failure locks the bypass).
+    remediation = decide_remediation(
         score=score,
+        quiz_type="validation_assessment",
         was_bypass_attempt=was_bypass_attempt,
-        bypass_already_locked=bypass_already_locked,
+        bypass_already_locked=progress.get("bypass_locked", False),
+        error_retention_matrix=progress.get("error_retention_matrix", {}),
     )
 
+    result = {
+        # Derived from next_state (not re-evaluated against score) so this can
+        # never disagree with the threshold decide_remediation actually used.
+        "passed": remediation.next_state == STATE_PASSED,
+        "next_state": remediation.next_state,
+        "lock_bypass": remediation.lock_bypass,
+        "reason": remediation.reason,
+    }
+
     # If bypass is being locked (Case 1), calculate mandatory courses
-    if result["lock_bypass"]:
+    if remediation.lock_bypass:
         # All configured courses minus completed ones
         all_courses = [f"course_{i:02d}" for i in range(1, get_param("MAX_COURSES") + 1)]
         completed = progress.get("completed_courses", [])
@@ -170,7 +185,7 @@ def handle_user_assessment_failure(
         # Update progress
         progress["bypass_locked"] = True
         progress["bypass_attempts"] = progress.get("bypass_attempts", 0) + 1
-        progress["current_state"] = result["next_state"]
+        progress["current_state"] = remediation.next_state
         store.write_user_progress(user_id, progress)
 
     return {

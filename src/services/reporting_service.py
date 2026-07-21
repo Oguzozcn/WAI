@@ -12,7 +12,7 @@ Tier 3 (AGGREGATE) — Used by Corporate Report Agent:
 """
 
 import json
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from src.core.database import DepartmentScopedStore, KPIStoreReader
 from src.core.models import (
@@ -336,7 +336,7 @@ def generate_executive_email(
     email = {
         "subject": f"TEAP {period.capitalize()} Report — {report_date}",
         "to": "Transition Leadership Team",
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "high_priority_alerts": high_priority_depts,
         "executive_summary": {
             "total_departments_reporting": len(payloads),

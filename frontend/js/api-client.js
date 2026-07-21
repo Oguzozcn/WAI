@@ -62,6 +62,14 @@ const WisdomAPI = (() => {
     return _request('GET', `/api/user/${userId}/gap-review`);
   }
 
+  async function retryGapReview(userId, conceptTags) {
+    return _request('POST', '/api/quiz/gap-review/retry', { user_id: userId, concept_tags: conceptTags });
+  }
+
+  async function getQuizSession(quizId) {
+    return _request('GET', `/api/quiz/session/${quizId}`);
+  }
+
   // ── Department ──
   async function getDepartmentReadiness() {
     return _request('GET', '/api/department/readiness');
@@ -108,8 +116,9 @@ const WisdomAPI = (() => {
     return _request('GET', `/api/kb/catalog/learning-paths${userId ? '?user_id=' + userId : ''}`);
   }
 
-  async function generateFromInput(filename, appendToLatest) {
-    return _request('POST', '/api/kb/generate-from-input', { filename, append_to_latest: !!appendToLatest });
+  async function generateFromInput(filenames, appendToLatest) {
+    const list = Array.isArray(filenames) ? filenames : [filenames];
+    return _request('POST', '/api/kb/generate-from-input', { filenames: list, append_to_latest: !!appendToLatest });
   }
 
   // ── Conflicts (KB Review Queue) ──
@@ -144,6 +153,8 @@ const WisdomAPI = (() => {
     evaluateQuiz,
     getReflectionPrompt,
     getGapReview,
+    retryGapReview,
+    getQuizSession,
     getDepartmentReadiness,
     getAtRiskUsers,
     getKBDocuments,

@@ -126,8 +126,176 @@ def test_evaluate_triggers_gap_review_after_repeated_failures(client):
         )
         assert resp.status_code == 200
 
-    assert resp.json()["luck_elimination_status"]["action"] == "SPAWN_GAP_REVIEW"
-    assert "drift_concept" in resp.json()["luck_elimination_status"]["flagged_concepts"]
+    body = resp.json()
+    assert body["luck_elimination_status"]["action"] == "SPAWN_GAP_REVIEW"
+    assert "drift_concept" in body["luck_elimination_status"]["flagged_concepts"]
+    assert body["gap_review_triggered"] is True
+    assert body["gap_review_mandatory"] is False
+    concepts = [ex["concept"] for ex in body["gap_review"]["exercises"]]
+    assert "drift_concept" in concepts
+
+
+def test_evaluate_maintain_action_omits_gap_review(client):
+    """A single pass, no repeat failures — luck elimination stays in
+    MAINTAIN mode and the response must not carry gap_review keys at all."""
+    _seed_quiz("operations", "quiz_maintain", [_question("q1", correct_index=0)])
+
+    resp = client.post(
+        "/api/quiz/evaluate",
+        json={"quiz_id": "quiz_maintain", "user_id": "emp_004", "answers": [{"question_id": "q1", "selected_index": 0}]},
+        params={"department": "operations"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["luck_elimination_status"]["action"] == "MAINTAIN_ADAPTIVE_GAP_ASSESSMENT"
+    assert "gap_review_triggered" not in body
+    assert "gap_review" not in body
+
+
+def test_evaluate_force_mandatory_attaches_gap_review(client):
+    """FORCE_MANDATORY_LEARNING_PATH needs core_drift_concept_count (default 3)
+    DISTINCT concepts each failed >= LUCK_FAILURE_THRESHOLD (default 2) times —
+    not one concept failed 3x (that's still just SPAWN_GAP_REVIEW)."""
+    concepts = ["drift_a", "drift_b", "drift_c"]
+    for i, concept in enumerate(concepts):
+        _seed_quiz(
+            "operations", f"quiz_mand_{i}",
+            [_question("q1", correct_index=0, concept_tags=[concept]),
+             _question("q2", correct_index=0, concept_tags=[concept])],
+        )
+
+    resp = None
+    for i in range(len(concepts)):
+        resp = client.post(
+            "/api/quiz/evaluate",
+            json={
+                "quiz_id": f"quiz_mand_{i}",
+                "user_id": "emp_005",
+                "answers": [
+                    {"question_id": "q1", "selected_index": 1},
+                    {"question_id": "q2", "selected_index": 1},
+                ],
+            },
+            params={"department": "operations"},
+        )
+        assert resp.status_code == 200
+
+    body = resp.json()
+    assert body["luck_elimination_status"]["action"] == "FORCE_MANDATORY_LEARNING_PATH"
+    assert body["gap_review_triggered"] is True
+    assert body["gap_review_mandatory"] is True
+
+
+def test_generate_remedial_course_llm_failure_still_has_questions(mock_gemini, test_data_dir):
+    """The remedial-course LLM-failure fallback must still be gradeable —
+    regression test for the empty-questions bug found during the UAT audit."""
+    from src.services.curriculum_service import generate_remedial_course
+
+    mock_gemini(Exception("boom"))
+    course = generate_remedial_course(
+        incorrect_answers=[{
+            "question_text": "What is X?", "user_answer": "A", "correct_answer": "B",
+            "concept_tags": ["topic_x"],
+        }],
+        user_id="emp_001",
+        source_course_id="course_1",
+        department="operations",
+    )
+
+    sq_questions = course["lessons"][0]["short_quiz"]["questions"]
+    fa_questions = course["final_assessment"]["questions"]
+    assert len(sq_questions) > 0
+    assert len(fa_questions) > 0
+    for q in sq_questions + fa_questions:
+        assert "correct_answer_index" in q
+        assert "question_id" in q
+        assert len(q["options"]) == 4
+
+
+def test_evaluate_route_llm_failure_remedial_course_gradeable(client, mock_gemini):
+    """End-to-end: a failed final assessment with a broken LLM call still
+    produces a remedial course the learner can actually pass."""
+    _seed_quiz(
+        "operations", "quiz_fa_fail",
+        [_question("q1", correct_index=0, concept_tags=["topic_y"])],
+    )
+    mock_gemini(Exception("boom"))
+
+    resp = client.post(
+        "/api/quiz/evaluate",
+        json={
+            "quiz_id": "quiz_fa_fail",
+            "user_id": "emp_001",
+            "answers": [{"question_id": "q1", "selected_index": 1}],  # wrong
+            "quiz_type": "final_assessment",
+            "course_id": "course_source",
+        },
+        params={"department": "operations"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["remedial_course_generated"] is True
+
+    # The remedial course's quiz is only lazily written to the quiz store the
+    # first time /api/quiz/by-lesson fetches it — check the embedded copy on
+    # the progress record directly, which is what's persisted at generation time.
+    store = DepartmentScopedStore("operations")
+    progress = store.read_user_progress("emp_001")
+    remedial = next(
+        rc for rc in progress["remedial_courses"]
+        if rc["course_id"] == body["remedial_course_id"]
+    )
+    assert len(remedial["lessons"][0]["short_quiz"]["questions"]) > 0
+    assert len(remedial["final_assessment"]["questions"]) > 0
+
+
+def test_gap_review_retry_generates_startable_quiz(client, test_data_dir, seed_progress, mock_gemini):
+    """The gap-review banner used to only be instructions text — retry must
+    generate a real, immediately-startable quiz for the flagged concept."""
+    seed_progress(
+        test_data_dir, "operations", "emp_006",
+        concept_diagnoses={
+            "escalation_procedure": [
+                {"misconception": "Confuses ticket severity with escalation priority.", "resolved": False}
+            ]
+        },
+    )
+    # extra_context (the misconception above) makes grounding_context non-empty,
+    # so generate_quiz takes the LLM path — mock it rather than hitting live Gemini.
+    mock_gemini(RuntimeError("no live calls in tests"))
+
+    resp = client.post(
+        "/api/quiz/gap-review/retry",
+        json={"user_id": "emp_006", "concept_tags": ["escalation_procedure"]},
+        params={"department": "operations"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["concept_tags"] == ["escalation_procedure"]
+    assert len(body["questions"]) == 3
+    for q in body["questions"]:
+        assert "correct_answer_index" not in q
+
+    # The quiz is cached and fetchable by ID for the redirect target.
+    session_resp = client.get(
+        f"/api/quiz/session/{body['quiz_id']}", params={"department": "operations"}
+    )
+    assert session_resp.status_code == 200
+    assert session_resp.json()["quiz_id"] == body["quiz_id"]
+
+
+def test_gap_review_retry_rejects_empty_concept_tags(client):
+    resp = client.post(
+        "/api/quiz/gap-review/retry",
+        json={"user_id": "emp_006", "concept_tags": []},
+        params={"department": "operations"},
+    )
+    assert resp.status_code == 400
+
+
+def test_quiz_session_unknown_id_404(client):
+    resp = client.get("/api/quiz/session/does_not_exist", params={"department": "operations"})
+    assert resp.status_code == 404
 
 
 def test_quiz_start_locked_after_max_attempts(client, test_data_dir, seed_progress):

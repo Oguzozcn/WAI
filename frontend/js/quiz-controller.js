@@ -45,7 +45,7 @@ class QuizSessionController {
   // ?path= param working exactly as before.
   _fetchPath() {
     return this.pathId
-      ? fetch(`/api/learning-path/${encodeURIComponent(this.pathId)}`).then(r => r.json())
+      ? fetch(`/api/learning-path/${encodeURIComponent(this.pathId)}?user_id=${encodeURIComponent(this.userId)}`).then(r => r.json())
       : fetch(`/api/learning-path/latest?user_id=${this.userId}`).then(r => r.json());
   }
 
@@ -153,6 +153,10 @@ class QuizSessionController {
       this.feedbackCache.set(q.question_id, feedback);
       this.show_feedback(feedback.is_correct, feedback);
 
+      if (!feedback.is_correct) {
+        this._mountInlineReflection(q, feedback);
+      }
+
       // Update button text to indicate "Continue"
       this._dom.nextBtn.disabled = false;
       this._dom.nextBtn.innerHTML = `Continue <span class="material-symbols-outlined">arrow_forward</span>`;
@@ -250,20 +254,24 @@ class QuizSessionController {
     if (iconSpan) {
       iconSpan.textContent = isCorrect ? 'check_circle' : 'cancel';
       iconSpan.classList.toggle('text-green-600', isCorrect);
+      iconSpan.classList.toggle('dark:text-green-400', isCorrect);
       iconSpan.classList.toggle('text-red-600', !isCorrect);
+      iconSpan.classList.toggle('dark:text-red-400', !isCorrect);
     }
     if (titleSpan) {
       titleSpan.textContent = isCorrect ? 'Correct!' : 'Incorrect';
       titleSpan.classList.toggle('text-green-700', isCorrect);
+      titleSpan.classList.toggle('dark:text-green-300', isCorrect);
       titleSpan.classList.toggle('text-red-700', !isCorrect);
+      titleSpan.classList.toggle('dark:text-red-300', !isCorrect);
     }
     if (whyEl) {
       whyEl.textContent = feedback.feedback_why || '';
-      whyEl.className = 'font-body-md text-body-md mb-2 font-medium ' + (isCorrect ? 'text-green-900' : 'text-red-900');
+      whyEl.className = 'font-body-md text-body-md mb-2 font-medium ' + (isCorrect ? 'text-green-900 dark:text-green-200' : 'text-red-900 dark:text-red-200');
     }
     if (howEl) {
       howEl.textContent = feedback.feedback_how_to_think || '';
-      howEl.className = 'font-body-md text-body-md ' + (isCorrect ? 'text-green-800' : 'text-red-800');
+      howEl.className = 'font-body-md text-body-md ' + (isCorrect ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300');
     }
     if (correctEl) {
       if (!isCorrect) {
@@ -277,11 +285,77 @@ class QuizSessionController {
     // Also visually mark the correct option in the list
     this._markOptionsAfterFeedback(feedback);
 
+    // Clear any reflection panel left over from a previous wrong answer —
+    // _mountInlineReflection (called separately, only on a wrong answer)
+    // re-adds it fresh for this question.
+    const oldReflection = panel.querySelector('[data-feedback="reflection"]');
+    if (oldReflection) oldReflection.remove();
+
     // Reveal panel with animation
     panel.style.maxHeight = panel.scrollHeight + 40 + 'px';
     panel.style.opacity = '1';
     panel.style.marginTop = '16px';
     panel.classList.remove('invisible');
+  }
+
+  /**
+   * Mount an expandable "Reflect on this" panel under the wrong-answer
+   * feedback, backed by POST /api/quiz/reflection (generate_reflection_prompt)
+   * — previously a fully-built, fully-working endpoint the frontend never
+   * called. Loads lazily on first expand, not eagerly for every wrong answer.
+   */
+  _mountInlineReflection(question, feedback) {
+    const panel = this._dom.feedbackPanel;
+    if (!panel) return;
+
+    const container = document.createElement('div');
+    container.setAttribute('data-feedback', 'reflection');
+    container.className = 'mt-3 pt-3 border-t border-outline-variant/50';
+    container.innerHTML = `
+      <button type="button" class="reflection-toggle-btn flex items-center gap-1 font-label-md text-label-md text-primary uppercase tracking-wider hover:underline">
+        <span class="material-symbols-outlined text-[16px]">psychology_alt</span>
+        Reflect on this
+        <span class="material-symbols-outlined text-[16px] reflection-chevron">expand_more</span>
+      </button>
+      <div class="reflection-body hidden mt-2 font-body-md text-body-md text-on-surface-variant"></div>`;
+    panel.appendChild(container);
+
+    const toggleBtn = container.querySelector('.reflection-toggle-btn');
+    const chevron = container.querySelector('.reflection-chevron');
+    const body = container.querySelector('.reflection-body');
+    let loaded = false;
+
+    toggleBtn.addEventListener('click', async () => {
+      const nowHidden = !body.classList.contains('hidden');
+      body.classList.toggle('hidden');
+      chevron.textContent = nowHidden ? 'expand_more' : 'expand_less';
+
+      if (!nowHidden && !loaded) {
+        body.textContent = 'Loading reflection prompts...';
+        try {
+          const reflection = await WisdomAPI.getReflectionPrompt(
+            question.question_id,
+            question.text || '',
+            feedback.selected_answer || '',
+            feedback.correct_answer || '',
+            feedback.concept_tags || question.concept_tags || [],
+          );
+          loaded = true;
+          const prompts = (reflection.reflection_prompts || [])
+            .map(p => `<li>${_escapeHtml(p)}</li>`).join('');
+          body.innerHTML = `<ul class="list-disc list-inside space-y-1">${prompts}</ul>`;
+        } catch (err) {
+          console.error('Reflection prompt error:', err);
+          body.textContent = 'Could not load reflection prompts right now.';
+        }
+      }
+
+      // Recompute the panel's animated max-height to fit the newly
+      // shown/hidden content instead of clipping or leaving a gap.
+      panel.style.maxHeight = panel.scrollHeight + 40 + 'px';
+    });
+
+    panel.style.maxHeight = panel.scrollHeight + 40 + 'px';
   }
 
   // ──────────────────────────────────────────
@@ -423,7 +497,9 @@ class QuizSessionController {
 
     if (questionCounter) {
       questionCounter.textContent = passed ? 'Quiz Passed!' : 'Quiz Failed';
-      questionCounter.classList.add(passed ? 'text-green-600' : 'text-red-600');
+      questionCounter.classList.add(...(passed
+        ? ['text-green-600', 'dark:text-green-400']
+        : ['text-red-600', 'dark:text-red-400']));
     }
 
     if (questionText) {
@@ -435,19 +511,51 @@ class QuizSessionController {
       let remedialBanner = '';
       if (!passed && this.quizType === 'final_assessment' && result.remedial_course_generated) {
         remedialBanner = `
-          <div class="mt-4 p-4 rounded-xl border-2 border-amber-400 bg-amber-50 text-amber-900 text-sm font-medium flex gap-3 items-start">
-            <span class="material-symbols-outlined text-amber-600 mt-0.5">auto_fix_high</span>
+          <div class="mt-4 p-4 rounded-xl border-2 border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200 text-sm font-medium flex gap-3 items-start">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 mt-0.5">auto_fix_high</span>
             <div>
               <p class="font-bold mb-1">Personalized Remedial Course Ready!</p>
-              <p>${result.remedial_message || 'A custom course has been added to your learning path based on your gap analysis.'}</p>
+              <p>${_escapeHtml(result.remedial_message || 'A custom course has been added to your learning path based on your gap analysis.')}</p>
               <a href="/learning-path" class="inline-block mt-2 px-4 py-1.5 bg-amber-500 text-white rounded-lg font-bold text-xs hover:bg-amber-600 transition-all">View My Learning Path</a>
             </div>
           </div>`;
       }
 
+      // Show a targeted gap-review notification when repeated failures on the
+      // same concept trip the luck-elimination check (any quiz type, pass or fail).
+      let gapReviewBanner = '';
+      if (result.gap_review_triggered && result.gap_review && result.gap_review.exercises) {
+        const mandatory = !!result.gap_review_mandatory;
+        const borderCls = mandatory
+          ? 'border-red-400 bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-200'
+          : 'border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200';
+        const iconCls = mandatory ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400';
+        const exerciseItems = result.gap_review.exercises.map(ex =>
+          `<li class="flex items-center justify-between gap-3 py-1">
+             <span><strong>${_escapeHtml(ex.concept)}</strong> — missed ${ex.failure_count} time(s)${ex.severity === 'critical' ? ' <span class="font-bold">(critical)</span>' : ''}</span>
+             <button type="button" class="gap-retry-btn shrink-0 px-3 py-1 rounded-lg border border-current text-xs font-bold hover:bg-white/60 dark:hover:bg-black/30 transition-all" data-gap-retry-concept="${_escapeHtml(ex.concept)}">Start Targeted Retry</button>
+           </li>`
+        ).join('');
+        gapReviewBanner = `
+          <div class="mt-4 p-4 rounded-xl border-2 ${borderCls} text-sm font-medium flex gap-3 items-start">
+            <span class="material-symbols-outlined ${iconCls} mt-0.5">troubleshoot</span>
+            <div class="flex-1">
+              <p class="font-bold mb-1">${mandatory ? 'Mandatory Review Required' : 'Targeted Gap Review Ready'}</p>
+              <p>${mandatory
+                ? "You've repeatedly missed these concepts — a focused review is required before continuing."
+                : "You've missed these concepts more than once — a focused review has been prepared."}</p>
+              <ul class="list-disc list-inside mt-2 mb-1">${exerciseItems}</ul>
+            </div>
+          </div>`;
+      }
+
       questionText.innerHTML = `
-        You scored <strong>${Math.round(result.score * 100)}%</strong>.<br><br>${mainMsg}${remedialBanner}
+        You scored <strong>${Math.round(result.score * 100)}%</strong>.<br><br>${mainMsg}${remedialBanner}${gapReviewBanner}
       `;
+
+      if (result.gap_review_triggered) {
+        this._wireGapRetryButtons(questionText);
+      }
     }
 
     if (optionsContainer) optionsContainer.innerHTML = '';
@@ -624,14 +732,14 @@ class QuizSessionController {
 
       if (idx === feedback.correct_index) {
         label.classList.remove('border-outline-variant', 'border-primary', 'bg-primary-container/10');
-        label.classList.add('border-green-500', 'bg-green-50', 'border-2');
+        label.classList.add('border-green-500', 'bg-green-50', 'dark:bg-green-950', 'border-2');
         const text = label.querySelector('span:last-child');
-        if (text) { text.classList.add('text-green-700', 'font-bold'); text.classList.remove('text-on-surface', 'text-primary'); }
+        if (text) { text.classList.add('text-green-700', 'dark:text-green-300', 'font-bold'); text.classList.remove('text-on-surface', 'text-primary'); }
       } else if (idx === feedback.selected_index && !feedback.is_correct) {
         label.classList.remove('border-outline-variant', 'border-primary', 'bg-primary-container/10');
-        label.classList.add('border-red-500', 'bg-red-50', 'border-2');
+        label.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950', 'border-2');
         const text = label.querySelector('span:last-child');
-        if (text) { text.classList.add('text-red-700', 'font-bold'); text.classList.remove('text-on-surface', 'text-primary'); }
+        if (text) { text.classList.add('text-red-700', 'dark:text-red-300', 'font-bold'); text.classList.remove('text-on-surface', 'text-primary'); }
       }
     });
   }
@@ -645,6 +753,34 @@ class QuizSessionController {
     panel.classList.add('invisible');
   }
 
+  /**
+   * Wire "Start Targeted Retry" buttons rendered inside the gap-review
+   * banner — each generates (via /api/quiz/gap-review/retry) a short quiz
+   * seeded with the learner's stored misconception for that one concept,
+   * then navigates to it. Turns the gap-review banner from inert text into
+   * something the learner can actually act on.
+   */
+  _wireGapRetryButtons(scopeEl) {
+    if (!scopeEl) return;
+    scopeEl.querySelectorAll('[data-gap-retry-concept]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const concept = btn.dataset.gapRetryConcept;
+        const originalLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Preparing...';
+        try {
+          const quiz = await WisdomAPI.retryGapReview(this.userId, [concept]);
+          window.location.href = `/quiz?quiz_id=${encodeURIComponent(quiz.quiz_id)}&type=gap_review`;
+        } catch (err) {
+          console.error('Gap review retry error:', err);
+          btn.disabled = false;
+          btn.textContent = originalLabel;
+          this._flashMessage('Could not prepare the retry quiz. Please try again.');
+        }
+      });
+    });
+  }
+
   _flashMessage(msg) {
     // Simple inline toast
     const existing = document.querySelector('.quiz-toast');
@@ -656,6 +792,15 @@ class QuizSessionController {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
   }
+}
+
+// Escapes text interpolated into innerHTML-built markup (concept names,
+// question text, etc. come from server data — not user-typed, but still
+// safer to escape than to trust blindly).
+function _escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str ?? '');
+  return div.innerHTML;
 }
 
 // Pull the real server-side error message out of a failed response instead
@@ -709,6 +854,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!session) return;
 
   const urlParams = new URLSearchParams(window.location.search);
+  const quizId = urlParams.get('quiz_id') || '';
   const courseId = urlParams.get('course') || urlParams.get('course_id');
   const lessonId = urlParams.get('lesson') || urlParams.get('lesson_id');
   const topic = urlParams.get('topic') || '';
@@ -719,7 +865,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   let quizData = null;
 
   try {
-    if (courseId && lessonId) {
+    if (quizId) {
+      // Already-generated quiz loaded by ID (e.g. a gap-review retry quiz
+      // generated by /api/quiz/gap-review/retry, or any other on-demand quiz).
+      quizData = await WisdomAPI.getQuizSession(quizId);
+    } else if (courseId && lessonId) {
       // Lesson-scoped short quiz (existing flow via by-lesson endpoint)
       const res = await fetch(`/api/quiz/by-lesson/${courseId}/${lessonId}?user_id=${userId}`);
       if (!res.ok) throw new Error(await _quizErrorDetail(res));
@@ -787,11 +937,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const subtitleEl = document.querySelector('[data-quiz="subtitle"]');
     if (subtitleEl) {
-      subtitleEl.textContent = quizTypeParam === 'short_quiz' ? 'Short Quiz' : 'Final Assessment';
+      const subtitles = { short_quiz: 'Short Quiz', gap_review: 'Targeted Gap Review' };
+      subtitleEl.textContent = subtitles[quizTypeParam] || 'Final Assessment';
     }
 
-    // Hide skip button for short quizzes
-    if (quizTypeParam === 'short_quiz') {
+    // Hide skip button for short quizzes and gap reviews (short, focused sets)
+    if (quizTypeParam === 'short_quiz' || quizTypeParam === 'gap_review') {
       const skipBtn = document.querySelector('[data-quiz="skip-btn"]');
       if (skipBtn) skipBtn.style.display = 'none';
     }

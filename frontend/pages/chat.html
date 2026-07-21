@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 
 <html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>WisdomAI Chat</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -184,9 +186,6 @@
 </div>
 </div>
 <div class="flex items-center gap-4">
-<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors">
-<span class="material-symbols-outlined">notifications</span>
-</button>
 <img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, circular professional headshot photograph of a person, well-lit against a neutral background, used as an avatar in a clean, modern corporate gamification user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHOvR80nqLymMD9oE5McPMTMNJbeAhpPNIRBgQ0C_v0Udam3opV0PInVthd8IQvGEfI90qVNimxDkeQBBxYzLwZh9X7Aj-l4SB4fAoTznCWhSDz2uurPKG5jP2bsFFfqKiG8P3NqwZBWwnrhoLtq2CQgGQooHWDQfQCYV08aKrK-UvK0qcnk-6yrNjmLpJYMVV33sqdPZq6s2Z2owmbPcfwmj_jjQvWYOB49KzaLZ2wb0chanBI3i8"/>
 </div>
 </header>
@@ -201,6 +200,12 @@
 <span class="font-label-md text-label-md text-on-surface-variant">WisdomAI</span>
 <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl rounded-tl-sm shadow-sm text-body-md font-body-md text-on-surface">
 <p>Hi! Ask me anything about your learning path, quizzes, or the knowledge base.</p>
+</div>
+<div id="suggested-prompts" class="flex flex-wrap gap-2 mt-1">
+<button class="suggested-prompt-chip bg-surface-container-low border border-outline-variant hover:border-primary rounded-full px-4 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors" data-prompt="What's in my learning path?" type="button">What's in my learning path?</button>
+<button class="suggested-prompt-chip bg-surface-container-low border border-outline-variant hover:border-primary rounded-full px-4 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors" data-prompt="Quiz me on my current course" type="button">Quiz me on my current course</button>
+<button class="suggested-prompt-chip bg-surface-container-low border border-outline-variant hover:border-primary rounded-full px-4 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors" data-prompt="Summarize the latest upload" type="button">Summarize the latest upload</button>
+<button class="suggested-prompt-chip bg-surface-container-low border border-outline-variant hover:border-primary rounded-full px-4 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors" data-prompt="What should I learn next?" type="button">What should I learn next?</button>
 </div>
 </div>
 </div>
@@ -252,6 +257,7 @@
             const typingIndicator = document.getElementById('typing-indicator');
             const sendBtn = document.getElementById('send-btn');
             const chatContainer = document.getElementById('chat-container');
+            const suggestedPrompts = document.getElementById('suggested-prompts');
 
             const session = window.WisdomAuth.requireAuth();
             if (!session) return;
@@ -303,6 +309,7 @@
                 textarea.value = '';
                 textarea.style.height = '';
                 appendUserMessage(text);
+                if (suggestedPrompts) suggestedPrompts.classList.add('hidden');
                 typingIndicator.classList.remove('hidden');
                 scrollToBottom();
 
@@ -325,6 +332,16 @@
 
             sendBtn.addEventListener('click', sendMessage);
 
+            if (suggestedPrompts) {
+                suggestedPrompts.querySelectorAll('.suggested-prompt-chip').forEach((chip) => {
+                    chip.addEventListener('click', () => {
+                        textarea.value = chip.dataset.prompt;
+                        textarea.focus();
+                        sendMessage();
+                    });
+                });
+            }
+
             textarea.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -334,6 +351,5 @@
         });
     </script>
 <script src="/js/api-client.js"></script>
-<script src="/js/theme-toggle.js"></script>
 <script src="/js/sidebar.js"></script>
 </body></html>

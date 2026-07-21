@@ -14,6 +14,7 @@ Migrated from WAI_agent/shared/persistence.py → src/core/database.py (ADK 2.0)
 
 import json
 import os
+import shutil
 import threading
 from pathlib import Path
 from datetime import date, datetime, timezone
@@ -151,6 +152,7 @@ class DepartmentScopedStore:
         self.learning_paths_path = self.base_path / "learning_paths" / department_id
         self.quizzes_path = self.base_path / "quizzes" / department_id
         self.kb_jobs_path = self.base_path / "kb_jobs" / department_id
+        self.version_history_path = self.base_path / "knowledge_base" / department_id / "version_history"
 
         # ── Catalog Paths (Knowledge Vault catalog structure) ──
         self.catalog_path = self.base_path / "knowledge_base" / department_id / "catalog"
@@ -169,6 +171,7 @@ class DepartmentScopedStore:
         self.learning_paths_path.mkdir(parents=True, exist_ok=True)
         self.quizzes_path.mkdir(parents=True, exist_ok=True)
         self.kb_jobs_path.mkdir(parents=True, exist_ok=True)
+        self.version_history_path.mkdir(parents=True, exist_ok=True)
         self.catalog_inputs_path.mkdir(parents=True, exist_ok=True)
         self.catalog_standard_paths_path.mkdir(parents=True, exist_ok=True)
         self.catalog_unofficial_paths_path.mkdir(parents=True, exist_ok=True)
@@ -216,6 +219,13 @@ class DepartmentScopedStore:
             documents.append(json.loads(file_path.read_text()))
         return documents
 
+    def read_knowledge_document(self, doc_id: str) -> Optional[dict]:
+        """Read a single knowledge base document by id. Returns None if missing."""
+        file_path = self.knowledge_base_path / f"{doc_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
     def write_knowledge_document(self, doc_id: str, data: dict) -> None:
         """Write a knowledge base document to the department-scoped directory."""
         file_path = self.knowledge_base_path / f"{doc_id}.json"
@@ -244,6 +254,20 @@ class DepartmentScopedStore:
         if not file_path.exists():
             return None
         return file_path.read_text(encoding="utf-8")
+
+    def write_raw_document_bytes(self, filename: str, data: bytes) -> str:
+        """Save an uploaded binary document (PDF/image/audio/video) to raw/."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        file_path = self.raw_documents_path / safe_name
+        file_path.write_bytes(data)
+        return str(file_path)
+
+    def read_raw_document_bytes(self, filename: str) -> Optional[bytes]:
+        """Read a binary raw document from the raw/ subdirectory."""
+        file_path = self.raw_documents_path / filename
+        if not file_path.exists():
+            return None
+        return file_path.read_bytes()
 
     def list_raw_documents(self) -> list[str]:
         """List all raw document filenames in this department's raw/ directory."""
@@ -340,6 +364,97 @@ class DepartmentScopedStore:
                 return candidate
             version += 1
 
+    # ── Version History ──
+    # A JSON log per original filename recording every point-in-time state it's
+    # been in. "live" entries point at a normal, still-existing catalog file
+    # (today's current content, or a `new_version` sibling); "archived" entries
+    # are full snapshots of content that got superseded by an Overwrite/Restore,
+    # stored under version_history/{filename}/v{N}/ so it's never truly lost.
+
+    def read_version_history(self, filename: str) -> list[dict]:
+        """Read the version history log for a filename. Returns [] if none yet."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        log_path = self.version_history_path / f"{safe_name}.json"
+        if not log_path.exists():
+            return []
+        return json.loads(log_path.read_text())
+
+    def write_version_history(self, filename: str, entries: list[dict]) -> None:
+        """Persist the version history log for a filename."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        log_path = self.version_history_path / f"{safe_name}.json"
+        log_path.write_text(json.dumps(entries, indent=2))
+
+    def archive_document_snapshot(
+        self,
+        filename: str,
+        version: int,
+        content: str | bytes,
+        mime_type: str,
+        content_category: str,
+        chunks_doc: Optional[dict] = None,
+    ) -> str:
+        """Save a full point-in-time snapshot of a document about to be
+        superseded (raw content + meta + its parsed chunks doc, if any)."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        bundle_dir = self.version_history_path / safe_name / f"v{version}"
+        bundle_dir.mkdir(parents=True, exist_ok=True)
+
+        data = content.encode("utf-8") if isinstance(content, str) else content
+        (bundle_dir / "raw.bin").write_bytes(data)
+        (bundle_dir / "meta.json").write_text(
+            json.dumps({"mime_type": mime_type, "content_category": content_category}, indent=2)
+        )
+        if chunks_doc is not None:
+            (bundle_dir / "chunks.json").write_text(json.dumps(chunks_doc, indent=2))
+        return str(bundle_dir)
+
+    def read_archived_snapshot(self, filename: str, version: int) -> Optional[dict]:
+        """Read back an archived snapshot for restore. Returns None if missing/pruned."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        bundle_dir = self.version_history_path / safe_name / f"v{version}"
+        raw_path = bundle_dir / "raw.bin"
+        meta_path = bundle_dir / "meta.json"
+        if not raw_path.exists() or not meta_path.exists():
+            return None
+        meta = json.loads(meta_path.read_text())
+        raw_bytes = raw_path.read_bytes()
+        content: str | bytes = raw_bytes.decode("utf-8") if meta["content_category"] == "text" else raw_bytes
+        chunks_path = bundle_dir / "chunks.json"
+        chunks_doc = json.loads(chunks_path.read_text()) if chunks_path.exists() else None
+        return {
+            "content": content,
+            "mime_type": meta["mime_type"],
+            "content_category": meta["content_category"],
+            "chunks_doc": chunks_doc,
+        }
+
+    def prune_old_versions(self, filename: str, keep: int = 15) -> None:
+        """Delete the oldest archived bundles beyond `keep`. The log entries stay
+        (marked `pruned: true`) so the audit trail still shows they existed."""
+        entries = self.read_version_history(filename)
+        archived = [e for e in entries if e.get("kind") == "archived" and not e.get("pruned")]
+        if len(archived) <= keep:
+            return
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        for entry in archived[: len(archived) - keep]:
+            bundle_dir = self.version_history_path / safe_name / f"v{entry['version']}"
+            if bundle_dir.exists():
+                shutil.rmtree(bundle_dir)
+            entry["pruned"] = True
+        self.write_version_history(filename, entries)
+
+    def delete_version_history(self, filename: str) -> None:
+        """Remove a filename's entire version history log and archived bundles
+        (called when the document itself is deleted, to avoid orphaned history)."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        log_path = self.version_history_path / f"{safe_name}.json"
+        if log_path.exists():
+            log_path.unlink()
+        bundle_root = self.version_history_path / safe_name
+        if bundle_root.exists():
+            shutil.rmtree(bundle_root)
+
     # ── Learning Path Persistence ──
 
     def write_learning_path(self, path_id: str, data: dict) -> None:
@@ -380,10 +495,46 @@ class DepartmentScopedStore:
         file_path.write_text(content, encoding="utf-8")
         return str(file_path)
 
+    def write_catalog_input_bytes(self, filename: str, data: bytes) -> str:
+        """Save an uploaded binary document (PDF/image/audio/video) to catalog/inputs/."""
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        file_path = self.catalog_inputs_path / safe_name
+        file_path.write_bytes(data)
+        return str(file_path)
+
+    def write_catalog_input_meta(self, filename: str, mime_type: str, content_category: str) -> None:
+        """Record the mime type / content category for a catalog input file.
+
+        Stored as a sidecar `.meta.json` next to the file — the raw/catalog input
+        files themselves stay in their native format (text or binary), so this is
+        the only place that remembers what kind of content a filename holds.
+        """
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        meta_path = self.catalog_inputs_path / f"{safe_name}.meta.json"
+        meta_path.write_text(json.dumps({
+            "mime_type": mime_type,
+            "content_category": content_category,
+        }, indent=2))
+
+    def read_catalog_input_meta(self, filename: str) -> dict:
+        """Read the mime type / content category for a catalog input file.
+
+        Defaults to plain-text document metadata when no sidecar exists — covers
+        files uploaded before multimodal support was added.
+        """
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        meta_path = self.catalog_inputs_path / f"{safe_name}.meta.json"
+        if not meta_path.exists():
+            return {"mime_type": "text/plain", "content_category": "text"}
+        return json.loads(meta_path.read_text())
+
     def delete_catalog_input(self, filename: str) -> bool:
         """Delete an uploaded document's catalog/inputs/ copy."""
         safe_name = filename.replace("/", "_").replace("\\", "_")
         file_path = self.catalog_inputs_path / safe_name
+        meta_path = self.catalog_inputs_path / f"{safe_name}.meta.json"
+        if meta_path.exists():
+            meta_path.unlink()
         if not file_path.exists():
             return False
         file_path.unlink()
@@ -393,12 +544,15 @@ class DepartmentScopedStore:
         """List all input files in catalog/inputs/ with metadata."""
         results = []
         for f in sorted(self.catalog_inputs_path.iterdir()):
-            if f.is_file() and f.name not in (".gitkeep",):
+            if f.is_file() and f.name not in (".gitkeep",) and not f.name.endswith(".meta.json"):
                 stat = f.stat()
+                meta = self.read_catalog_input_meta(f.name)
                 results.append({
                     "filename": f.name,
                     "size_bytes": stat.st_size,
                     "date_added": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "mime_type": meta["mime_type"],
+                    "content_category": meta["content_category"],
                 })
         return results
 

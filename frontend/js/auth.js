@@ -59,12 +59,14 @@
     return session;
   }
 
-  // Redirects non-managers to the personal dashboard. Call in addition to
-  // requireAuth() at the top of manager-only pages.
+  // Redirects users with the wrong role to the personal dashboard, carrying
+  // a `denied` reason so the dashboard can explain why they landed there
+  // (see sidebar.js, which shows the toast once it mounts on the target page).
+  // Call in addition to requireAuth() at the top of role-gated pages.
   function requireRole(role) {
     const session = requireAuth();
     if (session && session.role !== role) {
-      window.location.href = '/';
+      window.location.href = '/?denied=' + encodeURIComponent(role);
       return null;
     }
     return session;

@@ -1,8 +1,10 @@
 <!DOCTYPE html><html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title class="">WisdomAI - Learning Path</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <style>
@@ -250,7 +252,6 @@
 
 
 <script src="/js/api-client.js"></script>
-<script src="/js/theme-toggle.js"></script>
 <script src="/js/sidebar.js"></script>
 <script src="/js/global-search.js"></script>
 
@@ -304,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const [pathRes, progRes] = await Promise.all([
-                pathId ? fetch('/api/learning-path/' + encodeURIComponent(pathId)) : Promise.resolve(null),
+                pathId ? fetch('/api/learning-path/' + encodeURIComponent(pathId) + '?user_id=' + encodeURIComponent(userId)) : Promise.resolve(null),
                 WisdomAPI.getUserProgress(userId)
             ]);
 
@@ -352,7 +353,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('lp-title').textContent = titleText;
         const lpBreadcrumb = document.getElementById('lp-breadcrumb-path');
         if (lpBreadcrumb) lpBreadcrumb.textContent = titleText;
-        document.getElementById('lp-desc').textContent = path.courses.length + ' courses • ' + (path.total_estimated_hours || '0') + 'h total';
+        document.getElementById('lp-desc').textContent = path.courses.length + (path.courses.length === 1 ? ' course • ' : ' courses • ') + (path.total_estimated_hours || '0') + 'h total';
 
         // A manager's own unpublished draft isn't an "active" path — nobody
         // (including them) is actually enrolled in it yet.
@@ -380,6 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         path.courses.forEach((course) => {
             const isRemedial = course.is_remedial === true;
+            const isCourseCompleted = completedSet.has(course.course_id);
             if (!isRemedial) courseNumber++;
 
             // Course Header
@@ -419,24 +421,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 container.innerHTML += `
                 <div class="relative flex flex-col items-center">
                     ${isActive ? '<div class="absolute -top-12 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-lg text-xs font-bold animate-bounce shadow-md border border-secondary z-30">START HERE</div>' : ''}
-                    <a href="/lesson?course=${course.course_id}" class="w-20 h-20 rounded-full ${isCompleted ? 'bg-primary' : 'bg-secondary-container'} flex items-center justify-center text-white squishy-button cursor-pointer border-4 border-white no-underline relative z-20" style="text-decoration:none">
+                    <a href="/lesson?course=${course.course_id}" class="w-20 h-20 rounded-full ${isCompleted ? 'bg-primary' : 'bg-secondary-container'} flex items-center justify-center text-white squishy-button cursor-pointer border-4 border-white no-underline relative z-20 ${isActive ? 'ring-4 ring-primary/40' : ''}" style="text-decoration:none">
                         <span class="material-symbols-outlined text-3xl">${isCompleted ? 'check' : 'play_arrow'}</span>
                     </a>
-                    <span class="mt-3 font-bold text-on-surface-variant text-sm text-center px-4 relative z-20 bg-background/80 rounded-full">${course.title}</span>
+                    <span class="mt-3 font-bold text-on-surface-variant text-sm text-center px-4 relative z-20 bg-background/80 dark:bg-gray-800/80 rounded-full">${course.title}</span>
                 </div>
                 `;
             } else {
                 lessons.forEach((lesson) => {
                     const isActive = activeCourseId === course.course_id && activeLessonId === lesson.lesson_id;
-                    const lessonBg = isRemedial ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-secondary-container text-on-secondary-container border-white';
+                    let lessonBg, lessonIcon;
+                    if (isCourseCompleted) {
+                        lessonBg = 'bg-primary text-on-primary border-white';
+                        lessonIcon = 'check';
+                    } else {
+                        lessonBg = isRemedial ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-secondary-container text-on-secondary-container border-white';
+                        lessonIcon = isRemedial ? 'manage_search' : 'menu_book';
+                    }
+                    const activeRing = isActive ? 'ring-4 ring-primary/40' : '';
                     container.innerHTML += `
                     <div class="relative flex flex-col items-center group my-4">
                         ${isActive ? '<div class="absolute -top-12 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-lg text-xs font-bold animate-bounce shadow-md border border-secondary z-30">START HERE</div>' : ''}
-                        <a href="/lesson?course=${course.course_id}&lesson=${lesson.lesson_id}" class="w-20 h-20 rounded-full ${lessonBg} flex items-center justify-center squishy-button cursor-pointer border-4 hover:ring-4 transition-all no-underline relative z-20" style="text-decoration:none">
-                            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">${isRemedial ? 'manage_search' : 'menu_book'}</span>
+                        <a href="/lesson?course=${course.course_id}&lesson=${lesson.lesson_id}" class="w-20 h-20 rounded-full ${lessonBg} ${activeRing} flex items-center justify-center squishy-button cursor-pointer border-4 hover:ring-4 transition-all no-underline relative z-20" style="text-decoration:none">
+                            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">${lessonIcon}</span>
                         </a>
-                        <span class="mt-2 font-bold text-on-surface text-sm text-center px-2 max-w-[200px] relative z-20 bg-background/80 rounded-full">${lesson.title}</span>
-                        <span class="text-xs text-on-surface-variant relative z-20 bg-background/80 rounded-full px-2">${lesson.estimated_minutes || 15} min</span>
+                        <span class="mt-2 font-bold text-on-surface text-sm text-center px-3 py-1 max-w-[220px] leading-snug relative z-20 bg-background/80 dark:bg-gray-800/80 rounded-full">${lesson.title}</span>
+                        <span class="text-xs text-on-surface-variant relative z-20 bg-background/80 dark:bg-gray-800/80 rounded-full px-2 mt-1">${lesson.estimated_minutes || 15} min</span>
                     </div>
                     `;
                 });

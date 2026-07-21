@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Agent Console — WisdomAI</title>
@@ -8,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
 <script id="tailwind-config">try{
   tailwind.config = {
     darkMode: "class",
@@ -72,6 +74,7 @@
   .graph-node-subtitle { font-size: 10px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
   .graph-edge { stroke: #c0c7d1; stroke-width: 1.5; fill: none; }
   .graph-edge-dashed { stroke-dasharray: 4 4; }
+  .dark .graph-edge { stroke: #4b5563; }
 
   #dev-panel-backdrop { transition: opacity .2s ease; }
   #dev-panel { transition: transform .25s ease; }
@@ -80,13 +83,13 @@
   textarea.prompt-editor { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.5; }
 </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-background text-on-background">
     <script src="/js/auth.js"></script>
 
 <div id="sidebar-mount"></div>
 
 <main class="flex-1 overflow-y-auto sidebar-offset">
-  <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between">
+  <header class="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">settings_suggest</span>
       <h1 class="font-display font-bold text-xl text-on-surface">Agent Console</h1>
@@ -116,7 +119,7 @@
         <span class="material-symbols-outlined text-sm">pan_tool</span> Drag empty space to pan
       </span>
     </div>
-    <div id="graph-viewport" class="bg-white rounded-2xl border border-outline-variant p-4">
+    <div id="graph-viewport" class="bg-surface-container-lowest rounded-2xl border border-outline-variant p-4">
       <svg id="graph-svg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
   </div>

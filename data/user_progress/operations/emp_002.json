@@ -5,23 +5,638 @@
   "entry_path": "intermediate",
   "current_state": "enrolled",
   "learning_path_id": "",
-  "enrolled_path_ids": [],
+  "enrolled_path_ids": [
+    "lp_ff5b91ff"
+  ],
   "completed_courses": [],
   "current_course_id": "",
-  "quiz_attempts": [],
-  "assessment_scores": [],
-  "best_assessment_score": 0.0,
-  "error_retention_matrix": {},
-  "luck_failures": {},
+  "quiz_attempts": [
+    {
+      "quiz_id": "quiz_45ff2966",
+      "score": 0.2,
+      "total_questions": 5,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-21T07:45:35.569776+00:00"
+    },
+    {
+      "quiz_id": "quiz_19436adc",
+      "score": 0.2,
+      "total_questions": 5,
+      "correct_answers": 1,
+      "attempted_at": "2026-07-21T07:47:45.648469+00:00"
+    }
+  ],
+  "assessment_scores": [
+    {
+      "quiz_id": "quiz_45ff2966",
+      "score": 0.2,
+      "type": "quiz"
+    },
+    {
+      "quiz_id": "quiz_19436adc",
+      "score": 0.2,
+      "type": "quiz"
+    }
+  ],
+  "best_assessment_score": 0.2,
+  "error_retention_matrix": {
+    "ui_browser_verify2": 4,
+    "concept_1": 2,
+    "concept_3": 2,
+    "concept_4": 2,
+    "concept_5": 2,
+    "ui_browser_verify3": 4
+  },
+  "luck_failures": {
+    "ui_browser_verify2": 4,
+    "ui_browser_verify3": 4
+  },
   "bypass_locked": false,
   "bypass_attempts": 0,
-  "readiness_score": 0.0,
-  "is_at_risk": false,
+  "readiness_score": 0.06,
+  "is_at_risk": true,
   "blocked_by": "",
   "manager_id": "manager",
   "job_level": "individual_contributor",
-  "mastery_vectors": {},
+  "mastery_vectors": {
+    "ui_browser_verify2": {
+      "concept_id": "ui_browser_verify2",
+      "ability_score": 0.0,
+      "last_seen": "2026-07-21T07:46:13.373433+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 5,
+      "correct_count": 1
+    },
+    "ui_browser_verify3": {
+      "concept_id": "ui_browser_verify3",
+      "ability_score": 0.0,
+      "last_seen": "2026-07-21T07:48:17.780104+00:00",
+      "half_life_days": 7.0,
+      "historical_attempts": 5,
+      "correct_count": 1
+    }
+  },
   "enrolled_at": "2026-06-25T09:00:00Z",
-  "last_activity_at": "2026-07-19T08:44:19.795072+00:00",
-  "last_updated": "2026-07-19T08:44:19.795072+00:00"
+  "last_activity_at": "2026-07-21T09:32:22.895372+00:00",
+  "last_updated": "2026-07-21T09:32:22.897550+00:00",
+  "psychometric_ability": -1.9971183258367637,
+  "concept_diagnoses": {
+    "concept_1": [
+      {
+        "concept_tag": "concept_1",
+        "misconception": "Conflating environmental prerequisite validation (Part 1) with active runtime execution, leading to running actions before verifying system readiness.",
+        "question_text": "Regarding 'ui_browser_verify2', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_browser_verify2, part 1.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify2, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_74d3ae3d",
+        "course_id": "remedial_1405a3f2",
+        "recorded_at": "2026-07-21T07:46:13.370516+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_1",
+        "misconception": "Over-generalized the entire verification pipeline as a session authentication handshake (Statement B), failing to recognize Part 1 as the dedicated environment-readiness and process-initialization phase (Statement A).",
+        "question_text": "Regarding 'ui_browser_verify3', which of the following represents the core concept for part 1?",
+        "user_answer": "Statement B: a description related to ui_browser_verify3, part 1.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify3, part 1.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_e05a1ea1",
+        "course_id": "remedial_7faef29d",
+        "recorded_at": "2026-07-21T07:48:17.777145+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_3": [
+      {
+        "concept_tag": "concept_3",
+        "misconception": "Assuming that assertion-checking (Part 3) relies on generic thread sleeps or global timeouts, rather than explicit, element-specific polling behaviors.",
+        "question_text": "Regarding 'ui_browser_verify2', which of the following represents the core concept for part 3?",
+        "user_answer": "Statement B: a description related to ui_browser_verify2, part 3.",
+        "correct_answer": "Statement C: a description related to ui_browser_verify2, part 3.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_74d3ae3d",
+        "course_id": "remedial_1405a3f2",
+        "recorded_at": "2026-07-21T07:46:13.370516+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_3",
+        "misconception": "Substituted the DOM structural presence check (Statement C) with the session authentication check (Statement B), demonstrating an inability to distinguish layout/document completeness from active user session state.",
+        "question_text": "Regarding 'ui_browser_verify3', which of the following represents the core concept for part 3?",
+        "user_answer": "Statement B: a description related to ui_browser_verify3, part 3.",
+        "correct_answer": "Statement C: a description related to ui_browser_verify3, part 3.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_e05a1ea1",
+        "course_id": "remedial_7faef29d",
+        "recorded_at": "2026-07-21T07:48:17.777145+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_4": [
+      {
+        "concept_tag": "concept_4",
+        "misconception": "Mistaking post-execution cleanup/teardown (Part 4) for continuous telemetry logging, which risks leaving active browser processes orphaned.",
+        "question_text": "Regarding 'ui_browser_verify2', which of the following represents the core concept for part 4?",
+        "user_answer": "Statement B: a description related to ui_browser_verify2, part 4.",
+        "correct_answer": "Statement D: a description related to ui_browser_verify2, part 4.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_74d3ae3d",
+        "course_id": "remedial_1405a3f2",
+        "recorded_at": "2026-07-21T07:46:13.370516+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_4",
+        "misconception": "Confused element interactability and focus-state verification (Statement D) with the session authentication check (Statement B), failing to isolate user interface readiness from transport-layer session validity.",
+        "question_text": "Regarding 'ui_browser_verify3', which of the following represents the core concept for part 4?",
+        "user_answer": "Statement B: a description related to ui_browser_verify3, part 4.",
+        "correct_answer": "Statement D: a description related to ui_browser_verify3, part 4.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_e05a1ea1",
+        "course_id": "remedial_7faef29d",
+        "recorded_at": "2026-07-21T07:48:17.777145+00:00",
+        "resolved": false
+      }
+    ],
+    "concept_5": [
+      {
+        "concept_tag": "concept_5",
+        "misconception": "Confusing a terminal fallback routine (Part 5) with a standard execution retry loop, failing to recognize state-salvaging procedures.",
+        "question_text": "Regarding 'ui_browser_verify2', which of the following represents the core concept for part 5?",
+        "user_answer": "Statement B: a description related to ui_browser_verify2, part 5.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify2, part 5.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_74d3ae3d",
+        "course_id": "remedial_1405a3f2",
+        "recorded_at": "2026-07-21T07:46:13.370516+00:00",
+        "resolved": false
+      },
+      {
+        "concept_tag": "concept_5",
+        "misconception": "Incorrectly mapped the final assertion compilation and resource teardown phase (Statement A) to the session authentication check (Statement B), neglecting the post-execution logging and cleanup steps of the lifecycle.",
+        "question_text": "Regarding 'ui_browser_verify3', which of the following represents the core concept for part 5?",
+        "user_answer": "Statement B: a description related to ui_browser_verify3, part 5.",
+        "correct_answer": "Statement A: a description related to ui_browser_verify3, part 5.",
+        "source": "remedial_course_generation",
+        "quiz_id": "quiz_e05a1ea1",
+        "course_id": "remedial_7faef29d",
+        "recorded_at": "2026-07-21T07:48:17.777145+00:00",
+        "resolved": false
+      }
+    ]
+  },
+  "remedial_courses": [
+    {
+      "course_id": "remedial_1405a3f2",
+      "title": "Mastering the Lifecycle of ui_browser_verify2",
+      "description": "This course clarifies the distinct functional phases of the ui_browser_verify2 protocol. It corrects common patterns of treating all verification steps as generic runtime execution, detailing the transition from environment validation to specialized fallback routines.",
+      "topics": [
+        "ui_browser_verify2",
+        "concept_1",
+        "concept_3",
+        "concept_4",
+        "concept_5"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_002",
+      "source_course_id": "course_fae3a35f",
+      "gap_topics": [
+        "ui_browser_verify2",
+        "concept_1",
+        "concept_3",
+        "concept_4",
+        "concept_5"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_2081c550",
+      "final_assessment_id": "quiz_74d3ae3d",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Deconstructing ui_browser_verify2: From Setup to Teardown",
+          "content_summary": "Many learners struggle with 'ui_browser_verify2' because they treat the entire protocol as a single, continuous execution block. This leads to the misconception that every phase behaves like a generic browser instruction. In reality, 'ui_browser_verify2' is divided into strict, isolated lifecycle phases designed to maximize automation reliability and prevent resource leaks. Part 1 is purely focused on initialization and checking system prerequisites, not executing live tests. Differentiating this setup phase ensures that the environment is healthy before wasting computing resources on browser actions.\n\nMoving deeper into the execution lifecycle, Part 3 governs assertion verification. A common mistake here is assuming that the protocol pauses execution globally or relies on broad network timeouts to handle latency. Instead, Part 3 utilizes explicit, element-targeted waiting strategies that poll the DOM dynamically. This distinction prevents the automation from becoming flaky or slowing down unnecessarily on stable networks, providing a robust check on dynamic frontend elements.\n\nAfter verification, the protocol enters cleanup in Part 4. It is vital not to confuse this teardown step with a logging routine. While telemetry logs are generated during execution, Part 4's primary mandate is the explicit termination of browser contexts and purging of memory profiles. Failing to understand this distinction leads to orphaned processes that drain server performance. Finally, Part 5 acts as the exception-handling and fallback state. This is not a simple retry loop that runs the same code repeatedly; it is a dedicated fallback route designed to safely recover state or output safe-defaults if the main assertions fail.\n\nBy mastering these distinct phases, automated test designers can write deterministic scripts that handle errors gracefully, clean up resources reliably, and avoid the common pitfalls of generalized execution thinking.",
+          "key_points": [
+            "Part 1 is strictly for environment validation and prerequisite checks to fail-fast before browser startup.",
+            "Part 3 relies on explicit, element-specific waiting strategies to verify assertions dynamically instead of global thread pauses.",
+            "Part 4 enforces explicit context teardown to prevent memory leaks, which is entirely distinct from continuous logging."
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_2081c550",
+          "short_quiz": {
+            "quiz_id": "quiz_2081c550",
+            "topic": "Mastering the Lifecycle of ui_browser_verify2",
+            "quiz_type": "short_quiz",
+            "question_count": 3,
+            "questions": [
+              {
+                "text": "What is the primary objective of Part 1 in the 'ui_browser_verify2' lifecycle?",
+                "options": [
+                  "To validate browser environmental dependencies and environment variables before launching a session.",
+                  "To immediately initiate the primary browser run-loop and load the landing page.",
+                  "To initiate parallel API connections to external databases.",
+                  "To write final execution logs to the localized backup directory."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Part 1 focuses entirely on setup validation and prerequisite checking to fail fast.",
+                  "1": "Incorrect. This represents the misconception of treating setup as active execution.",
+                  "2": "Incorrect. Database connections are handled in later integration stages.",
+                  "3": "Incorrect. Logging is a peripheral function, not the goal of Part 1."
+                },
+                "concept_tags": [
+                  "concept_1"
+                ],
+                "question_id": "q_01160a"
+              },
+              {
+                "text": "How does Part 3 handle slower rendering speeds of target DOM elements during verification?",
+                "options": [
+                  "By employing explicit, element-specific waiting strategies that poll target properties.",
+                  "By pausing all thread execution uniformly using standard global timeout periods.",
+                  "By triggering an immediate, silent bypass to the fallback state.",
+                  "By requesting a hard restart of the host browser process."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Explicit, targeted polling ensures high precision and reduces flakiness.",
+                  "1": "Incorrect. This represents the misconception of assuming general timeouts handle assertion checks.",
+                  "2": "Incorrect. Skipping verification violates the integrity of the assertion check.",
+                  "3": "Incorrect. Process restarts are expensive and not the default behavior for slow elements."
+                },
+                "concept_tags": [
+                  "concept_3"
+                ],
+                "question_id": "q_59544f"
+              },
+              {
+                "text": "Which action accurately characterizes the primary purpose of Part 4 of 'ui_browser_verify2'?",
+                "options": [
+                  "Explicitly tearing down active browser contexts and purging temporary directories.",
+                  "Writing continuous telemetry logs and console event records to the cloud.",
+                  "Restarting the test execution block with identical baseline parameters.",
+                  "Mapping system configuration properties to localized runtime dictionaries."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Teardown ensures resources are freed up and no processes are orphaned.",
+                  "1": "Incorrect. This reflects the misconception of confusing resource teardown with telemetry logging.",
+                  "2": "Incorrect. Teardown does not loop or restart the script.",
+                  "3": "Incorrect. Configuration mapping is completed in the initialization phase."
+                },
+                "concept_tags": [
+                  "concept_4"
+                ],
+                "question_id": "q_15fccc"
+              }
+            ],
+            "created_at": "2026-07-21T07:46:13.370446+00:00"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_74d3ae3d",
+        "topic": "Mastering the Lifecycle of ui_browser_verify2",
+        "quiz_type": "final_assessment",
+        "question_count": 5,
+        "questions": [
+          {
+            "text": "Why must the prerequisite validation of Part 1 remain separated from core verification tasks?",
+            "options": [
+              "To prevent unnecessary browser startup overhead if environmental configurations are invalid.",
+              "To allow multiple browser instances to run in parallel without path collisions.",
+              "To create a clean baseline log file before system memory is fully allocated.",
+              "To force the local driver engine to perform automated version upgrades."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Keeping validation independent allows the script to fail-fast and save system overhead.",
+              "1": "Incorrect. Parallel configuration is managed by the orchestrator, not Part 1.",
+              "2": "Incorrect. This mistakes logging needs for system-level dependency checks.",
+              "3": "Incorrect. Driver upgrades are outside the scope of individual test initialization."
+            },
+            "concept_tags": [
+              "concept_1"
+            ],
+            "question_id": "q_a107b4"
+          },
+          {
+            "text": "Under 'ui_browser_verify2' Part 3, what is the primary risk of relying on standard global timeouts instead of explicit wait states?",
+            "options": [
+              "Increased test flakiness and artificial execution delays in low-latency environments.",
+              "Immediate and irreversible termination of the underlying system daemon.",
+              "Corruption of system logs and mismatching of element selectors.",
+              "An accidental transition into the cleanup protocols of Part 4."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Global timeouts force tests to wait longer than necessary, making execution slow and flaky.",
+              "1": "Incorrect. Global timeouts do not terminate background daemons.",
+              "2": "Incorrect. Selecting elements is not affected by the mechanism of wait states.",
+              "3": "Incorrect. Standard timeouts do not trigger unexpected phase transitions."
+            },
+            "concept_tags": [
+              "concept_3"
+            ],
+            "question_id": "q_e9d4b7"
+          },
+          {
+            "text": "What happens if a developer omits or misconfigures Part 4 (Teardown) in a high-volume testing pipeline?",
+            "options": [
+              "Orphaned browser processes will accumulate, causing severe resource leaks.",
+              "The runtime will continuously output blank telemetry logs.",
+              "The testing suite will automatically re-run the initialization phase.",
+              "The assertion states will default to success regardless of test outcomes."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Teardown failures directly lead to orphaned processes and resource exhaustion.",
+              "1": "Incorrect. This stems from the misconception that Part 4 is primarily a logging controller.",
+              "2": "Incorrect. Misconfigured teardown does not prompt automatic re-runs.",
+              "3": "Incorrect. Test assertions are determined in Part 3 and are unaffected by subsequent teardown."
+            },
+            "concept_tags": [
+              "concept_4"
+            ],
+            "question_id": "q_6ad07b"
+          },
+          {
+            "text": "In Part 5 (Exception Handling), how does the fallback routine differ from a standard loop retry?",
+            "options": [
+              "It executes alternative recovery workflows rather than blindly repeating the failed assertion.",
+              "It re-runs the identical verification step up to five times using default execution timeouts.",
+              "It terminates execution immediately without cleaning temporary memory states.",
+              "It converts the failed outcome into a neutral log without flagging the pipeline."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Fallback routines are dynamic, custom scripts meant to gracefully recover state.",
+              "1": "Incorrect. This is the misconception that Part 5 acts as a basic, repetitive retry loop.",
+              "2": "Incorrect. Failing to clean up memory is a bug, not a design feature of the fallback state.",
+              "3": "Incorrect. Fallbacks do not hide test outcomes; they manage recovery workflows."
+            },
+            "concept_tags": [
+              "concept_5"
+            ],
+            "question_id": "q_b68232"
+          },
+          {
+            "text": "Which of the following describes a correctly designed, complete 'ui_browser_verify2' cycle?",
+            "options": [
+              "Verify configuration prerequisites, poll target elements dynamically, purge contexts, and execute recovery states if error thresholds are met.",
+              "Initiate constant background runs, pause execution using system sleep, write diagnostic logs, and repeat failed blocks iteratively.",
+              "Verify environmental paths, skip checking active elements, leave contexts open for manual debugging, and report standard logs.",
+              "Run validation checks, apply static timeouts, initiate browser reboots, and force-stop the process upon failure."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. This cleanly outlines the proper sequence: environment check, explicit polling, structured cleanup, and exception recovery.",
+              "1": "Incorrect. This option relies on the incorrect 'Statement B' paradigms of constant loops, static pauses, and simple retries.",
+              "2": "Incorrect. Leaving contexts open during testing pipelines causes memory leaks.",
+              "3": "Incorrect. Dynamic wait states and graceful fallback routines are preferred over static timeouts and forced hard crashes."
+            },
+            "concept_tags": [
+              "concept_1",
+              "concept_3",
+              "concept_4",
+              "concept_5"
+            ],
+            "question_id": "q_49fb38"
+          }
+        ],
+        "created_at": "2026-07-21T07:46:13.370475+00:00"
+      },
+      "created_at": "2026-07-21T07:46:13.370503+00:00",
+      "updated_at": "2026-07-21T07:46:13.370510+00:00",
+      "regenerated_count": 0
+    },
+    {
+      "course_id": "remedial_7faef29d",
+      "title": "Remediation: Advanced Browser Verification Lifecycle (ui_browser_verify3)",
+      "description": "This targeted remedial course addresses the systematic misinterpretation of the five-part 'ui_browser_verify3' protocol. It corrects the critical misconception of treating all verification stages as a uniform session-level authentication handshake, establishing clear operational boundaries for each distinct phase.",
+      "topics": [
+        "ui_browser_verify3",
+        "concept_1",
+        "concept_3",
+        "concept_4",
+        "concept_5"
+      ],
+      "estimated_hours": 1.0,
+      "order": 0,
+      "is_remedial": true,
+      "remedial_for_user": "emp_002",
+      "source_course_id": "course_fae3a35f",
+      "gap_topics": [
+        "ui_browser_verify3",
+        "concept_1",
+        "concept_3",
+        "concept_4",
+        "concept_5"
+      ],
+      "has_final_assessment": true,
+      "short_quiz_id": "quiz_43910528",
+      "final_assessment_id": "quiz_e05a1ea1",
+      "lessons": [
+        {
+          "lesson_id": "lesson_r01",
+          "title": "Deconstructing ui_browser_verify3: Beyond the Session Handshake",
+          "content_summary": "A common point of failure for automation engineers is treating the 'ui_browser_verify3' routine as a singular, repetitive session handshake (Statement B). In reality, this utility represents a highly structured, sequential execution pipeline containing five distinct phases. Over-reliance on Statement B assumes the system is only confirming active login tokens. However, you must separate security verification from environment, DOM, interaction, and cleanup states.\n\nPart 1 of the pipeline (Statement A) acts strictly as an environment-readiness checker. It verifies that the browser driver process is initiated, local port allocations are clear, and configuration parameters are loaded. It does not look at user sessions. Part 3 (Statement C) targets the structural integrity of the Document Object Model (DOM), verifying that essential node selectors are parsed and rendered. Attempting to run interaction tests before this stage completes results in premature timeouts.\n\nPart 4 (Statement D) transitions from structural presence to functional capability, verifying that elements are not just present, but visible, enabled, and ready for click or focus events. Finally, Part 5 (Statement A) handles assertion logging and clean-up, compiling metrics and closing orphan processes. Conflating any of these stages with a basic session check results in false positives, unmitigated memory leaks, and brittle test suites.",
+          "key_points": [
+            "Part 1 (Statement A) is strictly limited to local driver initialization and process-level environment readiness.",
+            "Parts 3 (Statement C) and 4 (Statement D) manage DOM presence and interactive usability respectively; they are completely independent of active user session tokens.",
+            "Part 5 (Statement A) executes the final post-assertion log generation and teardown, releasing critical system resources allocated in Part 1."
+          ],
+          "estimated_minutes": 20,
+          "has_quiz": true,
+          "short_quiz_id": "quiz_43910528",
+          "short_quiz": {
+            "quiz_id": "quiz_43910528",
+            "topic": "Remediation: Advanced Browser Verification Lifecycle (ui_browser_verify3)",
+            "quiz_type": "short_quiz",
+            "question_count": 3,
+            "questions": [
+              {
+                "text": "When executing Part 1 of 'ui_browser_verify3', what system state are you verifying?",
+                "options": [
+                  "Statement A: Local environment readiness, browser driver initialization, and runtime configuration validation.",
+                  "Statement B: Session handshake validation, verifying active user authentication tokens and cookie persistence.",
+                  "Statement C: DOM layout structural completeness and node rendering.",
+                  "Statement D: Interaction capability checks including pointer-event compliance."
+                ],
+                "correct_answer_index": 0,
+                "rationale": {
+                  "0": "Correct. Part 1 is solely focused on bootstrapping and environmental sanity checks before any testing begins.",
+                  "1": "Incorrect. This represents the core misconception of treating early-stage infrastructure checks as a session-level handshake.",
+                  "2": "Incorrect. DOM structural checking is reserved for Part 3.",
+                  "3": "Incorrect. Interaction validation does not occur until Part 4."
+                },
+                "concept_tags": [
+                  "concept_1"
+                ],
+                "question_id": "q_3473fe"
+              },
+              {
+                "text": "Why must Part 3 (Statement C) execute successfully before Part 4 (Statement D) can begin?",
+                "options": [
+                  "Because session authentication (Statement B) must be renewed dynamically during Part 3.",
+                  "Because Part 3 is responsible for writing the execution log to the disk.",
+                  "Because Statement C confirms the elements exist in the DOM, which is a prerequisite for verifying their interactive states in Statement D.",
+                  "Because Part 3 is when the browser process first launches."
+                ],
+                "correct_answer_index": 2,
+                "rationale": {
+                  "0": "Incorrect. This relies on the false assumption that session renewal (Statement B) governs intermediate layout verification phases.",
+                  "1": "Incorrect. Tear-down and assertion logging occur in Part 5, not Part 3.",
+                  "2": "Correct. An element must structurally exist in the DOM (Part 3) before you can evaluate its interactability or focus state (Part 4).",
+                  "3": "Incorrect. The browser process is verified as active in Part 1."
+                },
+                "concept_tags": [
+                  "concept_3",
+                  "concept_4"
+                ],
+                "question_id": "q_c9543c"
+              },
+              {
+                "text": "Which statement represents the core concept of Part 4 inside the 'ui_browser_verify3' workflow?",
+                "options": [
+                  "Statement B: Performing the backend session handshake and user credential validation.",
+                  "Statement A: Environment initialization and initial driver registration.",
+                  "Statement C: Document Object Model structure verification.",
+                  "Statement D: Verifying target element interactability, focus state, and click responsiveness."
+                ],
+                "correct_answer_index": 3,
+                "rationale": {
+                  "0": "Incorrect. Selecting Statement B fails to recognize that interactive readiness is distinct from session authentication.",
+                  "1": "Incorrect. Environment initialization is the role of Part 1.",
+                  "2": "Incorrect. This describes Part 3's DOM structural verification.",
+                  "3": "Correct. Part 4 checks whether the elements are in an active, interactable state for the user."
+                },
+                "concept_tags": [
+                  "concept_4"
+                ],
+                "question_id": "q_742a13"
+              }
+            ],
+            "created_at": "2026-07-21T07:48:17.777075+00:00"
+          }
+        }
+      ],
+      "final_assessment": {
+        "quiz_id": "quiz_e05a1ea1",
+        "topic": "Remediation: Advanced Browser Verification Lifecycle (ui_browser_verify3)",
+        "quiz_type": "final_assessment",
+        "question_count": 5,
+        "questions": [
+          {
+            "text": "A test execution fails at Part 1 of 'ui_browser_verify3' due to a missing local driver binary. Which statement represents this failed core concept?",
+            "options": [
+              "Statement A: Environment readiness and driver verification.",
+              "Statement B: Session handshake validation.",
+              "Statement C: DOM element rendering verification.",
+              "Statement D: Interaction state verification."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Driver binary availability and environment readiness are verified during Part 1 (Statement A).",
+              "1": "Incorrect. Distractor chosen due to the misconception that all initial failures relate to session handshakes.",
+              "2": "Incorrect. DOM structures are checked later in the cycle.",
+              "3": "Incorrect. Interaction states require a running driver, which is validated in Part 1."
+            },
+            "concept_tags": [
+              "concept_1"
+            ],
+            "question_id": "q_0674cc"
+          },
+          {
+            "text": "During automated script analysis, you need to verify that key elements are correctly injected into the page tree structure. Which part of 'ui_browser_verify3' handles this task?",
+            "options": [
+              "Part 1 (Statement A: Environment Readiness)",
+              "Part 2 (Session handshake validation)",
+              "Part 3 (Statement C: DOM structure completeness)",
+              "Part 5 (Statement A: Teardown and Assertion Logging)"
+            ],
+            "correct_answer_index": 2,
+            "rationale": {
+              "0": "Incorrect. Part 1 checks the environment, not page elements.",
+              "1": "Incorrect. Distractor leveraging the session handshake misconception.",
+              "2": "Correct. Part 3 is explicitly designed to confirm DOM node availability and layout completeness.",
+              "3": "Incorrect. Part 5 compiles final data and cleans up resources."
+            },
+            "concept_tags": [
+              "concept_3"
+            ],
+            "question_id": "q_108831"
+          },
+          {
+            "text": "If a button is visible on the screen but fails to respond to physical mouse clicks because its event listeners haven't bound yet, which verification step has failed?",
+            "options": [
+              "Part 1 (Statement A: Environment Readiness)",
+              "Part 3 (Statement C: DOM compliance check)",
+              "Part 4 (Statement D: Interaction and clickability verification)",
+              "Part 5 (Statement B: Session validation check)"
+            ],
+            "correct_answer_index": 2,
+            "rationale": {
+              "0": "Incorrect. This phase is completed before the webpage is even loaded.",
+              "1": "Incorrect. The element is structurally present in the DOM, so Part 3 succeeded.",
+              "2": "Correct. Click responsiveness and event listener bindings are verified under the interactive rules of Part 4.",
+              "3": "Incorrect. This distractor combines Part 5 with the session-validation misconception."
+            },
+            "concept_tags": [
+              "concept_4"
+            ],
+            "question_id": "q_29397b"
+          },
+          {
+            "text": "After all assertion checks are completed, what is the core responsibility of Part 5 in 'ui_browser_verify3'?",
+            "options": [
+              "Statement A: Saving execution logs, parsing final deltas, and executing driver cleanup routines.",
+              "Statement B: Renewing the active session authentication handshake.",
+              "Statement C: Verifying structural layout node rendering.",
+              "Statement D: Validating element clickability states."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Part 5 (Statement A) handles assertion output compilation, logging, and graceful process teardown.",
+              "1": "Incorrect. This is the persistent misconception of treating teardown as a session handshake validation.",
+              "2": "Incorrect. This describes Part 3.",
+              "3": "Incorrect. This describes Part 4."
+            },
+            "concept_tags": [
+              "concept_5"
+            ],
+            "question_id": "q_3c1d5c"
+          },
+          {
+            "text": "How do Part 1 and Part 5 of the 'ui_browser_verify3' lifecycle relate to one another?",
+            "options": [
+              "Part 1 initiates the environment checks (Statement A) and Part 5 gracefully terminates those environment resources (Statement A).",
+              "Part 1 validates the session handshake (Statement B) while Part 5 validates DOM structure (Statement C).",
+              "Part 1 and Part 5 are completely identical and duplicate the session handshake check (Statement B).",
+              "Part 1 verifies clickability (Statement D) and Part 5 writes environmental specifications (Statement A)."
+            ],
+            "correct_answer_index": 0,
+            "rationale": {
+              "0": "Correct. Part 1 and Part 5 act as the bookends of the lifecycle (allocating/verifying resources at startup, and releasing/logging them at shutdown).",
+              "1": "Incorrect. This relies on mischaracterizing Part 1 as a session check.",
+              "2": "Incorrect. This relies heavily on the core misconception that Statement B is repeated throughout the stages.",
+              "3": "Incorrect. This mixes the definitions of Part 1 and Part 4."
+            },
+            "concept_tags": [
+              "concept_1",
+              "concept_5"
+            ],
+            "question_id": "q_2df0e4"
+          }
+        ],
+        "created_at": "2026-07-21T07:48:17.777106+00:00"
+      },
+      "created_at": "2026-07-21T07:48:17.777133+00:00",
+      "updated_at": "2026-07-21T07:48:17.777139+00:00",
+      "regenerated_count": 0
+    }
+  ]
 }

@@ -2,6 +2,7 @@
 <html lang="en" style="">
 
 <head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WisdomAI | Learning Paths</title>
@@ -9,6 +10,7 @@
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&amp;display=block"
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
     <script id="tailwind-config">try {
             tailwind.config = {
                 darkMode: "class",
@@ -185,7 +187,7 @@
             'ai': { icon: 'architecture', color: 'text-primary', bg: 'bg-primary/10', tag: 'AI & ML', tagColor: 'text-primary' },
             'ml': { icon: 'psychology', color: 'text-primary', bg: 'bg-primary/10', tag: 'AI & ML', tagColor: 'text-primary' },
             'cloud': { icon: 'cloud_sync', color: 'text-secondary', bg: 'bg-secondary/10', tag: 'Cloud', tagColor: 'text-secondary' },
-            'data': { icon: 'database', color: 'text-on-surface-variant', bg: 'bg-surface-variant/30', tag: 'Data', tagColor: 'text-on-surface-variant' },
+            'data': { icon: 'database', color: 'text-on-surface-variant', bg: 'bg-surface-variant/30 dark:bg-white/5', tag: 'Data', tagColor: 'text-on-surface-variant' },
             'vertex': { icon: 'model_training', color: 'text-primary', bg: 'bg-primary/10', tag: 'Vertex AI', tagColor: 'text-primary' },
             'gemini': { icon: 'auto_awesome', color: 'text-secondary', bg: 'bg-secondary/10', tag: 'Gemini', tagColor: 'text-secondary' },
             'default': { icon: 'school', color: 'text-primary', bg: 'bg-primary/10', tag: 'Course', tagColor: 'text-primary' },
@@ -276,8 +278,9 @@
 
                     return `
                 <div class="relative group" data-path-id="${p.path_id}">
-                <a href="/learning-path" data-path-id="${p.path_id}" data-path-type="${p.path_type}" class="path-card bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col hover:shadow-[0_4px_0_0_#0070ad] hover:-translate-y-1 transition-all duration-200 cursor-pointer no-underline">
-                    <div class="h-32 ${iconConfig.bg} relative flex items-center justify-center border-b border-outline-variant">
+                <a href="/learning-path" data-path-id="${p.path_id}" data-path-type="${p.path_type}" class="path-card bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer no-underline">
+                    <div class="h-28 ${iconConfig.bg} relative flex items-center justify-center border-b border-outline-variant overflow-hidden">
+                        <div class="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(255,255,255,0.35),transparent_70%)] dark:bg-[radial-gradient(120%_100%_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)] pointer-events-none"></div>
                         <span class="material-symbols-outlined text-5xl ${iconConfig.color}">${iconConfig.icon}</span>
                         ${badge}
                     </div>
@@ -288,7 +291,7 @@
                             ${p.source_document ? ` • Source: ${p.source_document}` : ''}
                         </p>
                         <div class="mt-auto">
-                            <div class="flex justify-between items-end mb-2">
+                            <div class="flex justify-between items-end mb-1.5">
                                 <div class="flex flex-col">
                                     <span class="text-xs font-label-md text-on-surface-variant uppercase tracking-wider">${status.label}</span>
                                     <span class="js-status-label ${status.big ? 'font-stats-number text-stats-number' : 'font-headline-sm text-[15px] font-bold'} ${status.color}">${status.value}</span>
@@ -302,7 +305,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
                                 <div class="${barColor} h-full rounded-full transition-all duration-500" style="width: ${status.progress}%;"></div>
                             </div>
                         </div>
@@ -400,6 +403,12 @@
                     <span class="material-symbols-outlined text-[18px]">publish</span> Publish to Team
                 </button>
             </div>
+            <div class="mb-2">
+                <button id="edit-path-manual-btn" type="button"
+                    class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container-lowest border border-outline-variant text-on-surface font-label-md text-sm rounded-lg hover:bg-surface-container-low transition-colors disabled:opacity-50">
+                    <span class="material-symbols-outlined text-[18px]">edit_note</span> Edit This Path Manually
+                </button>
+            </div>
             <div id="edit-path-error" class="hidden text-xs text-error mb-2"></div>
             <div class="flex items-center justify-between gap-3 pt-4 mt-2 border-t border-outline-variant">
                 <button id="edit-path-remove-btn" type="button"
@@ -440,6 +449,10 @@
 
         document.getElementById('edit-path-cancel-btn').addEventListener('click', () => {
             editModal.classList.add('hidden');
+        });
+
+        document.getElementById('edit-path-manual-btn').addEventListener('click', () => {
+            window.location.href = `/edit-learning-path?path_id=${encodeURIComponent(editingPathId)}&path_type=${encodeURIComponent(editingPathType)}`;
         });
 
         document.getElementById('edit-path-save-btn').addEventListener('click', async () => {
@@ -534,7 +547,6 @@
     </script>
 
     <script src="/js/api-client.js"></script>
-    <script src="/js/theme-toggle.js"></script>
     <script src="/js/sidebar.js"></script>
     <script src="/js/global-search.js"></script>
 </body>

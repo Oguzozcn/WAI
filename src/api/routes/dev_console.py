@@ -33,11 +33,15 @@ SKILL_TOOL_GROUPS = {
         "generate_learning_path", "generate_daily_agenda",
         "identify_content_gaps", "trigger_curriculum_generation",
     ],
+    # generate_gap_review, generate_remedial_course, and handle_user_assessment_failure
+    # are NOT directly agent-callable anymore (see agent.py's _FUNCTION_TOOLS
+    # comment) — evaluate_answers invokes the first two itself, driven by the
+    # single remediation_policy decision, so they no longer need their own
+    # tool nodes here.
     "knowledge-coach": [
         "generate_quiz", "evaluate_answers", "generate_reflection_prompt",
-        "generate_gap_review", "generate_remedial_course", "get_user_progress",
-        "update_progress", "determine_user_entry_path",
-        "handle_user_assessment_failure", "check_bypass_eligibility",
+        "get_user_progress", "update_progress", "determine_user_entry_path",
+        "check_bypass_eligibility",
     ],
     "kb-validator": [],
     "department-reporter": [
@@ -69,7 +73,6 @@ TOOL_LOGIC_CATEGORY = {
     "evaluate_answers": "assessment_scoring",
     "update_progress": "readiness_scoring",
     "determine_user_entry_path": "adaptive_routing",
-    "handle_user_assessment_failure": "luck_elimination",
     "trigger_curriculum_generation": "curriculum_generation",
     "identify_content_gaps": "curriculum_generation",
     "flag_at_risk_users": "platform_params",
@@ -87,7 +90,7 @@ LOGIC_PARAM_FIELDS = {
         "course_completion_weight", "quiz_performance_weight",
         "state_progress_weight", "quiz_window_size",
     },
-    "luck_elimination": {"core_drift_concept_count"},
+    "luck_elimination": {"core_drift_concept_count", "hlr_retention_threshold", "hlr_ability_threshold"},
     "adaptive_routing": {"confidence_threshold", "accuracy_threshold"},
     "curriculum_generation": {
         "conflict_overlap_ratio", "conflict_min_overlap_count",
@@ -126,6 +129,10 @@ def _validate_logic_params(category: str, merged: dict) -> str | None:
     elif category == "luck_elimination":
         if merged["core_drift_concept_count"] < 1:
             return "core_drift_concept_count must be at least 1."
+        if not (0 <= merged["hlr_retention_threshold"] <= 1):
+            return "hlr_retention_threshold must be between 0 and 1."
+        if not (0 <= merged["hlr_ability_threshold"] <= 1):
+            return "hlr_ability_threshold must be between 0 and 1."
     elif category == "adaptive_routing":
         if not (0 <= merged["confidence_threshold"] <= 1):
             return "confidence_threshold must be between 0 and 1."

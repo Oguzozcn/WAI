@@ -5,15 +5,16 @@ ADK function tools for the Knowledge Coach agent.
 Handles quiz generation, evaluation, metacognitive reflection, and gap review.
 """
 
-import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.core.database import DepartmentScopedStore
 from src.core.config import DEFAULT_DEPARTMENT
 from src.core.dev_config import get_param, get_config, get_logic_param
-from src.core.luck_elimination import LuckEliminationEngine
-from src.services.llm_client import get_gemini_client
+from src.core.luck_elimination import LuckEliminationEngine, calculate_hlr_retention
+from src.core.remediation_policy import decide_remediation
+from src.core.state_machine import get_mandatory_courses
+from src.services.llm_client import call_gemini_json
 import math
 
 class EnterprisePsychometricEngine:
@@ -75,6 +76,7 @@ def generate_quiz(
     question_count: int = 5,
     quiz_type: str = "short_quiz",
     department: str = DEFAULT_DEPARTMENT,
+    extra_context: str = "",
 ) -> dict:
     """Generate a quiz on a specific topic from the department's knowledge base.
 
@@ -87,6 +89,10 @@ def generate_quiz(
         question_count: Number of questions to generate (max 10 for quizzes, 20 for assessments)
         quiz_type: Type of quiz - "short_quiz", "validation_assessment", or "gap_review"
         department: The department scope
+        extra_context: Optional additional grounding text prepended ahead of
+            any knowledge-base matches (e.g. a learner's stored misconception
+            for this topic) — also forces the LLM-grounded path even when no
+            knowledge-base document matches the topic.
 
     Returns:
         A quiz object with questions, options, and metadata.
@@ -104,13 +110,14 @@ def generate_quiz(
         """Deterministic fallback question (unchanged legacy behavior)."""
         correct_idx = i % 4
 
-        # Build 4 options: 1 correct, 3 obviously incorrect
-        options = []
-        for j in range(4):
-            if j == correct_idx:
-                options.append(f"Correct Concept: This is the accurate definition for part {i+1} of {topic}.")
-            else:
-                options.append(f"Incorrect Option: This is a completely unrelated or wrong statement regarding part {i+1}.")
+        # All 4 options share identical neutral phrasing so none of them leaks
+        # the answer through wording -- only correct_answer_index (never sent
+        # to the client) marks which one is right.
+        letters = "ABCD"
+        options = [
+            f"Statement {letters[j]}: a description related to {topic}, part {i+1}."
+            for j in range(4)
+        ]
 
         # Generate mock rationale for each option
         rationale = {}
@@ -161,6 +168,10 @@ def generate_quiz(
         grounding_len += len(snippet)
 
     grounding_context = "\n\n".join(grounding_parts).strip()
+    if extra_context.strip():
+        grounding_context = (
+            f"{extra_context.strip()}\n\n{grounding_context}" if grounding_context else extra_context.strip()
+        )
 
     # ── Generate questions: LLM (grounded) with heuristic fallback ──
     questions = []
@@ -174,26 +185,7 @@ def generate_quiz(
                 grounding_context=grounding_context,
             )
 
-            client = get_gemini_client()
-            response = client.models.generate_content(
-                model=tool_config.get("model") or get_param("GEMINI_MODEL"),
-                contents=prompt,
-            )
-            raw = (response.text or "").strip()
-            if not raw:
-                raise ValueError("LLM returned an empty response.")
-
-            # Strip markdown code fences if present
-            if raw.startswith("```"):
-                raw = raw.split("```", 2)[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-                raw = raw.rsplit("```", 1)[0].strip()
-
-            llm_data = json.loads(raw)
-            if not isinstance(llm_data, dict):
-                raise ValueError(f"LLM returned unexpected type: {type(llm_data).__name__}")
-
+            llm_data = call_gemini_json(prompt, model=tool_config.get("model"))
             llm_questions = llm_data.get("questions")
             if not isinstance(llm_questions, list) or not llm_questions:
                 raise ValueError("LLM response missing a non-empty 'questions' list.")
@@ -223,7 +215,7 @@ def generate_quiz(
         "difficulty": difficulty,
         "question_count": question_count,
         "knowledge_base_available": len(knowledge_base) > 0,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "questions": questions,
     }
 
@@ -234,12 +226,21 @@ def evaluate_answers(
     quiz_id: str,
     user_id: str,
     answers: list[dict],
+    quiz_type: str = "short_quiz",
+    was_bypass_attempt: bool = False,
+    course_id: str = "",
     department: str = DEFAULT_DEPARTMENT,
 ) -> dict:
     """Evaluate a user's quiz answers and update their progress.
 
-    Scores responses, identifies knowledge gaps, and updates the
-    error retention matrix for luck elimination tracking.
+    Scores responses, identifies knowledge gaps, and runs the single
+    remediation policy decision (bypass lockout, gap review, or mandatory
+    path) against the updated error retention matrix — see
+    src.core.remediation_policy.decide_remediation for the fused logic. When
+    the policy calls for it, this ALSO generates the gap review and/or
+    remedial course itself (not left to the caller, and not something the
+    agent decides via a separate tool call) — so a chat-invoked evaluation
+    and an /api/quiz/evaluate-invoked one always produce the same outcome.
 
     Args:
         quiz_id: The ID of the quiz being evaluated
@@ -247,10 +248,21 @@ def evaluate_answers(
         answers: List of answer dicts, each with:
                  {"question_id": str, "user_answer": str, "correct_answer": str,
                   "is_correct": bool, "concept_tags": [str]}
+        quiz_type: "short_quiz" | "validation_assessment" | "final_assessment"
+                   | "gap_review" — only a failed final_assessment can spawn
+                   a remedial course.
+        was_bypass_attempt: Whether this was a veteran/intermediate fast-track
+                             bypass attempt of the standard learning path —
+                             failing one locks the bypass option.
+        course_id: The course this quiz belongs to, if any — used as the
+                   remedial course's source_course_id when one is spawned.
         department: The department scope
 
     Returns:
-        Evaluation results with score, gap analysis, and next steps.
+        Evaluation results with score, gap analysis, a `remediation` decision
+        object (see RemediationDecision), and — when triggered —
+        gap_review_triggered/gap_review/gap_review_mandatory and/or
+        remedial_course_generated/remedial_course_id/remedial_message.
     """
     store = DepartmentScopedStore(department)
 
@@ -283,7 +295,7 @@ def evaluate_answers(
         "score": score,
         "total_questions": total,
         "correct_answers": correct,
-        "attempted_at": datetime.utcnow().isoformat(),
+        "attempted_at": datetime.now(timezone.utc).isoformat(),
     })
     progress["quiz_attempts"] = quiz_attempts
 
@@ -299,9 +311,27 @@ def evaluate_answers(
     if score > progress.get("best_assessment_score", 0):
         progress["best_assessment_score"] = score
 
-    # Run luck elimination check
+    # Run luck elimination check (drives luck_elimination_status/message below)
     engine = LuckEliminationEngine()
     luck_result = engine.evaluate_user_progression(error_matrix)
+
+    # Single remediation decision — fuses the state machine's bypass-lockout
+    # verdict with the luck-elimination verdict above into one policy object
+    # every entry point (this call, the quiz route, the agent hook) agrees on.
+    remediation = decide_remediation(
+        score=score,
+        quiz_type=quiz_type,
+        was_bypass_attempt=was_bypass_attempt,
+        bypass_already_locked=progress.get("bypass_locked", False),
+        error_retention_matrix=error_matrix,
+    )
+    if remediation.lock_bypass:
+        all_courses = [f"course_{i:02d}" for i in range(1, get_param("MAX_COURSES") + 1)]
+        completed = progress.get("completed_courses", [])
+        remediation.mandatory_courses = get_mandatory_courses(all_courses, completed)
+        progress["bypass_locked"] = True
+        progress["bypass_attempts"] = progress.get("bypass_attempts", 0) + 1
+        progress["current_state"] = remediation.next_state
 
     # Run IRT Psychometric update
     current_ability = progress.get("psychometric_ability", 0.0)
@@ -329,7 +359,7 @@ def evaluate_answers(
             "correct_answer": answer.get("correct_answer", ""),
         })
 
-    return {
+    result = {
         "quiz_id": quiz_id,
         "user_id": user_id,
         "score": round(score, 2),
@@ -341,12 +371,61 @@ def evaluate_answers(
         "pass_threshold": f"{pass_threshold:.0%}",
         "gaps": gaps,
         "luck_elimination_status": luck_result,
+        "remediation": remediation.to_dict(),
         "message": (
             f"You scored {score:.0%} ({correct}/{total}). "
             + ("Congratulations, you passed! " if passed else f"You need {pass_threshold:.0%} to pass. ")
             + luck_result["reason"]
         ),
     }
+
+    # Act on the remediation decision — generation happens here (not via a
+    # separate agent tool call, not duplicated in the HTTP route) so a
+    # chat-invoked evaluation and a web-quiz-invoked one always produce the
+    # same remediation content for the same failure.
+    if remediation.spawn_gap_review:
+        try:
+            gap_review = generate_gap_review(user_id=user_id, department=department)
+            if gap_review.get("exercises"):
+                result["gap_review_triggered"] = True
+                result["gap_review"] = gap_review
+                result["gap_review_mandatory"] = (
+                    remediation.luck_action == "FORCE_MANDATORY_LEARNING_PATH"
+                )
+        except Exception as e:
+            print(f"[evaluate_answers] Gap review generation failed: {e}")
+
+    if remediation.spawn_remedial_course and incorrect_answers:
+        # Best-effort question_text enrichment from the persisted quiz record
+        # (chat-invoked evaluations may not have one — generate_remedial_course
+        # falls back to question_id when question_text is missing).
+        cached_quiz = store.read_quiz(quiz_id)
+        if cached_quiz:
+            q_lookup = {q["question_id"]: q for q in cached_quiz.get("questions", [])}
+            for ans in incorrect_answers:
+                q = q_lookup.get(ans.get("question_id", ""))
+                if q:
+                    ans["question_text"] = q.get("text", "")
+
+        try:
+            from src.services.curriculum_service import generate_remedial_course
+            remedial = generate_remedial_course(
+                incorrect_answers=incorrect_answers,
+                user_id=user_id,
+                source_course_id=course_id,
+                department=department,
+            )
+            result["remedial_course_generated"] = True
+            result["remedial_course_id"] = remedial.get("course_id")
+            result["remedial_message"] = (
+                f"A personalized remedial course \"{remedial.get('title')}\" has been "
+                "added to your learning path based on your gap analysis."
+            )
+        except Exception as e:
+            print(f"[evaluate_answers] Remedial course generation failed: {e}")
+            result["remedial_course_generated"] = False
+
+    return result
 
 
 def generate_reflection_prompt(
@@ -430,28 +509,65 @@ def generate_gap_review(
     engine = LuckEliminationEngine()
     concept_summary = engine.get_concept_failure_summary(error_matrix)
 
+    concept_diagnoses = progress.get("concept_diagnoses", {})
+    mastery_vectors = progress.get("mastery_vectors", {})
+    retention_threshold = get_logic_param("luck_elimination", "hlr_retention_threshold")
+    ability_threshold = get_logic_param("luck_elimination", "hlr_ability_threshold")
+
     # Build targeted review exercises
     exercises = []
+    scheduled_for_later = []
     for concept_info in concept_summary:
         if concept_info["status"] == "ok":
             continue
 
+        concept = concept_info["concept"]
+
+        # HLR due-filtering: a concept with a mastery vector is only deferred
+        # ("not due yet") when BOTH retention is still high (recently/well
+        # seen) AND ability is decent (they've actually been getting it
+        # right) — a concept that was just failed has its ability_score
+        # freshly lowered, so it never gets silently deferred right after
+        # the failure that flagged it in the first place. No vector at all
+        # keeps the original immediate-inclusion behavior (nothing to gate on).
+        vector = mastery_vectors.get(concept)
+        if vector:
+            retention = calculate_hlr_retention(vector)
+            ability = vector.get("ability_score", 0.5)
+            if retention >= retention_threshold and ability >= ability_threshold:
+                scheduled_for_later.append({
+                    "concept": concept,
+                    "failure_count": concept_info["failures"],
+                    "retention": round(retention, 2),
+                    "reason": "Still well-retained — not due for review yet.",
+                })
+                continue
+
+        diagnosis_entries = concept_diagnoses.get(concept, [])
+        misconception = diagnosis_entries[-1].get("misconception", "") if diagnosis_entries else ""
+        instructions = (
+            f"Review the concept '{concept}'. Your known misconception: {misconception} "
+            f"You've missed this {concept_info['failures']} time(s). After reviewing, "
+            f"you'll be quizzed again on this topic."
+            if misconception else
+            f"Review the concept '{concept}' thoroughly. "
+            f"You've missed this {concept_info['failures']} time(s). "
+            f"After reviewing, you'll be quizzed again on this topic."
+        )
+
         exercises.append({
-            "concept": concept_info["concept"],
+            "concept": concept,
             "failure_count": concept_info["failures"],
             "severity": concept_info["status"],
             "review_type": "spaced_repetition",
-            "instructions": (
-                f"Review the concept '{concept_info['concept']}' thoroughly. "
-                f"You've missed this {concept_info['failures']} time(s). "
-                f"After reviewing, you'll be quizzed again on this topic."
-            ),
+            "instructions": instructions,
         })
 
     return {
         "user_id": user_id,
         "total_gap_areas": len(exercises),
         "exercises": exercises,
+        "scheduled_for_later": scheduled_for_later,
         "strategy": (
             "Duolingo-style spaced repetition: Each gap area will be "
             "revisited with varied question formats until mastered. "

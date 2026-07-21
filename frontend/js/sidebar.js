@@ -27,17 +27,25 @@
     { href: '/catalog', icon: 'menu_book', label: 'Catalog' },
   ];
   const SUPPORT_LINK = { icon: 'help', label: 'Support' };   // href="#" -> coming-soon toast
-  const SETTINGS_LINK = { icon: 'settings', label: 'Settings' }; // href="#" -> coming-soon toast
+  const SETTINGS_LINK = { href: '/settings', icon: 'settings', label: 'Settings' };
 
   const LOGO_SRC = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ';
 
   const STORAGE_KEY = 'wai-sidebar-collapsed';
+  const THEME_STORAGE_KEY = 'wai-theme';
   const ACTIVE_CLASSES = 'bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200';
   const INACTIVE_CLASSES = 'text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all';
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   function isCollapsed() {
     return localStorage.getItem(STORAGE_KEY) === 'true';
+  }
+
+  // The blocking inline script in each page's <head> already applied the
+  // 'dark' class before this file runs (avoids a light->dark flash), so this
+  // just reads that resulting state rather than re-deciding it.
+  function isDarkMode() {
+    return document.documentElement.classList.contains('dark');
   }
 
   // Exact-match active detection. '/' matches ONLY the root path, never as a prefix.
@@ -102,7 +110,14 @@
       return linkHtml(l, { active: isActive(l.href) });
     }).join('');
     const supportHtml = linkHtml(SUPPORT_LINK, { id: 'sidebar-support-link' });
-    const settingsHtml = linkHtml(SETTINGS_LINK, { id: 'sidebar-settings-link' });
+    const settingsHtml = linkHtml(SETTINGS_LINK, { id: 'sidebar-settings-link', active: isActive(SETTINGS_LINK.href) });
+    const themeToggleHtml = (
+      '<button id="sidebar-theme-toggle" type="button" ' +
+        'class="sidebar-nav-link flex items-center gap-3 px-4 py-3 w-full text-left ' + INACTIVE_CLASSES + '">' +
+        '<span class="material-symbols-outlined">' + (isDarkMode() ? 'light_mode' : 'dark_mode') + '</span>' +
+        '<span class="sidebar-label font-label-md text-label-md">' + (isDarkMode() ? 'Light mode' : 'Dark mode') + '</span>' +
+      '</button>'
+    );
 
     return (
       '<aside id="sidebar" class="hidden md:flex flex-col h-full py-6 px-4 fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low z-40 min-h-screen">' +
@@ -116,10 +131,21 @@
         '</div>' +
         '<nav class="sidebar-nav flex-1 space-y-1">' + navLinks + supportHtml + '</nav>' +
         '<div class="mt-auto pt-6 border-t border-outline-variant">' +
-          '<div class="space-y-1">' + accountHtml() + settingsHtml + '</div>' +
+          '<div class="space-y-1">' + accountHtml() + themeToggleHtml + settingsHtml + '</div>' +
         '</div>' +
       '</aside>'
     );
+  }
+
+  function applyTheme(dark) {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem(THEME_STORAGE_KEY, dark ? 'dark' : 'light');
+    const btn = document.getElementById('sidebar-theme-toggle');
+    if (!btn) return;
+    const icon = btn.querySelector('.material-symbols-outlined');
+    const label = btn.querySelector('.sidebar-label');
+    if (icon) icon.textContent = dark ? 'light_mode' : 'dark_mode';
+    if (label) label.textContent = dark ? 'Light mode' : 'Dark mode';
   }
 
   // ── Content offset + collapse CSS (injected once) ───────────────────────────
@@ -197,12 +223,17 @@
       });
     }
 
-    ['sidebar-support-link', 'sidebar-settings-link'].forEach(function (id) {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('click', function (e) {
-        e.preventDefault();
-        toast('Feature coming soon!');
+    const themeToggle = document.getElementById('sidebar-theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function () {
+        applyTheme(!isDarkMode());
       });
+    }
+
+    const supportLink = document.getElementById('sidebar-support-link');
+    if (supportLink) supportLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      toast('Feature coming soon!');
     });
 
     const logoutLink = document.getElementById('sidebar-logout-link');
@@ -221,6 +252,19 @@
     }
   }
 
+  // If auth.js's requireRole() just redirected here for lacking a role,
+  // explain why instead of silently landing the user back on their dashboard.
+  function showAccessDeniedToastIfNeeded() {
+    const params = new URLSearchParams(window.location.search);
+    const denied = params.get('denied');
+    if (!denied) return;
+    toast("You don't have " + denied + " access for that page.", 'warn');
+    params.delete('denied');
+    const query = params.toString();
+    const url = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+    window.history.replaceState({}, '', url);
+  }
+
   // ── Init (runs synchronously at script position; #sidebar-mount is above it) ─
   function init() {
     injectStyles();
@@ -228,10 +272,13 @@
     if (mount) mount.innerHTML = renderSidebarHtml();
     applyState(isCollapsed());
     wireEvents();
+    showAccessDeniedToastIfNeeded();
   }
 
   // Expose a tiny hook so pages can react after the sidebar is mounted.
-  window.WisdomSidebar = { toast: toast, isActive: isActive };
+  // applyTheme is exposed so other in-page controls (e.g. the Settings page's
+  // own theme toggle) can flip the theme and keep this sidebar's button in sync.
+  window.WisdomSidebar = { toast: toast, isActive: isActive, applyTheme: applyTheme, isDarkMode: isDarkMode };
 
   init();
 })();
