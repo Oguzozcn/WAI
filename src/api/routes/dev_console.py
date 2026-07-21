@@ -319,6 +319,10 @@ async def api_dev_update_tool(tool_name: str, body: ToolUpdate):
             "short_quiz_question_count": 3,
             "final_assessment_question_count": 5,
         },
+        "generate_uat_report": {
+            "run_summary": "Run UAT-0001: 20 pass, 2 fail, 1 blocked, 0 not run, out of 23 checks.",
+            "results_json": '[{"id": "AUTH-01", "result": "pass"}]',
+        },
     }[tool_name]
     try:
         body.prompt_template.format(**dummy_values)

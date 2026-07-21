@@ -16,10 +16,11 @@
 - `name`, `description` (frontmatter) and the persona `instruction` (body). Written straight to the SKILL.md file.
 
 ### Tool prompt templates (`PATCH /api/dev/config/tool/{tool_name}`)
-Three LLM call sites have editable templates in `dev_config.tools`:
+Four LLM call sites have editable templates in `dev_config.tools`:
 - `generate_quiz`
 - `process_document_to_curriculum`
 - `generate_remedial_course`
+- `generate_uat_report` (the UAT Console's run summary)
 
 Each may also override `model` per-tool. The endpoint **dry-run validates** the template by `.format()`-ing it with dummy values — a template referencing an unknown `{placeholder}` is rejected with a 400 rather than breaking the next generation.
 

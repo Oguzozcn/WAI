@@ -4,7 +4,7 @@ All routers are registered in `src/api/main.py`. Interactive Swagger docs for ev
 
 ## Pages (`src/api/routes/pages.py`, no prefix)
 
-Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (dashboard), `/learning-path`, `/lesson`, `/quiz`, `/knowledge-vault`, `/chat`, `/learning-materials`, `/learning-paths`, `/edit-learning-path`, `/catalog`, `/manager-dashboard`, `/dev-console`, `/settings`, `/documentation`. No server-side auth — role gating happens client-side on each page (see [Auth & Roles](/documentation?page=backend/auth-and-roles)).
+Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (dashboard), `/learning-path`, `/lesson`, `/quiz`, `/knowledge-vault`, `/chat`, `/learning-materials`, `/learning-paths`, `/edit-learning-path`, `/catalog`, `/manager-dashboard`, `/dev-console`, `/settings`, `/documentation`, `/support`, `/support-console`, `/qa-console`. No server-side auth — role gating happens client-side on each page (see [Auth & Roles](/documentation?page=backend/auth-and-roles)).
 
 ## Auth (`/api/auth`)
 
@@ -92,3 +92,31 @@ All require `role=manager` (query param, client-trusted).
 | `GET /api/docs/export?format=txt|pdf&scope=all|<section>/<page>` | Download one page or the whole set as TXT (raw markdown) or PDF (fpdf2-rendered). |
 
 Page ids are validated against the manifest — they are never used to build filesystem paths directly, so path traversal is structurally impossible.
+
+## Support tickets (`/api/support`)
+
+ITSM-style ticket lifecycle: `new → in_progress → on_hold → resolved → closed` (closed can only reopen to `in_progress`). Priorities: `critical/high/medium/low`. Every mutation appends to the ticket's `activity` log. Ticket ids are sequential and human-readable (`TKT-0001`), one JSON file per ticket under `data/support_tickets/{department}/`.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /tickets` | Submit a ticket. Body `{user_id, display_name, role, area, issue_type, subject, description, additional_comments}`. Vocabulary-validated; starts as `new`/`medium`. |
+| `GET /tickets?user_id=…&role=…` | Developer sees the whole department queue; anyone else only tickets they reported. |
+| `GET /tickets/{ticket_id}?user_id=…&role=…` | One ticket; 403 unless reporter or developer. |
+| `PATCH /tickets/{ticket_id}` | Developer-only triage: `status`, `priority`, `assignee`, `resolution_note` (each change → activity entry). |
+| `POST /tickets/{ticket_id}/comments` | Reporter or developer adds a comment to the activity log. |
+| `GET /meta` | The vocabulary (areas, issue types, statuses, priorities) mirrored by the frontend dropdowns. |
+
+## UAT (`/api/uat`) — developer-facing
+
+Manual acceptance testing: a **predefined whole-app checklist** (`UAT_CHECKLIST` in `src/api/routes/uat.py`, ~23 items across auth, dashboard, lessons, quiz, catalog, chat, manager tools, developer tools, support, global UI). Starting a run snapshots the checklist into a persistent run doc (`data/uat_runs/<dept>/UAT-<n>.json`), the tester marks each item `pass`/`fail`/`blocked` (+ note), and the report endpoint finalizes the run and writes an AI summary. Every endpoint that touches runs requires `role=developer` (client-trusted).
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /checklist` | The predefined checklist + result/verdict vocabularies (open read, like `/meta`). |
+| `POST /runs` | Start a run; items seeded from the checklist as `pending`. Sequential ids (`UAT-0001`). |
+| `GET /runs?role=…` | Run history, newest first (overview projection: status, summary counts, verdict). |
+| `GET /runs/{run_id}?role=…` | One full run (items + report). |
+| `PATCH /runs/{run_id}/items/{item_id}` | Body `{role, result, note}`. Vocabulary-validated; recomputes the summary; rejected (400) once the run is completed. |
+| `POST /runs/{run_id}/report` | Finalizes the run (`status=completed`) and generates the report via the `generate_uat_report` prompt template (dev_config `tools`) → `call_gemini_json`; **falls back to a deterministic report** (verdict from pass/fail/blocked/pending counts) when the LLM is unavailable. Re-callable to regenerate. |
+
+Report shape: `{verdict: go|conditional-go|no-go, headline, summary, key_risks[], recommendations[], source: llm|fallback, generated_at}`. Fallback verdict rules: nothing executed → `no-go`; clean and complete → `go`; ≥25% failed → `no-go`; otherwise `conditional-go`.

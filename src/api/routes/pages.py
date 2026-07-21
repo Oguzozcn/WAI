@@ -73,3 +73,15 @@ async def page_settings():
 @router.get("/documentation", response_class=HTMLResponse)
 async def page_documentation():
     return _serve_page("documentation.html")
+
+@router.get("/support", response_class=HTMLResponse)
+async def page_support():
+    return _serve_page("support.html")
+
+@router.get("/support-console", response_class=HTMLResponse)
+async def page_support_console():
+    return _serve_page("support-console.html")
+
+@router.get("/qa-console", response_class=HTMLResponse)
+async def page_qa_console():
+    return _serve_page("qa-console.html")

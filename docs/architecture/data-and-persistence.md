@@ -19,6 +19,8 @@ Base directory resolution order: explicit constructor arg → `WAI_DATA_DIR` env
 | `kb_jobs/<dept>/` | Async ingestion job status records | upload/generate jobs |
 | `version_history/<dept>/` | Document version snapshots (pruned, keep 15) | `archive_document_snapshot` |
 | `catalog/<dept>/` | Catalog inputs + drafts with `.meta.json` sidecars | catalog endpoints |
+| `support_tickets/<dept>/TKT-<n>.json` | Support tickets incl. activity log | support routes |
+| `uat_runs/<dept>/UAT-<n>.json` | Manual UAT runs (checklist snapshot, per-item results, AI report) | uat routes |
 
 Non-namespaced files at `data/` root: `credentials.json` (demo accounts), `dev_config.json` (live config), `kpi_store/` (Tier 2 — see below), seed scripts.
 

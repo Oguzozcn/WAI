@@ -26,17 +26,18 @@ Every page calls one of these in its inline script, immediately after `sidebar.j
 | Page | Requirement |
 |------|-------------|
 | `/`, `/learning-path`, `/lesson`, `/quiz`, `/catalog`, `/chat`, `/learning-paths`, `/settings` | any authenticated user |
+| `/support` | any authenticated user (developers are redirected to `/support-console`) |
 | `/knowledge-vault`, `/manager-dashboard`, `/edit-learning-path`, `/learning-materials` | `requireRole('manager')` |
-| `/dev-console`, `/documentation` | `requireRole('developer')` |
+| `/dev-console`, `/documentation`, `/support-console`, `/qa-console` | `requireRole('developer')` |
 
-The sidebar (`sidebar.js: visibleNavLinks()`) mirrors this: manager-only links are filtered out for non-managers; `Agent Console` and `Documentation` are appended only for developers.
+The sidebar (`sidebar.js: visibleNavLinks()`) mirrors this: manager-only links are filtered out for non-managers; `Agent Console` and `Documentation` are appended only for developers. The Support link routes by role (`/support-console` for developers, `/support` otherwise).
 
 ## Server-side gating (client-trusted)
 
 Mutating endpoints require a `role` string **supplied by the client** (query param or body field) and check it with a one-line guard:
 
 - `_require_manager(role)` — manager.py, knowledge_base.py
-- `_require_developer(role)` — dev_console.py, docs.py
+- `_require_developer(role)` — dev_console.py, docs.py, support.py, uat.py
 
 This prevents *accidental* cross-role calls from the UI, not malicious ones — anyone with curl can pass `role=manager`. That is a **known, accepted demo limitation**, consistently applied everywhere rather than half-secured in some places.
 

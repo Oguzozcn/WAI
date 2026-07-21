@@ -39,7 +39,7 @@ All persisted shapes: `ConceptToken`, `MasteryVector`, `Lesson`, `Course`, `Lear
 
 ## dev_config.py — live configuration
 
-Backs `data/dev_config.json` with self-healing defaults (`_deep_merge_defaults` fills missing keys on read, so deleting the file is safe). API: `get_config()` (whole tree: `orchestrator`, `tools` (3 prompt templates), `platform_params` (10 values), `logic_params` (5 categories, ~20 values)), `update_config(path, patch)`, `get_param(name)`, `get_logic_param(category, name)`. Everything reads per-call — no restart needed after an Agent Console edit.
+Backs `data/dev_config.json` with self-healing defaults (`_deep_merge_defaults` fills missing keys on read, so deleting the file is safe). API: `get_config()` (whole tree: `orchestrator`, `tools` (4 prompt templates), `platform_params` (10 values), `logic_params` (5 categories, ~20 values)), `update_config(path, patch)`, `get_param(name)`, `get_logic_param(category, name)`. Everything reads per-call — no restart needed after an Agent Console edit.
 
 ## data_compliance_gate.py — GDPR gate
 

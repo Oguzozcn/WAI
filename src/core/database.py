@@ -152,6 +152,8 @@ class DepartmentScopedStore:
         self.learning_paths_path = self.base_path / "learning_paths" / department_id
         self.quizzes_path = self.base_path / "quizzes" / department_id
         self.kb_jobs_path = self.base_path / "kb_jobs" / department_id
+        self.tickets_path = self.base_path / "support_tickets" / department_id
+        self.uat_runs_path = self.base_path / "uat_runs" / department_id
         self.version_history_path = self.base_path / "knowledge_base" / department_id / "version_history"
 
         # ── Catalog Paths (Knowledge Vault catalog structure) ──
@@ -171,6 +173,8 @@ class DepartmentScopedStore:
         self.learning_paths_path.mkdir(parents=True, exist_ok=True)
         self.quizzes_path.mkdir(parents=True, exist_ok=True)
         self.kb_jobs_path.mkdir(parents=True, exist_ok=True)
+        self.tickets_path.mkdir(parents=True, exist_ok=True)
+        self.uat_runs_path.mkdir(parents=True, exist_ok=True)
         self.version_history_path.mkdir(parents=True, exist_ok=True)
         self.catalog_inputs_path.mkdir(parents=True, exist_ok=True)
         self.catalog_standard_paths_path.mkdir(parents=True, exist_ok=True)
@@ -336,6 +340,60 @@ class DepartmentScopedStore:
         if not file_path.exists():
             return None
         return json.loads(file_path.read_text())
+
+    # ── Support Tickets ──
+    # One JSON file per ticket, department-scoped like everything else. The
+    # developer support console reads across a department via list_tickets().
+
+    def write_ticket(self, ticket_id: str, data: dict) -> None:
+        """Persist a support ticket (creation and every triage update)."""
+        data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        file_path = self.tickets_path / f"{ticket_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_ticket(self, ticket_id: str) -> Optional[dict]:
+        """Read a support ticket by its ID. Returns None if unknown."""
+        file_path = self.tickets_path / f"{ticket_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def list_tickets(self) -> list[dict]:
+        """All tickets in this department, newest first."""
+        tickets = []
+        for file_path in self.tickets_path.glob("*.json"):
+            if file_path.stem == ".gitkeep":
+                continue
+            tickets.append(json.loads(file_path.read_text()))
+        tickets.sort(key=lambda t: t.get("created_at", ""), reverse=True)
+        return tickets
+
+    # ── UAT Runs ──
+    # One JSON file per UAT run (checklist results + generated report), so
+    # past acceptance-test runs stay reviewable and comparable over time.
+
+    def write_uat_run(self, run_id: str, data: dict) -> None:
+        """Persist a UAT run (creation, every item result, and the report)."""
+        data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        file_path = self.uat_runs_path / f"{run_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_uat_run(self, run_id: str) -> Optional[dict]:
+        """Read a UAT run by its ID. Returns None if unknown."""
+        file_path = self.uat_runs_path / f"{run_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def list_uat_runs(self) -> list[dict]:
+        """All UAT runs in this department, newest first."""
+        runs = []
+        for file_path in self.uat_runs_path.glob("*.json"):
+            if file_path.stem == ".gitkeep":
+                continue
+            runs.append(json.loads(file_path.read_text()))
+        runs.sort(key=lambda r: r.get("started_at", ""), reverse=True)
+        return runs
 
     # ── Duplicate Detection ──
 

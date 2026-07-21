@@ -120,3 +120,67 @@ def test_process_document_falls_back_to_raw_section_text(test_data_dir, mock_gem
     lessons = result["course"]["lessons"]
     assert lessons[0]["content"] == "Body one text."
     assert lessons[1]["content"] == "Body two text."
+    # No LLM title available -> falls back to the heading-derived heuristic title.
+    assert lessons[0]["title"] == "Section One"
+    assert lessons[1]["title"] == "Section Two"
+    # No LLM course_title -> falls back to the cleaned-up filename.
+    assert result["course"]["title"] == "Uploaded Document"
+
+
+def test_process_document_uses_llm_titles_when_present(test_data_dir, mock_gemini):
+    llm_json = json.dumps({
+        "course_title": "Warehouse Safety Fundamentals",
+        "sections": [
+            {"index": 0, "title": "Personal Protective Equipment Basics",
+             "content_summary": "LLM Summary Zero", "key_points": ["k1"]},
+            {"index": 1, "title": "Forklift Operating Rules",
+             "content_summary": "LLM Summary One", "key_points": ["k2"]},
+        ],
+    })
+    mock_gemini(llm_json)
+
+    result = process_document_to_curriculum(
+        _DOC, document_title="warehouse_dtp_v2_FINAL.txt", department="operations",
+    )
+    assert result["status"] == "success"
+    assert result["course"]["title"] == "Warehouse Safety Fundamentals"
+    lessons = result["course"]["lessons"]
+    assert lessons[0]["title"] == "Personal Protective Equipment Basics"
+    assert lessons[1]["title"] == "Forklift Operating Rules"
+
+
+def test_process_document_falls_back_per_field_when_llm_omits_titles(test_data_dir, mock_gemini):
+    """An LLM response using the OLD schema (no course_title/title fields) must
+    not break — each missing field falls back to its own heuristic independently."""
+    llm_json = json.dumps({
+        "sections": [
+            {"index": 0, "content_summary": "LLM Summary Zero", "key_points": ["k1"]},
+            {"index": 1, "content_summary": "LLM Summary One", "key_points": ["k2"]},
+        ]
+    })
+    mock_gemini(llm_json)
+
+    result = process_document_to_curriculum(
+        _DOC, document_title="warehouse_dtp.txt", department="operations",
+    )
+    assert result["course"]["title"] == "Warehouse Dtp"
+    lessons = result["course"]["lessons"]
+    assert lessons[0]["title"] == "Section One"
+    assert lessons[0]["content"] == "LLM Summary Zero"  # content_summary still used
+
+
+def test_process_document_caps_an_overlong_llm_title(test_data_dir, mock_gemini):
+    long_title = "Word " * 40  # far longer than the 100-char course-title cap
+    llm_json = json.dumps({
+        "course_title": long_title,
+        "sections": [
+            {"index": 0, "title": long_title, "content_summary": "s0", "key_points": ["k1"]},
+            {"index": 1, "content_summary": "s1", "key_points": ["k2"]},
+        ],
+    })
+    mock_gemini(llm_json)
+
+    result = process_document_to_curriculum(_DOC, department="operations")
+    assert len(result["course"]["title"]) <= 101  # 100 chars + the ellipsis char
+    assert result["course"]["title"].endswith("…")
+    assert len(result["course"]["lessons"][0]["title"]) <= 81

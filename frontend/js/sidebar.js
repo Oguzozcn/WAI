@@ -12,7 +12,7 @@
  *   - Auto-detect the active link from window.location.pathname.
  *   - Desktop collapse/expand toggle (w-64 <-> w-20), persisted in localStorage.
  *   - Drive dynamic content offset via body.sidebar-expanded / .sidebar-collapsed.
- *   - Own the "Feature coming soon!" toast for Support/Settings.
+ *   - Route Support by role (/support form vs /support-console queue).
  *   - Own the mobile hamburger (#mobile-menu-btn) show/hide behaviour.
  */
 (function () {
@@ -26,8 +26,15 @@
     { href: '/manager-dashboard', icon: 'groups', label: 'Team Dashboards' },
     { href: '/catalog', icon: 'menu_book', label: 'Catalog' },
   ];
-  const SUPPORT_LINK = { icon: 'help', label: 'Support' };   // href="#" -> coming-soon toast
   const SETTINGS_LINK = { href: '/settings', icon: 'settings', label: 'Settings' };
+
+  // Support is role-aware: the developer lands on the ticket queue console,
+  // everyone else lands on the "report an issue" form.
+  function supportLink() {
+    const session = window.WisdomAuth && window.WisdomAuth.getSession();
+    const href = session && session.role === 'developer' ? '/support-console' : '/support';
+    return { href: href, icon: 'help', label: 'Support' };
+  }
 
   const LOGO_SRC = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBLLiZQ4Ntu9A6ncb0b-E0Z2bUUjP3ezD1hhJPpUsyGV3wYannVJU77x55EdLqWY8dEPo17cpHoe6dep3b0fyEVpmT7UPiXW1JO3vETEUa9EvxG5QUbo4NLLJ2bbhHEoSYB4DYrjfSVNCBD6UjacfrxrrYZBk0Z6H5N55fBhjqDlny7miBSCajGdNDRfuNWAau1E77XKe3k9xxmCgWFU8xbaiU4s9013wpuMvUw71_gGZjrOzQ323xXMGCSLTM0UUe4lQ';
 
@@ -73,9 +80,10 @@
 
   // Employees and developers never see the manager-only tools. Managers see everything.
   const MANAGER_ONLY_HREFS = ['/manager-dashboard', '/knowledge-vault'];
-  // Developers exclusively get the Agent Console and Documentation, appended to their nav.
+  // Developers exclusively get the Agent Console, Documentation and UAT Console.
   const DEV_ONLY_LINK = { href: '/dev-console', icon: 'settings_suggest', label: 'Agent Console' };
   const DOCS_LINK = { href: '/documentation', icon: 'description', label: 'Documentation' };
+  const UAT_LINK = { href: '/qa-console', icon: 'checklist', label: 'UAT Console' };
 
   function visibleNavLinks() {
     const session = window.WisdomAuth && window.WisdomAuth.getSession();
@@ -85,7 +93,7 @@
       links = links.filter(function (l) { return MANAGER_ONLY_HREFS.indexOf(l.href) === -1; });
     }
     if (role === 'developer') {
-      links = links.concat([DEV_ONLY_LINK, DOCS_LINK]);
+      links = links.concat([DEV_ONLY_LINK, DOCS_LINK, UAT_LINK]);
     }
     return links;
   }
@@ -110,7 +118,8 @@
     const navLinks = visibleNavLinks().map(function (l) {
       return linkHtml(l, { active: isActive(l.href) });
     }).join('');
-    const supportHtml = linkHtml(SUPPORT_LINK, { id: 'sidebar-support-link' });
+    const support = supportLink();
+    const supportHtml = linkHtml(support, { id: 'sidebar-support-link', active: isActive(support.href) });
     const settingsHtml = linkHtml(SETTINGS_LINK, { id: 'sidebar-settings-link', active: isActive(SETTINGS_LINK.href) });
     const themeToggleHtml = (
       '<button id="sidebar-theme-toggle" type="button" ' +
@@ -230,12 +239,6 @@
         applyTheme(!isDarkMode());
       });
     }
-
-    const supportLink = document.getElementById('sidebar-support-link');
-    if (supportLink) supportLink.addEventListener('click', function (e) {
-      e.preventDefault();
-      toast('Feature coming soon!');
-    });
 
     const logoutLink = document.getElementById('sidebar-logout-link');
     if (logoutLink) logoutLink.addEventListener('click', function () {

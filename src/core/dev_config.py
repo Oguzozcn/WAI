@@ -89,8 +89,8 @@ Return exactly {question_count} questions. Do NOT include any "question_id" fiel
         "process_document_to_curriculum": {
             "model": "gemini-3.5-flash",
             "description": (
-                "Course Splitter — turns each structural section of an uploaded "
-                "document into a teaching summary + key concepts, in one batched "
+                "Course Splitter — names the course, names and summarizes each "
+                "structural section of an uploaded document, in one batched "
                 "call. Placeholders: {section_count}, {sections_text}."
             ),
             "prompt_template": """You are an expert corporate training curriculum designer, turning a department's own operational documentation — Desktop Transition Procedures, process flows, competency matrices — into teaching material for someone stepping into that role or department for the first time.
@@ -100,14 +100,19 @@ You are given a document that has already been split into {section_count} sectio
 Document sections:
 {sections_text}
 
-For every section produce:
+First, write:
+- "course_title": a short, professional title (roughly 3-8 words, title case) for the WHOLE document as a training course, describing what it teaches — not a restatement of a filename or a generic label like "Module 1".
+
+Then for every section produce:
+- "title": a clear, professional lesson title (roughly 3-8 words, title case) grounded in what that section actually teaches. Never reuse a raw numbered heading verbatim (e.g. "1.1", "Section A") and never copy the first sentence of the content — write an actual title.
 - "content_summary": a clear, plain-English teaching explanation of that section's material (a few sentences — do NOT copy the input verbatim, explain it). If the section states a specific step order, a safety or compliance requirement, an approval threshold, or a system/tool name, preserve that detail exactly — a paraphrase that loses a specific number, order, or required step could cause a real handoff error. Where the source material makes the reasoning clear, explain WHY the procedure works that way, not just the mechanical steps.
 - "key_points": a list of 3-5 short key concept/term strings from that section.
 
 Return ONLY raw JSON (no markdown fences) matching EXACTLY this shape, with one object per input section and matching "index" values:
 {{
+  "course_title": "...",
   "sections": [
-    {{"index": 0, "content_summary": "...", "key_points": ["...", "..."]}}
+    {{"index": 0, "title": "...", "content_summary": "...", "key_points": ["...", "..."]}}
   ]
 }}""",
         },
@@ -183,6 +188,36 @@ Generate exactly {short_quiz_question_count} questions for the short quiz and {f
 At least one distractor per question should reflect the specific misconception you diagnosed, not a generic wrong answer.
 The "diagnoses" array must have exactly one entry per wrong answer listed above, in the same order.
 Focus strictly on the gap topics identified. Return ONLY valid JSON.""",
+        },
+        "generate_uat_report": {
+            "model": "gemini-3.5-flash",
+            "description": (
+                "UAT report writer — turns a finished manual acceptance-test "
+                "run (pass/fail/blocked per checklist item + tester notes) "
+                "into a QA-lead summary with a release verdict. "
+                "Placeholders: {run_summary}, {results_json}."
+            ),
+            "prompt_template": """You are a senior QA lead writing the summary report for a manual User Acceptance Testing (UAT) run of a corporate learning platform. A human tester worked through a predefined whole-app checklist and marked every item pass, fail, or blocked, sometimes with a note.
+
+{run_summary}
+
+Per-item results:
+{results_json}
+
+Write the report a release stakeholder would actually read:
+- The verdict must follow the results honestly: "go" only if nothing failed and nothing was blocked; "conditional-go" when the problems are limited and clearly scoped; "no-go" when failures are widespread or touch core flows (login, quiz engine, data integrity).
+- key_risks: one entry per failed or blocked item that matters, grouping duplicates, quoting the tester's note when it adds signal. Rank the riskiest first.
+- recommendations: concrete next actions (what to fix, what to re-test, what data/environment issue to unblock) — not generic advice.
+- Mention untested (pending) items if any exist; they weaken the verdict's coverage.
+
+Return ONLY raw JSON (no markdown fences) matching EXACTLY this shape:
+{{
+  "verdict": "go" | "conditional-go" | "no-go",
+  "headline": "<one-line result, e.g. '20 of 23 checks passed; quiz engine regression blocks release'>",
+  "summary": "<2-4 sentence assessment of what this run says about release readiness>",
+  "key_risks": ["<risk 1>", "<risk 2>"],
+  "recommendations": ["<action 1>", "<action 2>"]
+}}""",
         },
     },
     "platform_params": {

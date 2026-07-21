@@ -19,7 +19,7 @@
 
 ## curriculum_service.py — ingestion & content generation
 
-- Upload pipeline: `process_kb_upload_job` → parse/validate → `recursive_character_splitter` → conflict detection (overlap-ratio matching against existing KB) → `process_document_to_curriculum` (Gemini turns sections into courses/lessons) → `_generate_course_quizzes` (pre-generates short quizzes + final assessments).
+- Upload pipeline: `process_kb_upload_job` → parse/validate → `recursive_character_splitter` → conflict detection (overlap-ratio matching against existing KB) → `process_document_to_curriculum` (Gemini turns sections into courses/lessons, and writes the course title + each lesson title from the content itself, capped via `_clean_llm_title`; falls back per-field to a cleaned filename / heading-or-first-line heuristic if the LLM omits a title or the call fails) → `_generate_course_quizzes` (pre-generates short quizzes + final assessments).
 - `generate_learning_path`, `generate_daily_agenda`, `identify_content_gaps` — heuristic (non-LLM) path assembly and gap analysis.
 - `generate_remedial_course(...)` — Gemini-generated targeted course from a learner's wrong answers. Persists per-answer `concept_diagnoses` (root-cause misconceptions). Capped at `remedial_course_cap=2` pending courses per `source_course_id`; a third trigger **merges** new gaps into the most recent pending course and regenerates it instead of stacking a new one.
 - `get_pending_remedial_courses(progress, source_course_id)` — shared accessor for the cap check and dashboards.

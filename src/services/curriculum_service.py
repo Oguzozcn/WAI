@@ -931,23 +931,40 @@ def _extract_key_concepts(text: str) -> list[str]:
     return list(concepts)[:10]
 
 
-def _generate_sections_from_media(media_parts: list, document_title: str) -> tuple[list[dict], dict[int, dict]]:
+def _clean_llm_title(value: Any, max_len: int = 100) -> str:
+    """Validate/trim an LLM-provided title. Returns "" if unusable (missing,
+    not a string, blank) so callers can fall back to their heuristic title."""
+    if not isinstance(value, str):
+        return ""
+    title = " ".join(value.split())  # collapse whitespace/newlines
+    if not title:
+        return ""
+    return title if len(title) <= max_len else title[:max_len].rstrip() + "…"
+
+
+def _generate_sections_from_media(media_parts: list, document_title: str) -> tuple[list[dict], dict[int, dict], str]:
     """Media-only curriculum source (no text file in the selection): ask Gemini
     to invent the section breakdown directly from the attached image/audio/video/
     PDF parts, since there's no heading/paragraph structure to regex-split.
 
-    Returns (sections, llm_sections) in the exact shape `process_document_to_curriculum`'s
-    lesson-building loop already expects, so that loop needs no changes to consume
-    either a text-derived or a media-derived breakdown.
+    Returns (sections, llm_sections, course_title) — sections/llm_sections in
+    the exact shape `process_document_to_curriculum`'s lesson-building loop
+    already expects, so that loop needs no changes to consume either a
+    text-derived or a media-derived breakdown. course_title is "" if the LLM
+    didn't return a usable one (caller falls back to the filename-derived title).
     """
     max_sections = get_param("MAX_COURSES")
     prompt = (
         "You are designing a corporate training course from the attached media file(s) "
         f"(source: '{document_title}'). Break the material into up to {max_sections} "
         "logical lesson sections covering it end to end.\n\n"
-        'Respond with ONLY a JSON object of the shape {"sections": [{"index": 0, "title": "...", '
-        '"content_summary": "...", "key_points": ["...", ...]}, ...]}, no markdown code fences, '
-        "no other text. content_summary should be a thorough teaching summary of that section "
+        "First decide a short, professional course_title (roughly 3-8 words, title case) "
+        "describing what this course teaches — not a restatement of the filename.\n\n"
+        'Respond with ONLY a JSON object of the shape {"course_title": "...", "sections": '
+        '[{"index": 0, "title": "...", "content_summary": "...", "key_points": ["...", ...]}, ...]}, '
+        "no markdown code fences, no other text. Each section's title should be a clear, "
+        "professional lesson title (roughly 3-8 words, title case) grounded in what that "
+        "section teaches. content_summary should be a thorough teaching summary of that section "
         "(a few paragraphs); key_points should be 3-8 short key terms/concepts for that section."
     )
     client = get_gemini_client()
@@ -974,11 +991,13 @@ def _generate_sections_from_media(media_parts: list, document_title: str) -> tup
         raise ValueError("LLM returned no sections.")
 
     sections = [
-        {"title": e.get("title") or document_title, "content": e.get("content_summary") or ""}
+        {"title": _clean_llm_title(e.get("title"), max_len=80) or document_title,
+         "content": e.get("content_summary") or ""}
         for e in entries
     ]
     llm_sections = {i: e for i, e in enumerate(entries)}
-    return sections, llm_sections
+    course_title = _clean_llm_title(parsed.get("course_title"))
+    return sections, llm_sections, course_title
 
 
 def process_document_to_curriculum(
@@ -1021,6 +1040,7 @@ def process_document_to_curriculum(
     # selection is media-only (no text sections at all), skip straight to a
     # dedicated media-to-sections call instead.
     llm_sections: dict[int, dict] = {}
+    llm_course_title = ""
     try:
         if sections:
             section_blocks = []
@@ -1052,13 +1072,14 @@ def process_document_to_curriculum(
                 idx = entry.get("index")
                 if isinstance(idx, int) and 0 <= idx < len(sections):
                     llm_sections[idx] = entry
+            llm_course_title = _clean_llm_title(parsed.get("course_title"))
         else:
             # Media-only selection: no text structure to split, so let Gemini
             # invent the section breakdown directly from the attached media.
             # (media_parts is guaranteed non-empty here — the guard above
             # already returned early when both sections and media_parts were falsy.)
             assert media_parts
-            sections, llm_sections = _generate_sections_from_media(media_parts, document_title)
+            sections, llm_sections, llm_course_title = _generate_sections_from_media(media_parts, document_title)
 
     except Exception as e:
         print(f"[process_document_to_curriculum] LLM call failed ({e}), using fallback.")
@@ -1077,6 +1098,7 @@ def process_document_to_curriculum(
         entry = llm_sections.get(i)
         content = None
         key_concepts = None
+        title = None
         if entry is not None:
             summary = entry.get("content_summary")
             points = entry.get("key_points")
@@ -1084,15 +1106,20 @@ def process_document_to_curriculum(
                 content = summary.strip()
             if isinstance(points, list) and points:
                 key_concepts = [str(p) for p in points]
+            title = _clean_llm_title(entry.get("title"), max_len=80) or None
 
         if content is None:
             content = section["content"]
         if key_concepts is None:
             key_concepts = _extract_key_concepts(section["content"])
+        if title is None:
+            # No usable LLM title for this section — fall back to the
+            # heading/first-line heuristic from _split_text_into_sections.
+            title = section["title"]
 
         lessons.append({
             "lesson_id": f"lesson_{i + 1:02d}",
-            "title": section["title"],
+            "title": title,
             "content": content,
             "key_concepts": key_concepts,
             "estimated_minutes": max(10, min(30, len(section["content"]) // 200)),
@@ -1106,13 +1133,16 @@ def process_document_to_curriculum(
     total_minutes += len(lessons) * 5 + 15
     estimated_hours = round(total_minutes / 60, 1)
 
-    # Build the module/course
-    # Extract a clean title from the document name
+    # Build the module/course. Prefer the LLM-written course title (grounded in
+    # what the document actually teaches); fall back to a cleaned-up filename
+    # when the LLM didn't return a usable one. clean_title is always computed
+    # since the description field below still references the source filename.
     clean_title = document_title.replace(".txt", "").replace(".md", "").replace("_", " ").title()
+    course_title = llm_course_title or clean_title
 
     course = {
         "course_id": f"course_{uuid.uuid4().hex[:8]}",
-        "title": clean_title,
+        "title": course_title,
         "description": f"Auto-generated curriculum from '{document_title}'",
         "topics": list(set(
             concept

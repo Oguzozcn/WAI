@@ -1,0 +1,412 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Support Console - WisdomAI</title><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet"><script id="tailwind-config">try{
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-variant": "#dfe3e6",
+                "surface-bright": "#f6fafd",
+                "on-secondary-container": "#004966",
+                "secondary-fixed": "#c5e7ff",
+                "on-tertiary-fixed-variant": "#1f5100",
+                "on-surface-variant": "#404750",
+                "error-container": "#ffdad6",
+                "surface-container-low": "#f0f4f7",
+                "outline": "#707881",
+                "secondary-fixed-dim": "#80d0ff",
+                "on-tertiary-fixed": "#082100",
+                "on-primary-container": "#e0eeff",
+                "on-background": "#171c1f",
+                "primary-fixed-dim": "#95ccff",
+                "primary": "#005787",
+                "on-primary-fixed": "#001d32",
+                "on-error": "#ffffff",
+                "tertiary-fixed": "#87fe45",
+                "on-secondary-fixed": "#001e2d",
+                "surface-container-high": "#e5e9ec",
+                "primary-container": "#0070ad",
+                "on-secondary": "#ffffff",
+                "on-surface": "#171c1f",
+                "tertiary-container": "#327a00",
+                "surface-tint": "#00639a",
+                "on-primary-fixed-variant": "#004a75",
+                "inverse-primary": "#95ccff",
+                "error": "#ba1a1a",
+                "secondary": "#00658c",
+                "inverse-on-surface": "#edf1f4",
+                "on-tertiary-container": "#bbff92",
+                "surface-dim": "#d6dbdd",
+                "surface-container-lowest": "#ffffff",
+                "tertiary": "#255f00",
+                "primary-fixed": "#cde5ff",
+                "on-tertiary": "#ffffff",
+                "on-error-container": "#93000a",
+                "surface": "#f6fafd",
+                "secondary-container": "#2abcfd",
+                "on-primary": "#ffffff",
+                "tertiary-fixed-dim": "#6be026",
+                "inverse-surface": "#2c3134",
+                "surface-container": "#eaeef1",
+                "background": "#f6fafd",
+                "surface-container-highest": "#dfe3e6",
+                "outline-variant": "#c0c7d1",
+                "on-secondary-fixed-variant": "#004c6a",
+                "streak-flame": "#ff9600"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "full": "9999px"
+        },
+        "fontFamily": {
+                "display-lg": ["Hanken Grotesk"],
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "label-md": ["JetBrains Mono"],
+                "headline-md": ["Hanken Grotesk"],
+                "headline-lg": ["Hanken Grotesk"]
+        },
+        "fontSize": {
+                "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+        }
+      }
+    }
+  }
+}catch(_e){}</script></head><body class="bg-background text-on-background min-h-screen">
+<script src="/js/auth.js"></script>
+<!-- Sidebar Navigation (shared component) -->
+<div id="sidebar-mount"></div>
+
+<!-- Top AppBar -->
+<header class="flex items-center w-full px-4 md:px-10 h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
+  <button id="mobile-menu-btn" class="md:hidden p-2 mr-2">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+  <div class="flex items-center gap-3 flex-1">
+    <span class="material-symbols-outlined text-primary text-[28px]">support_agent</span>
+    <h1 class="font-headline-md text-headline-md">Support Console</h1>
+  </div>
+  <button id="refresh-btn" class="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">
+    <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+  </button>
+</header>
+
+<main class="sidebar-offset px-4 md:px-10 py-8">
+  <!-- Queue stats -->
+  <div id="stats-row" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6"></div>
+
+  <!-- Filters -->
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <select id="filter-status" class="rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary">
+      <option value="">All statuses</option>
+    </select>
+    <select id="filter-priority" class="rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary">
+      <option value="">All priorities</option>
+    </select>
+    <select id="filter-area" class="rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary">
+      <option value="">All areas</option>
+    </select>
+    <div class="relative flex-1 min-w-[200px] max-w-sm">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+      <input id="filter-search" type="text" placeholder="Search subject, reporter, id…"
+             class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm pl-10 focus:ring-primary focus:border-primary">
+    </div>
+    <span id="queue-count" class="text-sm text-on-surface-variant ml-auto"></span>
+  </div>
+
+  <div class="flex flex-col xl:flex-row gap-6 items-start">
+    <!-- Ticket queue -->
+    <section class="flex-1 w-full bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-surface-container-low text-left text-xs uppercase tracking-wider text-on-surface-variant">
+              <th class="px-4 py-3 font-bold">Number</th>
+              <th class="px-4 py-3 font-bold">Subject</th>
+              <th class="px-4 py-3 font-bold">Reporter</th>
+              <th class="px-4 py-3 font-bold">Area</th>
+              <th class="px-4 py-3 font-bold">Priority</th>
+              <th class="px-4 py-3 font-bold">Status</th>
+              <th class="px-4 py-3 font-bold">Opened</th>
+            </tr>
+          </thead>
+          <tbody id="queue-body"></tbody>
+        </table>
+      </div>
+      <div id="queue-empty" class="hidden p-8 text-center text-sm text-on-surface-variant">No tickets match the current filters.</div>
+    </section>
+
+    <!-- Detail panel -->
+    <aside id="detail-panel" class="hidden xl:sticky xl:top-24 w-full xl:w-[420px] bg-surface-container-lowest border border-outline-variant rounded-2xl p-6"></aside>
+  </div>
+</main>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none"></div>
+
+<script src="/js/sidebar.js"></script>
+<script>
+(function () {
+  'use strict';
+  const session = window.WisdomAuth.requireRole('developer');
+  if (!session) return;
+
+  const AREA_LABELS = {
+    'dashboard': 'Dashboard', 'learning-path': 'Learning Path', 'lesson': 'Lesson viewer',
+    'quiz': 'Quiz', 'chat-coach': 'Chat Coach', 'catalog': 'Catalog',
+    'knowledge-vault': 'Knowledge Vault', 'team-dashboards': 'Team Dashboards',
+    'login-auth': 'Login / sign-in', 'other': 'Other',
+  };
+  const TYPE_LABELS = {
+    'bug': 'Bug', 'ui-visual': 'UI / visual', 'performance': 'Performance',
+    'data-incorrect': 'Data issue', 'feature-request': 'Feature request',
+    'question': 'Question', 'other': 'Other',
+  };
+  const STATUS_META = {
+    'new':         { label: 'New',         cls: 'bg-secondary-fixed text-on-secondary-fixed' },
+    'in_progress': { label: 'In progress', cls: 'bg-primary-container text-on-primary-container' },
+    'on_hold':     { label: 'On hold',     cls: 'bg-surface-container-highest text-on-surface-variant' },
+    'resolved':    { label: 'Resolved',    cls: 'bg-tertiary-container text-on-tertiary-container' },
+    'closed':      { label: 'Closed',      cls: 'bg-inverse-surface text-inverse-on-surface' },
+  };
+  const PRIORITY_META = {
+    'critical': { label: 'Critical', cls: 'bg-error text-on-error' },
+    'high':     { label: 'High',     cls: 'bg-error-container text-on-error-container' },
+    'medium':   { label: 'Medium',   cls: 'bg-secondary-fixed text-on-secondary-fixed' },
+    'low':      { label: 'Low',      cls: 'bg-surface-container-highest text-on-surface-variant' },
+  };
+  const STATUS_ORDER = ['new', 'in_progress', 'on_hold', 'resolved', 'closed'];
+  const PRIORITY_ORDER = ['critical', 'high', 'medium', 'low'];
+
+  let allTickets = [];
+  let selectedId = null;
+
+  window.showToast = function (message, type) {
+    const container = document.getElementById('toast-container');
+    const colors = { info: 'bg-primary text-on-primary', warn: 'bg-error-container text-on-error-container' };
+    const t = document.createElement('div');
+    t.className = 'px-5 py-3 rounded-lg shadow-lg font-bold text-sm pointer-events-auto transition-all duration-300 opacity-0 translate-y-2 ' + (colors[type] || colors.info);
+    t.textContent = message;
+    container.appendChild(t);
+    requestAnimationFrame(function () { t.classList.remove('opacity-0', 'translate-y-2'); });
+    setTimeout(function () { t.classList.add('opacity-0', 'translate-y-2'); setTimeout(function () { t.remove(); }, 300); }, 3000);
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  function chip(meta) {
+    return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ' + meta.cls + '">' + meta.label + '</span>';
+  }
+
+  // ── Filters ───────────────────────────────────────────────────────────────
+  function fillFilter(id, order, meta) {
+    const sel = document.getElementById(id);
+    order.forEach(function (v) {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = meta[v].label || meta[v];
+      sel.appendChild(opt);
+    });
+  }
+  fillFilter('filter-status', STATUS_ORDER, STATUS_META);
+  fillFilter('filter-priority', PRIORITY_ORDER, PRIORITY_META);
+  Object.keys(AREA_LABELS).forEach(function (v) {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = AREA_LABELS[v];
+    document.getElementById('filter-area').appendChild(opt);
+  });
+
+  function filteredTickets() {
+    const st = document.getElementById('filter-status').value;
+    const pr = document.getElementById('filter-priority').value;
+    const ar = document.getElementById('filter-area').value;
+    const q = document.getElementById('filter-search').value.trim().toLowerCase();
+    return allTickets.filter(function (t) {
+      if (st && t.status !== st) return false;
+      if (pr && t.priority !== pr) return false;
+      if (ar && t.area !== ar) return false;
+      if (q) {
+        const hay = (t.ticket_id + ' ' + t.subject + ' ' + (t.reporter && t.reporter.display_name || '')).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  function renderStats() {
+    const counts = { new: 0, in_progress: 0, on_hold: 0, resolved: 0, closed: 0 };
+    allTickets.forEach(function (t) { if (counts[t.status] !== undefined) counts[t.status]++; });
+    document.getElementById('stats-row').innerHTML = STATUS_ORDER.map(function (s) {
+      return (
+        '<button type="button" data-stat="' + s + '" class="stat-card text-left bg-surface-container-lowest border border-outline-variant rounded-xl px-5 py-4 hover:bg-surface-container-low transition-colors">' +
+          '<div class="text-2xl font-extrabold" style="font-family:\'Hanken Grotesk\'">' + counts[s] + '</div>' +
+          '<div class="mt-1">' + chip(STATUS_META[s]) + '</div>' +
+        '</button>'
+      );
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.stat-card'), function (card) {
+      card.addEventListener('click', function () {
+        const sel = document.getElementById('filter-status');
+        sel.value = (sel.value === card.getAttribute('data-stat')) ? '' : card.getAttribute('data-stat');
+        renderQueue();
+      });
+    });
+  }
+
+  // ── Queue table ───────────────────────────────────────────────────────────
+  function renderQueue() {
+    const tickets = filteredTickets();
+    const body = document.getElementById('queue-body');
+    document.getElementById('queue-empty').classList.toggle('hidden', tickets.length > 0);
+    document.getElementById('queue-count').textContent = tickets.length + ' of ' + allTickets.length + ' tickets';
+    body.innerHTML = tickets.map(function (t) {
+      const sel = t.ticket_id === selectedId ? ' bg-secondary-container/20' : '';
+      return (
+        '<tr data-row="' + esc(t.ticket_id) + '" class="border-t border-outline-variant hover:bg-surface-container-low cursor-pointer transition-colors' + sel + '">' +
+          '<td class="px-4 py-3 font-label-md text-label-md text-primary font-bold whitespace-nowrap">' + esc(t.ticket_id) + '</td>' +
+          '<td class="px-4 py-3 max-w-[280px]"><div class="font-bold truncate">' + esc(t.subject) + '</div>' +
+            '<div class="text-xs text-on-surface-variant">' + esc(TYPE_LABELS[t.issue_type] || t.issue_type) + '</div></td>' +
+          '<td class="px-4 py-3 whitespace-nowrap">' + esc(t.reporter && t.reporter.display_name || '?') + '</td>' +
+          '<td class="px-4 py-3 whitespace-nowrap text-on-surface-variant">' + esc(AREA_LABELS[t.area] || t.area) + '</td>' +
+          '<td class="px-4 py-3">' + chip(PRIORITY_META[t.priority] || PRIORITY_META.medium) + '</td>' +
+          '<td class="px-4 py-3">' + chip(STATUS_META[t.status] || STATUS_META.new) + '</td>' +
+          '<td class="px-4 py-3 whitespace-nowrap text-on-surface-variant text-xs">' + fmtDate(t.created_at) + '</td>' +
+        '</tr>'
+      );
+    }).join('');
+    Array.prototype.forEach.call(body.querySelectorAll('[data-row]'), function (row) {
+      row.addEventListener('click', function () {
+        selectedId = row.getAttribute('data-row');
+        renderQueue();
+        renderDetail();
+      });
+    });
+  }
+
+  // ── Detail panel ──────────────────────────────────────────────────────────
+  function selectHtml(id, order, meta, current) {
+    return '<select id="' + id + '" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary">' +
+      order.map(function (v) {
+        return '<option value="' + v + '"' + (v === current ? ' selected' : '') + '>' + (meta[v].label || meta[v]) + '</option>';
+      }).join('') + '</select>';
+  }
+
+  function activityHtml(ticket) {
+    return (ticket.activity || []).slice().reverse().map(function (a) {
+      const icon = { created: 'flag', status_changed: 'sync_alt', reopened: 'restart_alt',
+                     priority_changed: 'priority_high', assigned: 'person', work_note: 'edit_note',
+                     comment: 'chat_bubble' }[a.event] || 'circle';
+      return (
+        '<div class="flex gap-3 text-sm">' +
+          '<span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">' + icon + '</span>' +
+          '<div class="flex-1 min-w-0">' +
+            '<span class="font-bold">' + esc(a.by) + '</span> ' +
+            '<span class="text-on-surface-variant">' + esc(a.event.replace(/_/g, ' ')) + '</span>' +
+            (a.detail ? '<div class="text-on-surface mt-0.5 break-words">' + esc(a.detail) + '</div>' : '') +
+            '<div class="text-xs text-on-surface-variant mt-0.5">' + fmtDate(a.at) + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('') || '<div class="text-sm text-on-surface-variant">No activity yet.</div>';
+  }
+
+  function renderDetail() {
+    const panel = document.getElementById('detail-panel');
+    const t = allTickets.find(function (x) { return x.ticket_id === selectedId; });
+    if (!t) { panel.classList.add('hidden'); return; }
+    panel.classList.remove('hidden');
+    panel.innerHTML =
+      '<div class="flex items-start justify-between gap-3 mb-1">' +
+        '<span class="font-label-md text-label-md text-primary font-bold">' + esc(t.ticket_id) + '</span>' +
+        '<button id="detail-close" type="button" class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined">close</span></button>' +
+      '</div>' +
+      '<h3 class="font-headline-md text-headline-md mb-2">' + esc(t.subject) + '</h3>' +
+      '<div class="flex flex-wrap gap-2 mb-4">' + chip(STATUS_META[t.status] || STATUS_META.new) + chip(PRIORITY_META[t.priority] || PRIORITY_META.medium) + '</div>' +
+      '<div class="text-sm space-y-1 mb-4 text-on-surface-variant">' +
+        '<div><span class="font-bold text-on-surface">Reporter:</span> ' + esc(t.reporter && t.reporter.display_name || '?') +
+          ' <span class="text-xs">(' + esc(t.reporter && t.reporter.role || '') + ')</span></div>' +
+        '<div><span class="font-bold text-on-surface">Area:</span> ' + esc(AREA_LABELS[t.area] || t.area) +
+          ' &nbsp;·&nbsp; <span class="font-bold text-on-surface">Type:</span> ' + esc(TYPE_LABELS[t.issue_type] || t.issue_type) + '</div>' +
+        '<div><span class="font-bold text-on-surface">Opened:</span> ' + fmtDate(t.created_at) + '</div>' +
+      '</div>' +
+      '<div class="bg-surface-container-low rounded-xl p-4 text-sm mb-2">' + esc(t.description) + '</div>' +
+      (t.additional_comments ? '<div class="text-sm text-on-surface-variant italic mb-2">"' + esc(t.additional_comments) + '"</div>' : '') +
+
+      '<div class="grid grid-cols-2 gap-3 mt-5 mb-3">' +
+        '<div><label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Status</label>' +
+          selectHtml('detail-status', STATUS_ORDER, STATUS_META, t.status) + '</div>' +
+        '<div><label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Priority</label>' +
+          selectHtml('detail-priority', PRIORITY_ORDER, PRIORITY_META, t.priority) + '</div>' +
+      '</div>' +
+      '<div class="mb-3"><label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Assignee</label>' +
+        '<input id="detail-assignee" type="text" value="' + esc(t.assignee || '') + '" placeholder="unassigned"' +
+        ' class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary"></div>' +
+      '<div class="mb-3"><label class="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Work note / resolution</label>' +
+        '<textarea id="detail-note" rows="2" placeholder="What was done, or what\'s blocking…"' +
+        ' class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary"></textarea></div>' +
+      '<button id="detail-save" type="button" class="w-full bg-primary text-on-primary font-bold text-sm px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity mb-5">Save changes</button>' +
+
+      '<h4 class="font-bold text-sm mb-2">Activity</h4>' +
+      '<div class="space-y-3 max-h-[320px] overflow-y-auto pr-1">' + activityHtml(t) + '</div>';
+
+    document.getElementById('detail-close').addEventListener('click', function () {
+      selectedId = null; renderQueue(); renderDetail();
+    });
+    document.getElementById('detail-save').addEventListener('click', function () {
+      const payload = {
+        role: 'developer',
+        display_name: session.display_name,
+        status: document.getElementById('detail-status').value,
+        priority: document.getElementById('detail-priority').value,
+        assignee: document.getElementById('detail-assignee').value.trim(),
+      };
+      const note = document.getElementById('detail-note').value.trim();
+      if (note) payload.resolution_note = note;
+      fetch('/api/support/tickets/' + encodeURIComponent(t.ticket_id), {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      }).then(function (r) {
+        if (!r.ok) return r.json().then(function (b) { throw new Error(b.detail || 'Update failed'); });
+        return r.json();
+      }).then(function () {
+        showToast(t.ticket_id + ' updated');
+        load();
+      }).catch(function (err) { showToast(err.message, 'warn'); });
+    });
+  }
+
+  // ── Load ──────────────────────────────────────────────────────────────────
+  function load() {
+    fetch('/api/support/tickets?user_id=' + encodeURIComponent(session.user_id) + '&role=developer')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        allTickets = data.tickets || [];
+        renderStats();
+        renderQueue();
+        renderDetail();
+      })
+      .catch(function () { showToast('Could not load the ticket queue.', 'warn'); });
+  }
+
+  ['filter-status', 'filter-priority', 'filter-area'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', renderQueue);
+  });
+  document.getElementById('filter-search').addEventListener('input', renderQueue);
+  document.getElementById('refresh-btn').addEventListener('click', load);
+  load();
+})();
+</script>
+</body></html>

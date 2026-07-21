@@ -1,0 +1,493 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>UAT Console - WisdomAI</title><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet"><script id="tailwind-config">try{
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-variant": "#dfe3e6",
+                "surface-bright": "#f6fafd",
+                "on-secondary-container": "#004966",
+                "secondary-fixed": "#c5e7ff",
+                "on-tertiary-fixed-variant": "#1f5100",
+                "on-surface-variant": "#404750",
+                "error-container": "#ffdad6",
+                "surface-container-low": "#f0f4f7",
+                "outline": "#707881",
+                "secondary-fixed-dim": "#80d0ff",
+                "on-tertiary-fixed": "#082100",
+                "on-primary-container": "#e0eeff",
+                "on-background": "#171c1f",
+                "primary-fixed-dim": "#95ccff",
+                "primary": "#005787",
+                "on-primary-fixed": "#001d32",
+                "on-error": "#ffffff",
+                "tertiary-fixed": "#87fe45",
+                "on-secondary-fixed": "#001e2d",
+                "surface-container-high": "#e5e9ec",
+                "primary-container": "#0070ad",
+                "on-secondary": "#ffffff",
+                "on-surface": "#171c1f",
+                "tertiary-container": "#327a00",
+                "surface-tint": "#00639a",
+                "on-primary-fixed-variant": "#004a75",
+                "inverse-primary": "#95ccff",
+                "error": "#ba1a1a",
+                "secondary": "#00658c",
+                "inverse-on-surface": "#edf1f4",
+                "on-tertiary-container": "#bbff92",
+                "surface-dim": "#d6dbdd",
+                "surface-container-lowest": "#ffffff",
+                "tertiary": "#255f00",
+                "primary-fixed": "#cde5ff",
+                "on-tertiary": "#ffffff",
+                "on-error-container": "#93000a",
+                "surface": "#f6fafd",
+                "secondary-container": "#2abcfd",
+                "on-primary": "#ffffff",
+                "tertiary-fixed-dim": "#6be026",
+                "inverse-surface": "#2c3134",
+                "surface-container": "#eaeef1",
+                "background": "#f6fafd",
+                "surface-container-highest": "#dfe3e6",
+                "outline-variant": "#c0c7d1",
+                "on-secondary-fixed-variant": "#004c6a",
+                "streak-flame": "#ff9600"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "full": "9999px"
+        },
+        "fontFamily": {
+                "display-lg": ["Hanken Grotesk"],
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "label-md": ["JetBrains Mono"],
+                "headline-md": ["Hanken Grotesk"],
+                "headline-lg": ["Hanken Grotesk"]
+        },
+        "fontSize": {
+                "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+        }
+      }
+    }
+  }
+}catch(_e){}</script></head><body class="bg-background text-on-background min-h-screen">
+<script src="/js/auth.js"></script>
+<!-- Sidebar Navigation (shared component) -->
+<div id="sidebar-mount"></div>
+
+<!-- Top AppBar -->
+<header class="flex items-center w-full px-4 md:px-10 h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
+  <button id="mobile-menu-btn" class="md:hidden p-2 mr-2">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+  <div class="flex items-center gap-3 flex-1">
+    <span class="material-symbols-outlined text-primary text-[28px]">checklist</span>
+    <h1 class="font-headline-md text-headline-md">UAT Console</h1>
+  </div>
+  <button id="new-run-btn" class="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-sm px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
+    <span class="material-symbols-outlined text-[18px]">add</span> New UAT run
+  </button>
+</header>
+
+<main class="sidebar-offset px-4 md:px-10 py-8">
+  <!-- Run header: which run, tester, progress -->
+  <div id="run-header" class="hidden bg-surface-container-lowest border border-outline-variant rounded-2xl px-6 py-4 mb-6">
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <span id="run-id" class="font-label-md text-label-md text-primary font-bold"></span>
+      <span id="run-status-chip"></span>
+      <span id="run-meta" class="text-sm text-on-surface-variant"></span>
+      <div class="flex items-center gap-2 ml-auto" id="run-counts"></div>
+    </div>
+    <div class="mt-3 h-2 rounded-full bg-surface-container-high overflow-hidden">
+      <div id="run-progress-bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden bg-surface-container-lowest border border-outline-variant rounded-2xl p-10 text-center mb-6">
+    <span class="material-symbols-outlined text-[44px] text-outline">fact_check</span>
+    <h2 class="font-headline-md text-headline-md mt-2 mb-1">No UAT run yet</h2>
+    <p class="text-sm text-on-surface-variant mb-4">Start a run to walk through the whole-app acceptance checklist. Each check has a launch button that pops the page open next to this console.</p>
+    <button id="empty-new-run-btn" class="inline-flex items-center gap-1.5 bg-primary text-on-primary font-bold text-sm px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined text-[18px]">add</span> Start the first run
+    </button>
+  </div>
+
+  <div class="flex flex-col xl:flex-row gap-6 items-start">
+    <!-- Checklist -->
+    <section id="checklist-container" class="flex-1 w-full space-y-5"></section>
+
+    <!-- Report + history -->
+    <aside class="w-full xl:w-[420px] xl:sticky xl:top-24 space-y-5">
+      <div id="report-card" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
+        <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px] text-primary">smart_toy</span> UAT Report
+        </h3>
+        <div id="report-body">
+          <p class="text-sm text-on-surface-variant">Mark the checklist, then generate the report. The AI summarizes the run into a release verdict, key risks, and recommended next steps.</p>
+        </div>
+        <button id="generate-report-btn" class="hidden mt-4 w-full inline-flex items-center justify-center gap-2 bg-primary text-on-primary font-bold text-sm px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
+          <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+          <span id="generate-report-label">Generate UAT report</span>
+        </button>
+      </div>
+
+      <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
+        <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px] text-primary">history</span> Run history
+        </h3>
+        <div id="history-list" class="space-y-2"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none"></div>
+
+<script src="/js/sidebar.js"></script>
+<script>
+(function () {
+  'use strict';
+  const session = window.WisdomAuth.requireRole('developer');
+  if (!session) return;
+
+  const RESULT_META = {
+    'pass':    { label: 'Pass',    icon: 'check_circle', selCls: 'bg-tertiary-container text-on-tertiary-container border-transparent' },
+    'fail':    { label: 'Fail',    icon: 'cancel',       selCls: 'bg-error text-on-error border-transparent' },
+    'blocked': { label: 'Blocked', icon: 'block',        selCls: 'bg-error-container text-on-error-container border-transparent' },
+  };
+  const VERDICT_META = {
+    'go':             { label: 'GO',             cls: 'bg-tertiary-container text-on-tertiary-container' },
+    'conditional-go': { label: 'CONDITIONAL GO', cls: 'bg-secondary-fixed text-on-secondary-fixed' },
+    'no-go':          { label: 'NO-GO',          cls: 'bg-error text-on-error' },
+  };
+  const COUNT_CHIPS = [
+    { key: 'pass',    cls: 'bg-tertiary-container text-on-tertiary-container' },
+    { key: 'fail',    cls: 'bg-error text-on-error' },
+    { key: 'blocked', cls: 'bg-error-container text-on-error-container' },
+    { key: 'pending', cls: 'bg-surface-container-highest text-on-surface-variant' },
+  ];
+
+  let runs = [];          // overview list, newest first
+  let activeRun = null;   // full run doc currently displayed
+  let generating = false;
+
+  window.showToast = function (message, type) {
+    const container = document.getElementById('toast-container');
+    const colors = { info: 'bg-primary text-on-primary', warn: 'bg-error-container text-on-error-container' };
+    const t = document.createElement('div');
+    t.className = 'px-5 py-3 rounded-lg shadow-lg font-bold text-sm pointer-events-auto transition-all duration-300 opacity-0 translate-y-2 ' + (colors[type] || colors.info);
+    t.textContent = message;
+    container.appendChild(t);
+    requestAnimationFrame(function () { t.classList.remove('opacity-0', 'translate-y-2'); });
+    setTimeout(function () { t.classList.add('opacity-0', 'translate-y-2'); setTimeout(function () { t.remove(); }, 300); }, 3000);
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  function api(path, options) {
+    return fetch(path, options).then(function (r) {
+      if (!r.ok) return r.json().then(function (b) { throw new Error(b.detail || 'Request failed'); });
+      return r.json();
+    });
+  }
+
+  const isEditable = function () { return activeRun && activeRun.status === 'in_progress'; };
+
+  // ── Run header ────────────────────────────────────────────────────────────
+  function renderRunHeader() {
+    const header = document.getElementById('run-header');
+    const empty = document.getElementById('empty-state');
+    if (!activeRun) {
+      header.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+    header.classList.remove('hidden');
+    empty.classList.add('hidden');
+
+    const s = activeRun.summary;
+    document.getElementById('run-id').textContent = activeRun.run_id;
+    document.getElementById('run-status-chip').innerHTML = activeRun.status === 'completed'
+      ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-inverse-surface text-inverse-on-surface">Completed</span>'
+      : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-container text-on-primary-container">In progress</span>';
+    document.getElementById('run-meta').textContent =
+      'by ' + (activeRun.started_by && activeRun.started_by.display_name || '?') + ' · started ' + fmtDate(activeRun.started_at);
+    document.getElementById('run-counts').innerHTML = COUNT_CHIPS.map(function (c) {
+      return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ' + c.cls + '">' + s[c.key] + ' ' + c.key + '</span>';
+    }).join('');
+    const done = s.total - s.pending;
+    document.getElementById('run-progress-bar').style.width = (s.total ? Math.round(done / s.total * 100) : 0) + '%';
+  }
+
+  // ── Checklist ─────────────────────────────────────────────────────────────
+  function resultButtonsHtml(item) {
+    return Object.keys(RESULT_META).map(function (r) {
+      const meta = RESULT_META[r];
+      const selected = item.result === r;
+      const cls = selected ? meta.selCls
+        : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
+      const dis = isEditable() ? '' : ' disabled';
+      return '<button type="button" data-mark="' + r + '" data-item="' + esc(item.id) + '"' + dis +
+        ' class="inline-flex items-center gap-1 border rounded-full px-3 py-1 text-xs font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ' + cls + '">' +
+        '<span class="material-symbols-outlined text-[16px]">' + meta.icon + '</span>' + meta.label + '</button>';
+    }).join('');
+  }
+
+  function itemHtml(item) {
+    const showNote = item.result === 'fail' || item.result === 'blocked';
+    const noteHtml = showNote
+      ? '<input type="text" data-note-for="' + esc(item.id) + '" value="' + esc(item.note) + '"' +
+        (isEditable() ? '' : ' disabled') +
+        ' placeholder="What went wrong? (saved on Enter or when you click away)"' +
+        ' class="mt-2 w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary disabled:opacity-60">'
+      : '';
+    return (
+      '<div class="border-t border-outline-variant px-5 py-4" data-item-row="' + esc(item.id) + '">' +
+        '<div class="flex flex-wrap items-start gap-3">' +
+          '<div class="flex-1 min-w-[240px]">' +
+            '<div class="flex items-center gap-2 mb-0.5">' +
+              '<span class="font-label-md text-label-md text-primary font-bold">' + esc(item.id) + '</span>' +
+              '<span class="font-bold text-sm">' + esc(item.title) + '</span>' +
+            '</div>' +
+            '<div class="text-sm text-on-surface">' + esc(item.steps) + '</div>' +
+            '<div class="text-xs text-on-surface-variant mt-1"><span class="font-bold">Expected:</span> ' + esc(item.expected) + '</div>' +
+          '</div>' +
+          '<div class="flex items-center gap-2 flex-wrap">' +
+            '<button type="button" data-launch="' + esc(item.launch_url) + '"' +
+              ' class="inline-flex items-center gap-1 border border-outline-variant rounded-full px-3 py-1 text-xs font-bold text-primary hover:bg-surface-container-low transition-colors">' +
+              '<span class="material-symbols-outlined text-[16px]">open_in_new</span>Launch</button>' +
+            resultButtonsHtml(item) +
+          '</div>' +
+        '</div>' + noteHtml +
+      '</div>'
+    );
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById('checklist-container');
+    if (!activeRun) { container.innerHTML = ''; return; }
+
+    const byArea = {};
+    const areaOrder = [];
+    activeRun.items.forEach(function (i) {
+      if (!byArea[i.area]) { byArea[i.area] = []; areaOrder.push(i.area); }
+      byArea[i.area].push(i);
+    });
+
+    container.innerHTML = areaOrder.map(function (area) {
+      const items = byArea[area];
+      const done = items.filter(function (i) { return i.result !== 'pending'; }).length;
+      return (
+        '<section class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden">' +
+          '<div class="flex items-center justify-between px-5 py-3 bg-surface-container-low">' +
+            '<h2 class="font-bold text-sm">' + esc(area) + '</h2>' +
+            '<span class="text-xs text-on-surface-variant">' + done + ' / ' + items.length + ' checked</span>' +
+          '</div>' +
+          items.map(itemHtml).join('') +
+        '</section>'
+      );
+    }).join('');
+
+    // Launch buttons: pop the target page open next to the console.
+    Array.prototype.forEach.call(container.querySelectorAll('[data-launch]'), function (btn) {
+      btn.addEventListener('click', function () {
+        window.open(btn.getAttribute('data-launch'), '_blank', 'noopener,width=1280,height=900');
+      });
+    });
+    // Pass / Fail / Blocked buttons (click the selected one again to un-mark).
+    Array.prototype.forEach.call(container.querySelectorAll('[data-mark]'), function (btn) {
+      btn.addEventListener('click', function () {
+        const itemId = btn.getAttribute('data-item');
+        const item = activeRun.items.find(function (i) { return i.id === itemId; });
+        const result = btn.getAttribute('data-mark') === item.result ? 'pending' : btn.getAttribute('data-mark');
+        markItem(itemId, result, item.note || '');
+      });
+    });
+    // Note inputs save on Enter / blur.
+    Array.prototype.forEach.call(container.querySelectorAll('[data-note-for]'), function (input) {
+      const itemId = input.getAttribute('data-note-for');
+      const save = function () {
+        const item = activeRun.items.find(function (i) { return i.id === itemId; });
+        if (item && input.value.trim() !== (item.note || '')) markItem(itemId, item.result, input.value.trim());
+      };
+      input.addEventListener('blur', save);
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') input.blur(); });
+    });
+  }
+
+  function markItem(itemId, result, note) {
+    api('/api/uat/runs/' + encodeURIComponent(activeRun.run_id) + '/items/' + encodeURIComponent(itemId), {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'developer', result: result, note: note }),
+    }).then(function (data) {
+      const idx = activeRun.items.findIndex(function (i) { return i.id === itemId; });
+      activeRun.items[idx] = data.item;
+      activeRun.summary = data.summary;
+      renderRunHeader(); renderChecklist(); renderReportCard();
+    }).catch(function (err) { showToast(err.message, 'warn'); });
+  }
+
+  // ── Report card ───────────────────────────────────────────────────────────
+  function listHtml(entries) {
+    return '<ul class="space-y-1.5">' + entries.map(function (e) {
+      return '<li class="flex gap-2 text-sm"><span class="material-symbols-outlined text-[16px] text-on-surface-variant mt-0.5">arrow_right</span><span class="flex-1">' + esc(e) + '</span></li>';
+    }).join('') + '</ul>';
+  }
+
+  function renderReportCard() {
+    const body = document.getElementById('report-body');
+    const btn = document.getElementById('generate-report-btn');
+    const label = document.getElementById('generate-report-label');
+    if (!activeRun) {
+      body.innerHTML = '<p class="text-sm text-on-surface-variant">Start a run to begin.</p>';
+      btn.classList.add('hidden');
+      return;
+    }
+
+    const report = activeRun.report;
+    if (report) {
+      const vm = VERDICT_META[report.verdict] || VERDICT_META['conditional-go'];
+      body.innerHTML =
+        '<div class="flex items-center gap-2 mb-3">' +
+          '<span id="report-verdict" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold tracking-wider ' + vm.cls + '">' + vm.label + '</span>' +
+          '<span class="text-xs text-on-surface-variant">' + (report.source === 'llm' ? 'AI-generated' : 'auto-generated (AI unavailable)') + ' · ' + fmtDate(report.generated_at) + '</span>' +
+        '</div>' +
+        '<p class="font-bold text-sm mb-2">' + esc(report.headline) + '</p>' +
+        '<p class="text-sm text-on-surface-variant mb-4">' + esc(report.summary) + '</p>' +
+        '<h4 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Key risks</h4>' +
+        listHtml(report.key_risks) +
+        '<h4 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mt-4 mb-1.5">Recommendations</h4>' +
+        listHtml(report.recommendations);
+    } else if (generating) {
+      body.innerHTML =
+        '<div class="flex items-center gap-3 text-sm text-on-surface-variant py-2">' +
+          '<span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>' +
+          'Finalizing the run and writing the report…' +
+        '</div>';
+    } else {
+      const p = activeRun.summary.pending;
+      body.innerHTML = '<p class="text-sm text-on-surface-variant">' + (p === 0
+        ? 'Every check is marked. Generate the report to finalize this run.'
+        : p + ' check(s) still pending. You can generate the report anyway — pending items are called out as untested.') + '</p>';
+    }
+
+    btn.classList.toggle('hidden', generating);
+    label.textContent = report ? 'Regenerate report' : 'Generate UAT report';
+    btn.disabled = generating;
+  }
+
+  function generateReport() {
+    if (generating || !activeRun) return;
+    const pending = activeRun.summary.pending;
+    if (activeRun.status === 'in_progress' && pending > 0 &&
+        !confirm(pending + ' check(s) have not been run. Finalize the run anyway?')) return;
+    generating = true;
+    renderReportCard();
+    api('/api/uat/runs/' + encodeURIComponent(activeRun.run_id) + '/report', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'developer' }),
+    }).then(function (run) {
+      generating = false;
+      activeRun = run;
+      showToast(run.run_id + ' report ready');
+      renderAll();
+      loadRuns();
+    }).catch(function (err) {
+      generating = false;
+      renderReportCard();
+      showToast(err.message, 'warn');
+    });
+  }
+
+  // ── History ───────────────────────────────────────────────────────────────
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (!runs.length) {
+      list.innerHTML = '<p class="text-sm text-on-surface-variant">No previous runs.</p>';
+      return;
+    }
+    list.innerHTML = runs.map(function (r) {
+      const active = activeRun && r.run_id === activeRun.run_id;
+      const vm = r.verdict ? (VERDICT_META[r.verdict] || null) : null;
+      const s = r.summary || {};
+      return (
+        '<button type="button" data-run="' + esc(r.run_id) + '" class="w-full text-left border rounded-xl px-4 py-3 transition-colors ' +
+          (active ? 'border-primary bg-secondary-container/10' : 'border-outline-variant hover:bg-surface-container-low') + '">' +
+          '<div class="flex items-center gap-2">' +
+            '<span class="font-label-md text-label-md text-primary font-bold">' + esc(r.run_id) + '</span>' +
+            (vm ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider ' + vm.cls + '">' + vm.label + '</span>'
+                : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-container text-on-primary-container">IN PROGRESS</span>') +
+            '<span class="text-xs text-on-surface-variant ml-auto">' + fmtDate(r.started_at) + '</span>' +
+          '</div>' +
+          '<div class="text-xs text-on-surface-variant mt-1">' +
+            (s.pass || 0) + ' pass · ' + (s.fail || 0) + ' fail · ' + (s.blocked || 0) + ' blocked · ' + (s.pending || 0) + ' pending' +
+          '</div>' +
+        '</button>'
+      );
+    }).join('');
+    Array.prototype.forEach.call(list.querySelectorAll('[data-run]'), function (btn) {
+      btn.addEventListener('click', function () { openRun(btn.getAttribute('data-run')); });
+    });
+  }
+
+  // ── Data flow ─────────────────────────────────────────────────────────────
+  function renderAll() {
+    renderRunHeader(); renderChecklist(); renderReportCard(); renderHistory();
+  }
+
+  function openRun(runId) {
+    api('/api/uat/runs/' + encodeURIComponent(runId) + '?role=developer')
+      .then(function (run) { activeRun = run; renderAll(); })
+      .catch(function (err) { showToast(err.message, 'warn'); });
+  }
+
+  function newRun() {
+    api('/api/uat/runs', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: session.user_id, display_name: session.display_name, role: 'developer' }),
+    }).then(function (run) {
+      activeRun = run;
+      showToast(run.run_id + ' started');
+      renderAll();
+      loadRuns();
+    }).catch(function (err) { showToast(err.message, 'warn'); });
+  }
+
+  function loadRuns() {
+    return api('/api/uat/runs?role=developer').then(function (data) {
+      runs = data.runs || [];
+      renderHistory();
+      return runs;
+    }).catch(function () { showToast('Could not load UAT runs.', 'warn'); return []; });
+  }
+
+  document.getElementById('new-run-btn').addEventListener('click', newRun);
+  document.getElementById('empty-new-run-btn').addEventListener('click', newRun);
+  document.getElementById('generate-report-btn').addEventListener('click', generateReport);
+
+  // Initial load: resume the newest in-progress run, else show the newest run.
+  loadRuns().then(function (list) {
+    const resume = list.find(function (r) { return r.status === 'in_progress'; }) || list[0];
+    if (resume) openRun(resume.run_id); else renderAll();
+  });
+})();
+</script>
+</body></html>

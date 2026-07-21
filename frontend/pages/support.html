@@ -1,0 +1,369 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Support - WisdomAI</title><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet"><script id="tailwind-config">try{
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-variant": "#dfe3e6",
+                "surface-bright": "#f6fafd",
+                "on-secondary-container": "#004966",
+                "secondary-fixed": "#c5e7ff",
+                "on-tertiary-fixed-variant": "#1f5100",
+                "on-surface-variant": "#404750",
+                "error-container": "#ffdad6",
+                "surface-container-low": "#f0f4f7",
+                "outline": "#707881",
+                "secondary-fixed-dim": "#80d0ff",
+                "on-tertiary-fixed": "#082100",
+                "on-primary-container": "#e0eeff",
+                "on-background": "#171c1f",
+                "primary-fixed-dim": "#95ccff",
+                "primary": "#005787",
+                "on-primary-fixed": "#001d32",
+                "on-error": "#ffffff",
+                "tertiary-fixed": "#87fe45",
+                "on-secondary-fixed": "#001e2d",
+                "surface-container-high": "#e5e9ec",
+                "primary-container": "#0070ad",
+                "on-secondary": "#ffffff",
+                "on-surface": "#171c1f",
+                "tertiary-container": "#327a00",
+                "surface-tint": "#00639a",
+                "on-primary-fixed-variant": "#004a75",
+                "inverse-primary": "#95ccff",
+                "error": "#ba1a1a",
+                "secondary": "#00658c",
+                "inverse-on-surface": "#edf1f4",
+                "on-tertiary-container": "#bbff92",
+                "surface-dim": "#d6dbdd",
+                "surface-container-lowest": "#ffffff",
+                "tertiary": "#255f00",
+                "primary-fixed": "#cde5ff",
+                "on-tertiary": "#ffffff",
+                "on-error-container": "#93000a",
+                "surface": "#f6fafd",
+                "secondary-container": "#2abcfd",
+                "on-primary": "#ffffff",
+                "tertiary-fixed-dim": "#6be026",
+                "inverse-surface": "#2c3134",
+                "surface-container": "#eaeef1",
+                "background": "#f6fafd",
+                "surface-container-highest": "#dfe3e6",
+                "outline-variant": "#c0c7d1",
+                "on-secondary-fixed-variant": "#004c6a",
+                "streak-flame": "#ff9600"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "full": "9999px"
+        },
+        "fontFamily": {
+                "display-lg": ["Hanken Grotesk"],
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "label-md": ["JetBrains Mono"],
+                "headline-md": ["Hanken Grotesk"],
+                "headline-lg": ["Hanken Grotesk"]
+        },
+        "fontSize": {
+                "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+        }
+      }
+    }
+  }
+}catch(_e){}</script></head><body class="bg-background text-on-background min-h-screen">
+<script src="/js/auth.js"></script>
+<!-- Sidebar Navigation (shared component) -->
+<div id="sidebar-mount"></div>
+
+<!-- Top AppBar -->
+<header class="flex items-center w-full px-4 md:px-10 h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
+  <button id="mobile-menu-btn" class="md:hidden p-2 mr-2">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-primary text-[28px]">help</span>
+    <h1 class="font-headline-md text-headline-md">Support</h1>
+  </div>
+</header>
+
+<main class="sidebar-offset px-4 md:px-10 py-8 max-w-5xl">
+  <!-- Submit form -->
+  <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 md:p-8 mb-8">
+    <h2 class="font-headline-md text-headline-md mb-1">Report an issue</h2>
+    <p class="text-sm text-on-surface-variant mb-6">Tell us what went wrong and the team will pick it up from the support queue.</p>
+
+    <form id="ticket-form" class="space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="f-area" class="block text-sm font-bold mb-1.5">Where is the issue?</label>
+          <select id="f-area" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary" required>
+            <option value="" disabled selected>Choose a part of the app…</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-type" class="block text-sm font-bold mb-1.5">What kind of issue is it?</label>
+          <select id="f-type" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary" required>
+            <option value="" disabled selected>Choose an issue type…</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="f-subject" class="block text-sm font-bold mb-1.5">Subject</label>
+        <input id="f-subject" type="text" maxlength="120" placeholder="One line summary, e.g. 'Quiz page freezes after question 3'"
+               class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary" required>
+      </div>
+
+      <div>
+        <label for="f-description" class="block text-sm font-bold mb-1.5">What is the issue?</label>
+        <textarea id="f-description" rows="4" placeholder="Describe what happened, what you expected, and the steps to reproduce it if you can."
+                  class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary" required></textarea>
+      </div>
+
+      <div>
+        <label for="f-comments" class="block text-sm font-bold mb-1.5">Anything else? <span class="font-normal text-on-surface-variant">(optional)</span></label>
+        <textarea id="f-comments" rows="2" placeholder="Browser, screenshots you can share later, urgency, anything that helps."
+                  class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary"></textarea>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button type="submit" id="submit-btn"
+                class="inline-flex items-center gap-2 bg-primary text-on-primary font-bold text-sm px-6 py-3 rounded-full hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-[18px]">send</span> Submit ticket
+        </button>
+        <span id="submit-hint" class="text-sm text-on-surface-variant hidden"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- My tickets -->
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-headline-md text-headline-md">My tickets</h2>
+      <button id="refresh-btn" class="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">
+        <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+      </button>
+    </div>
+    <div id="tickets-list" class="space-y-3">
+      <div class="text-sm text-on-surface-variant">Loading your tickets…</div>
+    </div>
+  </section>
+</main>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none"></div>
+
+<script src="/js/sidebar.js"></script>
+<script>
+(function () {
+  'use strict';
+  const session = window.WisdomAuth.requireAuth();
+  if (!session) return;
+  // Developers work the queue, not the form.
+  if (session.role === 'developer') { window.location.href = '/support-console'; return; }
+
+  // ── Vocabulary (mirrors /api/support/meta) ─────────────────────────────────
+  const AREA_LABELS = {
+    'dashboard': 'Dashboard', 'learning-path': 'Learning Path', 'lesson': 'Lesson viewer',
+    'quiz': 'Quiz', 'chat-coach': 'Chat Coach', 'catalog': 'Catalog',
+    'knowledge-vault': 'Knowledge Vault', 'team-dashboards': 'Team Dashboards',
+    'login-auth': 'Login / sign-in', 'other': 'Somewhere else',
+  };
+  const TYPE_LABELS = {
+    'bug': 'Something is broken (bug)', 'ui-visual': 'UI / visual problem',
+    'performance': 'Slow / laggy performance', 'data-incorrect': 'Data looks wrong',
+    'feature-request': 'Feature request / idea', 'question': 'Question', 'other': 'Other',
+  };
+  const STATUS_META = {
+    'new':         { label: 'New',         cls: 'bg-secondary-fixed text-on-secondary-fixed' },
+    'in_progress': { label: 'In progress', cls: 'bg-primary-container text-on-primary-container' },
+    'on_hold':     { label: 'On hold',     cls: 'bg-surface-container-highest text-on-surface-variant' },
+    'resolved':    { label: 'Resolved',    cls: 'bg-tertiary-container text-on-tertiary-container' },
+    'closed':      { label: 'Closed',      cls: 'bg-inverse-surface text-inverse-on-surface' },
+  };
+
+  function fillSelect(id, labels) {
+    const sel = document.getElementById(id);
+    Object.keys(labels).forEach(function (value) {
+      const opt = document.createElement('option');
+      opt.value = value; opt.textContent = labels[value];
+      sel.appendChild(opt);
+    });
+  }
+  fillSelect('f-area', AREA_LABELS);
+  fillSelect('f-type', TYPE_LABELS);
+
+  window.showToast = function (message, type) {
+    const container = document.getElementById('toast-container');
+    const colors = { info: 'bg-primary text-on-primary', warn: 'bg-error-container text-on-error-container' };
+    const t = document.createElement('div');
+    t.className = 'px-5 py-3 rounded-lg shadow-lg font-bold text-sm pointer-events-auto transition-all duration-300 opacity-0 translate-y-2 ' + (colors[type] || colors.info);
+    t.textContent = message;
+    container.appendChild(t);
+    requestAnimationFrame(function () { t.classList.remove('opacity-0', 'translate-y-2'); });
+    setTimeout(function () { t.classList.add('opacity-0', 'translate-y-2'); setTimeout(function () { t.remove(); }, 300); }, 3000);
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+  function statusChip(status) {
+    const meta = STATUS_META[status] || STATUS_META['new'];
+    return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ' + meta.cls + '">' + meta.label + '</span>';
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  document.getElementById('ticket-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    const payload = {
+      user_id: session.user_id,
+      display_name: session.display_name,
+      role: session.role,
+      area: document.getElementById('f-area').value,
+      issue_type: document.getElementById('f-type').value,
+      subject: document.getElementById('f-subject').value.trim(),
+      description: document.getElementById('f-description').value.trim(),
+      additional_comments: document.getElementById('f-comments').value.trim(),
+    };
+    if (!payload.area || !payload.issue_type) { showToast('Please pick where the issue is and what kind it is.', 'warn'); return; }
+    if (!payload.subject || !payload.description) { showToast('Subject and description are required.', 'warn'); return; }
+
+    btn.disabled = true;
+    fetch('/api/support/tickets', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+    }).then(function (r) {
+      if (!r.ok) return r.json().then(function (b) { throw new Error(b.detail || 'Submit failed'); });
+      return r.json();
+    }).then(function (ticket) {
+      showToast('Ticket ' + ticket.ticket_id + ' submitted. We\'re on it!');
+      document.getElementById('ticket-form').reset();
+      loadTickets();
+    }).catch(function (err) {
+      showToast(err.message, 'warn');
+    }).finally(function () { btn.disabled = false; });
+  });
+
+  // ── My tickets list ───────────────────────────────────────────────────────
+  let expandedId = null;
+
+  function activityHtml(ticket) {
+    const items = (ticket.activity || []).slice().reverse().map(function (a) {
+      const icon = { created: 'flag', status_changed: 'sync_alt', reopened: 'restart_alt',
+                     priority_changed: 'priority_high', assigned: 'person', work_note: 'edit_note',
+                     comment: 'chat_bubble' }[a.event] || 'circle';
+      return (
+        '<div class="flex gap-3 text-sm">' +
+          '<span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">' + icon + '</span>' +
+          '<div class="flex-1">' +
+            '<span class="font-bold">' + esc(a.by) + '</span> ' +
+            '<span class="text-on-surface-variant">' + esc(a.event.replace(/_/g, ' ')) + '</span>' +
+            (a.detail ? '<div class="text-on-surface mt-0.5">' + esc(a.detail) + '</div>' : '') +
+            '<div class="text-xs text-on-surface-variant mt-0.5">' + fmtDate(a.at) + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    return items || '<div class="text-sm text-on-surface-variant">No activity yet.</div>';
+  }
+
+  function ticketCardHtml(t) {
+    const open = expandedId === t.ticket_id;
+    const resolution = t.resolution_note
+      ? '<div class="mt-3 p-3 rounded-lg bg-tertiary-container/30 border border-outline-variant text-sm">' +
+          '<span class="font-bold">Resolution note:</span> ' + esc(t.resolution_note) + '</div>'
+      : '';
+    return (
+      '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">' +
+        '<button type="button" data-ticket="' + esc(t.ticket_id) + '" class="ticket-toggle w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-surface-container-low transition-colors">' +
+          '<span class="font-label-md text-label-md text-primary font-bold whitespace-nowrap">' + esc(t.ticket_id) + '</span>' +
+          '<span class="flex-1 font-bold text-sm truncate">' + esc(t.subject) + '</span>' +
+          statusChip(t.status) +
+          '<span class="hidden sm:inline text-xs text-on-surface-variant whitespace-nowrap">' + fmtDate(t.created_at) + '</span>' +
+          '<span class="material-symbols-outlined text-on-surface-variant">' + (open ? 'expand_less' : 'expand_more') + '</span>' +
+        '</button>' +
+        (open ?
+          '<div class="px-5 pb-5 border-t border-outline-variant pt-4">' +
+            '<div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-on-surface-variant mb-3">' +
+              '<span><span class="font-bold text-on-surface">Where:</span> ' + esc(AREA_LABELS[t.area] || t.area) + '</span>' +
+              '<span><span class="font-bold text-on-surface">Type:</span> ' + esc(TYPE_LABELS[t.issue_type] || t.issue_type) + '</span>' +
+            '</div>' +
+            '<p class="text-sm mb-2">' + esc(t.description) + '</p>' +
+            (t.additional_comments ? '<p class="text-sm text-on-surface-variant mb-2">' + esc(t.additional_comments) + '</p>' : '') +
+            resolution +
+            '<h4 class="font-bold text-sm mt-4 mb-2">Activity</h4>' +
+            '<div class="space-y-3">' + activityHtml(t) + '</div>' +
+            '<div class="flex gap-2 mt-4">' +
+              '<input type="text" data-comment-for="' + esc(t.ticket_id) + '" placeholder="Add a comment for the team…" ' +
+                'class="flex-1 rounded-lg border-outline-variant bg-surface-container-lowest text-sm focus:ring-primary focus:border-primary">' +
+              '<button type="button" data-comment-send="' + esc(t.ticket_id) + '" ' +
+                'class="bg-secondary-container text-on-secondary-container font-bold text-sm px-4 rounded-lg hover:opacity-90">Send</button>' +
+            '</div>' +
+          '</div>'
+        : '') +
+      '</div>'
+    );
+  }
+
+  function loadTickets() {
+    fetch('/api/support/tickets?user_id=' + encodeURIComponent(session.user_id) + '&role=' + encodeURIComponent(session.role))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        const list = document.getElementById('tickets-list');
+        if (!data.tickets.length) {
+          list.innerHTML = '<div class="text-sm text-on-surface-variant bg-surface-container-low rounded-xl p-5">No tickets yet. If something breaks, report it above and track it here.</div>';
+          return;
+        }
+        list.innerHTML = data.tickets.map(ticketCardHtml).join('');
+        wireList();
+      })
+      .catch(function () {
+        document.getElementById('tickets-list').innerHTML = '<div class="text-sm text-on-surface-variant">Could not load tickets.</div>';
+      });
+  }
+
+  function wireList() {
+    Array.prototype.forEach.call(document.querySelectorAll('.ticket-toggle'), function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-ticket');
+        expandedId = (expandedId === id) ? null : id;
+        loadTickets();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-comment-send]'), function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-comment-send');
+        const input = document.querySelector('[data-comment-for="' + id + '"]');
+        const text = input ? input.value.trim() : '';
+        if (!text) return;
+        fetch('/api/support/tickets/' + encodeURIComponent(id) + '/comments', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: session.user_id, display_name: session.display_name, role: session.role, comment: text }),
+        }).then(function (r) {
+          if (!r.ok) return r.json().then(function (b) { throw new Error(b.detail || 'Comment failed'); });
+          loadTickets();
+        }).catch(function (err) { showToast(err.message, 'warn'); });
+      });
+    });
+  }
+
+  document.getElementById('refresh-btn').addEventListener('click', loadTickets);
+  loadTickets();
+})();
+</script>
+</body></html>
