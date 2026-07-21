@@ -4,7 +4,7 @@
 
 ## The graph view
 
-`GET /api/dev/graph` introspects the real system (not a hardcoded diagram): the orchestrator node, the five skills (from disk), and every function tool in `_FUNCTION_TOOLS`, with edges showing which skill primarily uses which tool. Clicking a node opens the matching editor panel. If something you expect is missing from the graph, it isn't registered in code.
+`GET /api/dev/graph` introspects the real system (not a hardcoded diagram): the orchestrator node, the six skills (from disk), and every function tool in `_FUNCTION_TOOLS`, with edges showing which skill primarily uses which tool. Clicking a node opens the matching editor panel. If something you expect is missing from the graph, it isn't registered in code.
 
 ## What's editable, exactly
 
@@ -16,11 +16,13 @@
 - `name`, `description` (frontmatter) and the persona `instruction` (body). Written straight to the SKILL.md file.
 
 ### Tool prompt templates (`PATCH /api/dev/config/tool/{tool_name}`)
-Four LLM call sites have editable templates in `dev_config.tools`:
+Six LLM call sites have editable templates in `dev_config.tools`:
 - `generate_quiz`
 - `process_document_to_curriculum`
 - `generate_remedial_course`
 - `generate_uat_report` (the UAT Console's run summary)
+- `draft_team_doc_page` (Team Docs: turns a single Knowledge Vault upload into a structured documentation page)
+- `generate_project_documentation` (Documentation Master: synthesizes a project's full doc set from every linked Knowledge Vault source — the only tool template that can carry native binary media alongside its rendered text prompt)
 
 Each may also override `model` per-tool. The endpoint **dry-run validates** the template by `.format()`-ing it with dummy values — a template referencing an unknown `{placeholder}` is rejected with a 400 rather than breaking the next generation.
 

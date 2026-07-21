@@ -6,6 +6,8 @@
 
 Code-level defaults for every threshold: `PASS_THRESHOLD = 0.80`, `LUCK_FAILURE_THRESHOLD = 2`, `MAX_COURSES = 10`, `MAX_QUIZ_QUESTIONS = 10`, `MAX_ASSESSMENT_QUESTIONS = 20`, `MAX_QUIZ_ATTEMPTS = 3`, `AT_RISK_READINESS_THRESHOLD = 0.60`, plus the 15 state constants (`STATE_ENROLLED` … `STATE_COMPLETED`) and entry paths (`veteran`/`intermediate`/`standard`). At runtime most numeric values are read through `dev_config.get_param()` instead, which overlays `data/dev_config.json` on these defaults.
 
+`SUPPORTED_MIME_TYPES` (extension → `(mime_type, content_category)`) also lives here rather than in `knowledge_base.py` — it's shared by the upload route and `documentation_service.py`, which both need to resolve a filename's category without a route↔service layering violation. Spreadsheets (`.xlsx`/`.xls`) map to `content_category = "text"`: they're extracted to a readable text dump at upload time (`knowledge_base._extract_spreadsheet_text`, via `openpyxl`) rather than getting their own category, so they join the exact same chunking/gap-analysis/documentation-synthesis pipeline as any other text-family upload.
+
 ## models.py — dataclass schemas
 
 All persisted shapes: `ConceptToken`, `MasteryVector`, `Lesson`, `Course`, `LearningPath`, `DailyAgenda`, `QuizQuestion`, `Quiz`, `QuizAttempt`, `UserProgress` (the big one — see [Data & Persistence](/documentation?page=architecture/data-and-persistence)), and the KPI schema family (`WorkforceMetrics`, `LearningMetrics`, `AssessmentMetrics`, `KnowledgeBaseMetrics`, `RiskIndicators`, `KPIPayload`, `ConflictAlert`). Each has `to_dict()`; `UserProgress.from_dict` tolerates unknown keys so old records survive schema additions.
@@ -39,7 +41,11 @@ All persisted shapes: `ConceptToken`, `MasteryVector`, `Lesson`, `Course`, `Lear
 
 ## dev_config.py — live configuration
 
-Backs `data/dev_config.json` with self-healing defaults (`_deep_merge_defaults` fills missing keys on read, so deleting the file is safe). API: `get_config()` (whole tree: `orchestrator`, `tools` (4 prompt templates), `platform_params` (10 values), `logic_params` (5 categories, ~20 values)), `update_config(path, patch)`, `get_param(name)`, `get_logic_param(category, name)`. Everything reads per-call — no restart needed after an Agent Console edit.
+Backs `data/dev_config.json` with self-healing defaults (`_deep_merge_defaults` fills missing keys on read, so deleting the file is safe). API: `get_config()` (whole tree: `orchestrator`, `tools` (5 prompt templates), `platform_params` (10 values), `logic_params` (5 categories, ~20 values)), `update_config(path, patch)`, `get_param(name)`, `get_logic_param(category, name)`. Everything reads per-call — no restart needed after an Agent Console edit.
+
+## doc_export.py — shared TXT/PDF rendering
+
+`export_txt(title, entries)` / `export_pdf(title, entries)` render a list of `{section_title, page_title, content}` markdown pages into a downloadable plain-text bundle or an fpdf2-generated PDF (cover page + TOC when multi-page; latin-1-safe character mapping). Extracted from `docs.py` (July 2026) so the developer docs (`/api/docs/export`) and Team Documentation (`/api/team-docs/projects/{id}/export`) share one renderer.
 
 ## data_compliance_gate.py — GDPR gate
 

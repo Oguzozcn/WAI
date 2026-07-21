@@ -21,6 +21,7 @@ Base directory resolution order: explicit constructor arg → `WAI_DATA_DIR` env
 | `catalog/<dept>/` | Catalog inputs + drafts with `.meta.json` sidecars | catalog endpoints |
 | `support_tickets/<dept>/TKT-<n>.json` | Support tickets incl. activity log | support routes |
 | `uat_runs/<dept>/UAT-<n>.json` | Manual UAT runs (checklist snapshot, per-item results, AI report) | uat routes |
+| `team_docs/<dept>/PROJ-<n>.json` | Team Documentation projects (metadata + `linked_sources` doc-id list + all markdown pages, each with `source`/`drafted_by` provenance — `drafted_by: "ai_synthesis"` pages come from Documentation Master and are the only ones a regeneration replaces) | team_docs routes, documentation_service |
 
 Non-namespaced files at `data/` root: `credentials.json` (demo accounts), `dev_config.json` (live config), `kpi_store/` (Tier 2 — see below), seed scripts.
 

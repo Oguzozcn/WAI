@@ -25,9 +25,13 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 SKILLS_DIR = PROJECT_ROOT / ".agents" / "skills"
 
 # Curated grouping matching the `# comment` blocks in agent.py's
-# _FUNCTION_TOOLS list. ADK itself doesn't partition tools per skill (they're
-# all flatly attached to one SkillToolset) — this mapping is informational,
-# reflecting how the code is actually organized today.
+# _FUNCTION_TOOLS list. This is NOT just informational: `_write_skill_file`
+# below re-derives each skill's `adk_additional_tools` frontmatter metadata
+# from this exact mapping on every save. ADK's SkillToolset only exposes a
+# function tool to the model once its skill is activated AND the skill's
+# frontmatter lists that tool under `adk_additional_tools` — without it, the
+# tool is invisible at chat time even though it's registered in
+# _FUNCTION_TOOLS (see skills-and-hooks.md's "Critical gotcha" section).
 SKILL_TOOL_GROUPS = {
     "curriculum-builder": [
         "generate_learning_path", "generate_daily_agenda",
@@ -50,11 +54,14 @@ SKILL_TOOL_GROUPS = {
     "corporate-report-agent": [
         "read_kpi_payloads", "generate_executive_email",
     ],
+    "documentation-master": [
+        "generate_project_documentation",
+    ],
 }
 
 # Tool names whose prompt is directly editable via dev_config.json's "tools"
 # section (i.e. they call Gemini and are ADK-registered function tools).
-LLM_ADK_TOOL_NAMES = {"generate_quiz", "generate_remedial_course"}
+LLM_ADK_TOOL_NAMES = {"generate_quiz", "generate_remedial_course", "generate_project_documentation"}
 
 # process_document_to_curriculum also calls Gemini and has an editable prompt
 # template, but it is NOT itself an ADK-registered tool — it's an internal
@@ -190,8 +197,21 @@ def _read_skill_file(skill_id: str) -> dict:
 
 
 def _write_skill_file(skill_id: str, name: str, description: str, instruction: str) -> None:
+    """Persist a skill's persona, always re-deriving its `adk_additional_tools`
+    frontmatter metadata from SKILL_TOOL_GROUPS (the single source of truth
+    the graph view also reads) rather than round-tripping whatever was on
+    disk before. Without this, ADK's SkillToolset gates a skill's function
+    tools behind this exact metadata key — omitting it (or letting a console
+    edit silently drop it, since this function used to emit only name/
+    description) makes every tool for that skill invisible to the model at
+    chat time, even though it's correctly registered in agent.py."""
     path = SKILLS_DIR / skill_id / "SKILL.md"
-    content = f"---\nname: {name}\ndescription: {description}\n---\n\n{instruction.strip()}\n"
+    frontmatter = f"---\nname: {name}\ndescription: {description}\n"
+    tool_names = SKILL_TOOL_GROUPS.get(skill_id, [])
+    if tool_names:
+        frontmatter += "metadata:\n  adk_additional_tools:\n"
+        frontmatter += "".join(f"    - {t}\n" for t in tool_names)
+    content = f"{frontmatter}---\n\n{instruction.strip()}\n"
     path.write_text(content, encoding="utf-8")
 
 
@@ -322,6 +342,15 @@ async def api_dev_update_tool(tool_name: str, body: ToolUpdate):
         "generate_uat_report": {
             "run_summary": "Run UAT-0001: 20 pass, 2 fail, 1 blocked, 0 not run, out of 23 checks.",
             "results_json": '[{"id": "AUTH-01", "result": "pass"}]',
+        },
+        "draft_team_doc_page": {
+            "project_name": "Sample Project",
+            "source_filename": "sample_procedures.txt",
+            "source_content": "Sample source document text.",
+        },
+        "generate_project_documentation": {
+            "project_name": "Sample Project",
+            "sources_text": "## sample_procedures.txt\n\nSample source document text.",
         },
     }[tool_name]
     try:

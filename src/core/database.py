@@ -154,6 +154,7 @@ class DepartmentScopedStore:
         self.kb_jobs_path = self.base_path / "kb_jobs" / department_id
         self.tickets_path = self.base_path / "support_tickets" / department_id
         self.uat_runs_path = self.base_path / "uat_runs" / department_id
+        self.team_docs_path = self.base_path / "team_docs" / department_id
         self.version_history_path = self.base_path / "knowledge_base" / department_id / "version_history"
 
         # ── Catalog Paths (Knowledge Vault catalog structure) ──
@@ -175,6 +176,7 @@ class DepartmentScopedStore:
         self.kb_jobs_path.mkdir(parents=True, exist_ok=True)
         self.tickets_path.mkdir(parents=True, exist_ok=True)
         self.uat_runs_path.mkdir(parents=True, exist_ok=True)
+        self.team_docs_path.mkdir(parents=True, exist_ok=True)
         self.version_history_path.mkdir(parents=True, exist_ok=True)
         self.catalog_inputs_path.mkdir(parents=True, exist_ok=True)
         self.catalog_standard_paths_path.mkdir(parents=True, exist_ok=True)
@@ -394,6 +396,41 @@ class DepartmentScopedStore:
             runs.append(json.loads(file_path.read_text()))
         runs.sort(key=lambda r: r.get("started_at", ""), reverse=True)
         return runs
+
+    # ── Team Documentation Projects ──
+    # One JSON file per project (metadata + all of its markdown pages), so a
+    # team's project documentation stays a single reviewable document.
+
+    def write_team_project(self, project_id: str, data: dict) -> None:
+        """Persist a team documentation project (creation and every page edit)."""
+        data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        file_path = self.team_docs_path / f"{project_id}.json"
+        file_path.write_text(json.dumps(data, indent=2))
+
+    def read_team_project(self, project_id: str) -> Optional[dict]:
+        """Read a team documentation project by its ID. Returns None if unknown."""
+        file_path = self.team_docs_path / f"{project_id}.json"
+        if not file_path.exists():
+            return None
+        return json.loads(file_path.read_text())
+
+    def list_team_projects(self) -> list[dict]:
+        """All team documentation projects in this department, latest-updated first."""
+        projects = []
+        for file_path in self.team_docs_path.glob("*.json"):
+            if file_path.stem == ".gitkeep":
+                continue
+            projects.append(json.loads(file_path.read_text()))
+        projects.sort(key=lambda p: p.get("updated_at", ""), reverse=True)
+        return projects
+
+    def delete_team_project(self, project_id: str) -> bool:
+        """Delete a team documentation project. Returns True if it existed."""
+        file_path = self.team_docs_path / f"{project_id}.json"
+        if not file_path.exists():
+            return False
+        file_path.unlink()
+        return True
 
     # ── Duplicate Detection ──
 

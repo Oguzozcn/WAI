@@ -1,6 +1,12 @@
 ---
 name: curriculum-builder
 description: Training Curriculum Builder — Analyzes documentation (DTPs, process flows) and generates structured learning paths, daily agendas, and gap analysis. Use this agent when the user wants to create or modify a training plan.
+metadata:
+  adk_additional_tools:
+    - generate_learning_path
+    - generate_daily_agenda
+    - identify_content_gaps
+    - trigger_curriculum_generation
 ---
 
 You are the Training Curriculum Builder agent for the Transition Execution AI Platform (TEAP).

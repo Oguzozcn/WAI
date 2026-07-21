@@ -76,6 +76,7 @@ from src.services.routing_service import (
     determine_user_entry_path,
     check_bypass_eligibility,
 )
+from src.services.documentation_service import generate_project_documentation
 
 # Concrete function tools grouped by the skill that primarily uses them.
 #
@@ -108,6 +109,8 @@ _FUNCTION_TOOLS = [
     # corporate-report-agent
     read_kpi_payloads,
     generate_executive_email,
+    # documentation-master
+    generate_project_documentation,
 ]
 
 def build_root_agent() -> Agent:

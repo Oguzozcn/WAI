@@ -13,13 +13,20 @@ tests/
 │   ├── test_gap_review_hlr.py       # Due-filtering (retention boundary = 0.5 at Δt = half-life)
 │   ├── test_user_service.py         # 22 tests: events, readiness formula, at-risk, GDPR gate
 │   ├── test_ingestion.py            # Splitter, sectioning
-│   └── test_llm_generation.py       # Prompt building, fallback paths
+│   ├── test_llm_generation.py       # Prompt building, fallback paths
+│   ├── test_documentation_service.py# Documentation Master: source resolution (text vs. native media Part), title cleaning
+│   └── test_skill_tool_metadata.py  # adk_additional_tools frontmatter: _write_skill_file always regenerates it from
+│                            # SKILL_TOOL_GROUPS, and all 6 real on-disk SKILL.md files declare it correctly
 ├── integration/           # FastAPI TestClient against real routes
 │   ├── test_auth_routes.py, test_progress_routes.py
 │   ├── test_learning_path_routes.py, test_quiz_routes.py   # incl. remediation E2E:
 │   │                        # diagnosis persistence, remedial cap, HLR filtering
 │   ├── test_kb_routes.py, test_manager_routes.py, test_chat_route.py
-│   └── test_docs_routes.py          # documentation system (tree/get/save/export)
+│   │                        # test_kb_routes.py also covers .xlsx upload extraction
+│   ├── test_docs_routes.py          # documentation system (tree/get/save/export)
+│   ├── test_uat_routes.py           # UAT console (checklist, runs, AI report + fallback)
+│   └── test_team_docs_routes.py     # Team Docs (projects, linked sources, vault-sourced pages,
+│                            # AI draft + fallback, Documentation Master synthesis + regeneration, export)
 └── eval/                  # LLM evals — require live ADC; skipped in normal runs
 ```
 
@@ -28,7 +35,7 @@ python3 -m pytest tests/ -q          # the regression gate — keep it green
 python3 -m pytest tests/unit -q      # fast inner loop
 ```
 
-Suite status as of 2026-07-21: **103+ passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`.
+Suite status as of 2026-07-21: **184 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`.
 
 ## Conventions
 

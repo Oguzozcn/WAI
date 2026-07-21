@@ -25,6 +25,7 @@
     { href: '/knowledge-vault', icon: 'folder', label: 'Knowledge Vault' },
     { href: '/manager-dashboard', icon: 'groups', label: 'Team Dashboards' },
     { href: '/catalog', icon: 'menu_book', label: 'Catalog' },
+    { href: '/team-documentation', icon: 'article', label: 'Team Docs' },
   ];
   const SETTINGS_LINK = { href: '/settings', icon: 'settings', label: 'Settings' };
 
@@ -80,6 +81,8 @@
 
   // Employees and developers never see the manager-only tools. Managers see everything.
   const MANAGER_ONLY_HREFS = ['/manager-dashboard', '/knowledge-vault'];
+  // Team Docs belongs to the manager/employee side; developers have their own docs.
+  const TEAM_ONLY_HREFS = ['/team-documentation'];
   // Developers exclusively get the Agent Console, Documentation and UAT Console.
   const DEV_ONLY_LINK = { href: '/dev-console', icon: 'settings_suggest', label: 'Agent Console' };
   const DOCS_LINK = { href: '/documentation', icon: 'description', label: 'Documentation' };
@@ -93,6 +96,7 @@
       links = links.filter(function (l) { return MANAGER_ONLY_HREFS.indexOf(l.href) === -1; });
     }
     if (role === 'developer') {
+      links = links.filter(function (l) { return TEAM_ONLY_HREFS.indexOf(l.href) === -1; });
       links = links.concat([DEV_ONLY_LINK, DOCS_LINK, UAT_LINK]);
     }
     return links;

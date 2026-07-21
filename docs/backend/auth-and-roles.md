@@ -27,6 +27,7 @@ Every page calls one of these in its inline script, immediately after `sidebar.j
 |------|-------------|
 | `/`, `/learning-path`, `/lesson`, `/quiz`, `/catalog`, `/chat`, `/learning-paths`, `/settings` | any authenticated user |
 | `/support` | any authenticated user (developers are redirected to `/support-console`) |
+| `/team-documentation` | `requireAuth()` + in-page redirect: developers are bounced to `/` (they have `/documentation`) |
 | `/knowledge-vault`, `/manager-dashboard`, `/edit-learning-path`, `/learning-materials` | `requireRole('manager')` |
 | `/dev-console`, `/documentation`, `/support-console`, `/qa-console` | `requireRole('developer')` |
 
@@ -36,8 +37,9 @@ The sidebar (`sidebar.js: visibleNavLinks()`) mirrors this: manager-only links a
 
 Mutating endpoints require a `role` string **supplied by the client** (query param or body field) and check it with a one-line guard:
 
-- `_require_manager(role)` — manager.py, knowledge_base.py
+- `_require_manager(role)` — manager.py, knowledge_base.py, team_docs.py (project creation and deletion only — an employee cannot start or remove a project, only contribute to existing ones)
 - `_require_developer(role)` — dev_console.py, docs.py, support.py, uat.py
+- `_require_team_member(role)` — team_docs.py: accepts `manager` or `individual_contributor`, rejecting developers (Team Docs is the manager/employee counterpart of the developer docs); used for everything except creating/deleting a project
 
 This prevents *accidental* cross-role calls from the UI, not malicious ones — anyone with curl can pass `role=manager`. That is a **known, accepted demo limitation**, consistently applied everywhere rather than half-secured in some places.
 

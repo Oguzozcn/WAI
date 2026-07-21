@@ -157,7 +157,10 @@ function selectNode(key) {
   if (selectedKey && nodeElements[selectedKey]) nodeElements[selectedKey].classList.add('is-selected');
 }
 
-function showToast(message, type) {
+// Named "notify" (not "showToast") so it never shadows window.showToast —
+// WisdomSidebar.toast() checks for that global and delegates to it, so a
+// same-named wrapper here would recurse into itself forever.
+function notify(message, type) {
   if (window.WisdomSidebar && window.WisdomSidebar.toast) { window.WisdomSidebar.toast(message, type); return; }
   alert(message);
 }
@@ -337,7 +340,7 @@ async function saveAndRefresh(url, body, onSuccess) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Save failed.');
-    showToast('Saved.');
+    notify('Saved.');
     onSuccess(data);
     return true;
   } catch (err) {

@@ -85,3 +85,7 @@ async def page_support_console():
 @router.get("/qa-console", response_class=HTMLResponse)
 async def page_qa_console():
     return _serve_page("qa-console.html")
+
+@router.get("/team-documentation", response_class=HTMLResponse)
+async def page_team_documentation():
+    return _serve_page("team-documentation.html")

@@ -192,7 +192,10 @@
 <script>
 const wisdomSession = window.WisdomAuth.requireRole('developer');
 
-function showToast(msg, type) {
+// Named "notify" (not "showToast") so it never shadows window.showToast —
+// WisdomSidebar.toast() checks for that global and delegates to it, so a
+// same-named wrapper here would recurse into itself forever.
+function notify(msg, type) {
   if (window.WisdomSidebar && window.WisdomSidebar.toast) window.WisdomSidebar.toast(msg, type);
   else alert(msg);
 }
@@ -314,10 +317,10 @@ document.getElementById('editor-save-btn').addEventListener('click', async () =>
     currentContent = content;
     document.getElementById('doc-view').innerHTML = window.WisdomMarkdown.render(content);
     exitEditMode();
-    showToast('Documentation saved');
+    notify('Documentation saved');
     loadPage(currentSectionId + '/' + currentPageId, false);
   } catch (err) {
-    showToast('Save failed: ' + err.message, 'warn');
+    notify('Save failed: ' + err.message, 'warn');
   }
 });
 

@@ -24,6 +24,54 @@ GEMINI_MODEL = "gemini-3.5-flash"
 DEPARTMENTS = ["operations"]
 DEFAULT_DEPARTMENT = "operations"
 
+# ── Knowledge Vault upload types ──
+# Extension → (mime_type, content_category). content_category drives which
+# processing branch a file takes: "text" keeps the original chunk/gap-analysis
+# pipeline (spreadsheets are extracted to text at upload time and join this
+# same branch); "pdf"/"image"/"audio"/"video" are handed to Gemini as native
+# binary media (Part.from_bytes) instead of being parsed with Python libraries.
+# Shared here (not in knowledge_base.py) so both the upload route and the
+# documentation-synthesis service can resolve a filename's category without a
+# route→service or service→route import.
+SUPPORTED_MIME_TYPES: dict[str, tuple[str, str]] = {
+    # Documents (text-family)
+    ".txt": ("text/plain", "text"),
+    ".md": ("text/plain", "text"),
+    ".html": ("text/html", "text"),
+    ".htm": ("text/html", "text"),
+    ".xml": ("text/xml", "text"),
+    ".csv": ("text/csv", "text"),
+    # Spreadsheets (extracted to a readable text dump at upload time)
+    ".xlsx": ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text"),
+    ".xls": ("application/vnd.ms-excel", "text"),
+    # Documents (native binary — Gemini reads it directly)
+    ".pdf": ("application/pdf", "pdf"),
+    # Images
+    ".png": ("image/png", "image"),
+    ".jpg": ("image/jpeg", "image"),
+    ".jpeg": ("image/jpeg", "image"),
+    ".webp": ("image/webp", "image"),
+    ".heic": ("image/heic", "image"),
+    ".heif": ("image/heif", "image"),
+    # Audio
+    ".wav": ("audio/wav", "audio"),
+    ".mp3": ("audio/mp3", "audio"),
+    ".aiff": ("audio/aiff", "audio"),
+    ".aac": ("audio/aac", "audio"),
+    ".ogg": ("audio/ogg", "audio"),
+    ".flac": ("audio/flac", "audio"),
+    # Video
+    ".mp4": ("video/mp4", "video"),
+    ".mpeg": ("video/mpeg", "video"),
+    ".mpg": ("video/mpeg", "video"),
+    ".mov": ("video/mov", "video"),
+    ".avi": ("video/avi", "video"),
+    ".webm": ("video/webm", "video"),
+    ".wmv": ("video/wmv", "video"),
+    ".3gp": ("video/3gpp", "video"),
+    ".flv": ("video/x-flv", "video"),
+}
+
 # ── KPI Schema ──
 SCHEMA_VERSION = "1.0"
 

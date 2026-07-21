@@ -38,6 +38,7 @@ ROUTING RULES:
 - Uploading or validating knowledge base documents (checking for conflicts/gaps against what's already on file) → kb-validator
 - Asking for a single department's KPI metrics or readiness snapshot → department-reporter
 - Asking for a cross-department executive summary or leadership email → corporate-report-agent
+- Generating or regenerating a Team Documentation project's full documentation set from its linked Knowledge Vault sources → documentation-master
 
 WHAT USERS SHOULD KNOW ABOUT THIS PLATFORM:
 - Course creation is NOT instant: turning a document into a learning path also pre-generates a short quiz for every lesson and a final assessment for every course, so quizzes are ready the moment a learner opens a lesson rather than generating on demand. This can take a while for a large document — if a user is waiting on it, they can continue working elsewhere and check back; generation keeps running in the background.
@@ -217,6 +218,65 @@ Return ONLY raw JSON (no markdown fences) matching EXACTLY this shape:
   "summary": "<2-4 sentence assessment of what this run says about release readiness>",
   "key_risks": ["<risk 1>", "<risk 2>"],
   "recommendations": ["<action 1>", "<action 2>"]
+}}""",
+        },
+        "draft_team_doc_page": {
+            "model": "gemini-3.5-flash",
+            "description": (
+                "Team Docs drafter — turns a Knowledge Vault upload into a "
+                "clean, structured project documentation page for the Team "
+                "Documentation section. "
+                "Placeholders: {project_name}, {source_filename}, {source_content}."
+            ),
+            "prompt_template": """You are a technical writer producing internal team documentation. A team member picked a document from their department's Knowledge Vault and wants it turned into a well-structured documentation page for the project "{project_name}".
+
+Source file: {source_filename}
+Source content:
+{source_content}
+
+Write the documentation page:
+- "title": a short, professional page title (roughly 3-8 words, title case) describing what this page documents — never a restatement of the filename.
+- "content_markdown": the full page as clean markdown. Start with a single "# " heading matching the title, then organize the material into logical "## " sections. Use bullet lists, numbered steps, and tables where the content naturally calls for them. Preserve every fact, figure, threshold, and procedure from the source — reorganize and clarify, but never invent information that is not in the source. Keep the tone factual and instructional.
+
+Return ONLY raw JSON (no markdown fences) matching EXACTLY this shape:
+{{
+  "title": "...",
+  "content_markdown": "..."
+}}""",
+        },
+        "generate_project_documentation": {
+            "model": "gemini-3.5-flash",
+            "description": (
+                "Documentation Master — synthesizes a full, onboarding-quality "
+                "documentation set for a Team Documentation project from every "
+                "Knowledge Vault source linked to it (PDFs, spreadsheets, "
+                "transcripts, glossaries, business-logic docs, DTPs — any mix). "
+                "Domain-agnostic: finance, e-commerce, and software projects "
+                "all go through the same synthesis. "
+                "Placeholders: {project_name}, {sources_text}."
+            ),
+            "prompt_template": """You are the Documentation Master: an onboarding documentation specialist who reads everything gathered for a project and writes the documentation set a brand-new team member would need to get up to speed. The project can be anything — a software system, a finance process, an e-commerce initiative, an internal business workflow — treat it as whatever the sources say it is, never assume "software" by default.
+
+Project: {project_name}
+
+Source material (text-family sources below; additional PDFs, images, audio, or video may be attached alongside this prompt as native media — read and use those too):
+{sources_text}
+
+Write the documentation as a set of pages. Include only the pages that genuinely apply to this project's material — do not force a section that has nothing behind it:
+- An overview page: what the project is and what it's for.
+- Business/domain context and requirements: who it serves, what problem it solves, what it must satisfy.
+- Process and data flow: how work actually moves through the system or workflow, grounded in the sources (diagrams described in words/tables are fine; there is no image output).
+- A glossary of terms, if the sources define or use domain-specific vocabulary worth capturing.
+- Implementation and code snippets — ONLY if the sources actually contain code, queries, configuration, or a genuine technical procedure (e.g. "create a staging layer in GCP"); quote real snippets from the sources, never invent syntax that isn't there.
+- Open questions or gaps — anything the sources leave unclear that an onboarding person would need to ask about.
+
+Ground every claim in the provided material. Never invent facts, numbers, or procedures that aren't in the sources. Write in clear, professional markdown (headings, lists, tables where useful).
+
+Return ONLY raw JSON (no markdown fences) matching EXACTLY this shape:
+{{
+  "pages": [
+    {{"title": "...", "content_markdown": "..."}}
+  ]
 }}""",
         },
     },

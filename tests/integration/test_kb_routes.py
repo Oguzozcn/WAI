@@ -39,6 +39,49 @@ def test_upload_txt_processes_and_completes(client):
     assert job["status"] == "completed"
 
 
+def test_upload_xlsx_extracts_text_and_processes_like_any_text_file(client):
+    import io
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Procedures"
+    ws.append(["Step", "Action", "Owner"])
+    ws.append([1, "Inspect forklift before every shift", "Operator"])
+    ws.append([2, "Log any defects in the maintenance sheet", "Operator"])
+    buf = io.BytesIO()
+    wb.save(buf)
+
+    resp = client.post(
+        "/api/kb/upload",
+        files={"file": ("low_level_design.xlsx", buf.getvalue(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        data={"department": "operations", "role": "manager"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "processing"
+
+    job = _poll_job(client, body["job_id"])
+    assert job["status"] == "completed"
+
+    store = DepartmentScopedStore("operations")
+    chunks_doc = store.read_knowledge_document("low_level_design_chunks")
+    assert chunks_doc is not None
+    all_text = " ".join(c["text"] for c in chunks_doc["chunks"])
+    assert "Inspect forklift before every shift" in all_text
+    assert "Procedures" in all_text  # sheet name heading made it into the extracted text
+
+
+def test_upload_rejects_unsupported_extension(client):
+    resp = client.post(
+        "/api/kb/upload",
+        files={"file": ("archive.zip", b"not a real zip", "application/zip")},
+        data={"department": "operations", "role": "manager"},
+    )
+    assert resp.status_code == 400
+
+
 def test_conflict_resolve_rejected_retracts_files(client, test_data_dir):
     # Seed an existing doc so the upload's concepts overlap → conflict → flagged.
     store = DepartmentScopedStore("operations")

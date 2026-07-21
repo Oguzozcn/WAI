@@ -1,3 +1,4 @@
+import io
 import json
 import re
 import uuid
@@ -6,6 +7,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
 from pydantic import BaseModel
 from pathlib import Path
+from openpyxl import load_workbook
 from src.services.curriculum_service import (
     identify_content_gaps,
     process_kb_upload_job,
@@ -15,51 +17,28 @@ from src.services.curriculum_service import (
 )
 from src.services.quiz_service import generate_quiz
 from src.core.database import DepartmentScopedStore
-from src.core.config import DEFAULT_DEPARTMENT
+from src.core.config import DEFAULT_DEPARTMENT, SUPPORTED_MIME_TYPES
 
 router = APIRouter(prefix="/api/kb", tags=["knowledge_base"])
 
-# Extension → (mime_type, content_category). content_category drives which
-# processing branch a file takes: "text" keeps the original chunk/gap-analysis
-# pipeline; "pdf"/"image"/"audio"/"video" are handed to Gemini as native binary
-# media (Part.from_bytes) instead of being parsed with Python libraries.
-SUPPORTED_MIME_TYPES: dict[str, tuple[str, str]] = {
-    # Documents (text-family)
-    ".txt": ("text/plain", "text"),
-    ".md": ("text/plain", "text"),
-    ".html": ("text/html", "text"),
-    ".htm": ("text/html", "text"),
-    ".xml": ("text/xml", "text"),
-    ".csv": ("text/csv", "text"),
-    # Documents (native binary — Gemini reads it directly)
-    ".pdf": ("application/pdf", "pdf"),
-    # Images
-    ".png": ("image/png", "image"),
-    ".jpg": ("image/jpeg", "image"),
-    ".jpeg": ("image/jpeg", "image"),
-    ".webp": ("image/webp", "image"),
-    ".heic": ("image/heic", "image"),
-    ".heif": ("image/heif", "image"),
-    # Audio
-    ".wav": ("audio/wav", "audio"),
-    ".mp3": ("audio/mp3", "audio"),
-    ".aiff": ("audio/aiff", "audio"),
-    ".aac": ("audio/aac", "audio"),
-    ".ogg": ("audio/ogg", "audio"),
-    ".flac": ("audio/flac", "audio"),
-    # Video
-    ".mp4": ("video/mp4", "video"),
-    ".mpeg": ("video/mpeg", "video"),
-    ".mpg": ("video/mpeg", "video"),
-    ".mov": ("video/mov", "video"),
-    ".avi": ("video/avi", "video"),
-    ".webm": ("video/webm", "video"),
-    ".wmv": ("video/wmv", "video"),
-    ".3gp": ("video/3gpp", "video"),
-    ".flv": ("video/x-flv", "video"),
-}
-
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # Gemini's inline-request limit (~20MB)
+
+_SPREADSHEET_EXTENSIONS = (".xlsx", ".xls")
+
+
+def _extract_spreadsheet_text(data: bytes) -> str:
+    """Dump every sheet's cell values into a readable text block so a
+    spreadsheet upload joins the same chunk/gap-analysis pipeline as any
+    other text-family document instead of needing its own content_category."""
+    workbook = load_workbook(io.BytesIO(data), data_only=True)
+    parts = []
+    for sheet in workbook.worksheets:
+        parts.append(f"## {sheet.title}")
+        for row in sheet.iter_rows(values_only=True):
+            cells = [str(v) if v is not None else "" for v in row]
+            if any(c.strip() for c in cells):
+                parts.append(" | ".join(cells))
+    return "\n".join(parts)
 
 @router.get("/documents")
 async def api_kb_documents(department: str = DEFAULT_DEPARTMENT):
@@ -184,8 +163,16 @@ async def api_kb_upload(
 
     # Text-family documents are decoded to str and keep the original chunking
     # pipeline; everything else (PDF/image/audio/video) stays as raw bytes and
-    # is handed to Gemini natively as binary media.
-    if content_category == "text":
+    # is handed to Gemini natively as binary media. Spreadsheets are also
+    # "text" category but need extraction rather than a plain UTF-8 decode.
+    if content_category == "text" and ext in _SPREADSHEET_EXTENSIONS:
+        try:
+            content = _extract_spreadsheet_text(content_bytes)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not read spreadsheet: {e}")
+        if not content.strip():
+            raise HTTPException(status_code=400, detail="Uploaded spreadsheet is empty.")
+    elif content_category == "text":
         try:
             content = content_bytes.decode("utf-8")
         except UnicodeDecodeError:

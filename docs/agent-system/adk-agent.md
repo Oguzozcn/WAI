@@ -20,12 +20,15 @@ Agent(
 
 The `SkillToolset` bundles two things:
 
-1. **Skills** — every directory under `.agents/skills/` is loaded via `list_skills_in_dir`/`load_skill_from_dir` on each build. A skill is a SKILL.md file: YAML frontmatter (`name`, `description`) + a markdown instruction body (the persona). The orchestrator selects a skill by intent, then follows its instructions.
+1. **Skills** — every directory under `.agents/skills/` is loaded via `list_skills_in_dir`/`load_skill_from_dir` on each build. A skill is a SKILL.md file: YAML frontmatter (`name`, `description`, `metadata.adk_additional_tools`) + a markdown instruction body (the persona). The orchestrator selects a skill by intent (calling ADK's `load_skill` meta-tool), then follows its instructions.
 2. **Function tools** (`_FUNCTION_TOOLS`) — plain Python functions from `src/services/`, grouped by primary skill:
    - *curriculum-builder*: `generate_learning_path`, `generate_daily_agenda`, `identify_content_gaps`, `trigger_curriculum_generation`
    - *knowledge-coach*: `generate_quiz`, `evaluate_answers`, `generate_reflection_prompt`, `get_user_progress`, `update_progress`, `determine_user_entry_path`, `check_bypass_eligibility`
    - *department-reporter*: `synthesize_department_kpi`, `get_department_readiness`, `flag_at_risk_users`
    - *corporate-report-agent*: `read_kpi_payloads`, `generate_executive_email`
+   - *documentation-master*: `generate_project_documentation`
+
+**A tool in this list is only actually callable once its skill's frontmatter declares it under `metadata.adk_additional_tools`** — this installed ADK version gates `additional_tools` behind skill activation, it doesn't flatly attach them. See [Skills & Hooks](/documentation?page=agent-system/skills-and-hooks)'s "Critical gotcha" section; `dev_console.py: _write_skill_file` keeps this metadata in sync with the grouping above automatically.
 
 ## Deliberately NOT exposed as tools
 

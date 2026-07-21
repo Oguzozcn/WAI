@@ -4,7 +4,7 @@ All routers are registered in `src/api/main.py`. Interactive Swagger docs for ev
 
 ## Pages (`src/api/routes/pages.py`, no prefix)
 
-Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (dashboard), `/learning-path`, `/lesson`, `/quiz`, `/knowledge-vault`, `/chat`, `/learning-materials`, `/learning-paths`, `/edit-learning-path`, `/catalog`, `/manager-dashboard`, `/dev-console`, `/settings`, `/documentation`, `/support`, `/support-console`, `/qa-console`. No server-side auth — role gating happens client-side on each page (see [Auth & Roles](/documentation?page=backend/auth-and-roles)).
+Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (dashboard), `/learning-path`, `/lesson`, `/quiz`, `/knowledge-vault`, `/chat`, `/learning-materials`, `/learning-paths`, `/edit-learning-path`, `/catalog`, `/manager-dashboard`, `/dev-console`, `/settings`, `/documentation`, `/team-documentation`, `/support`, `/support-console`, `/qa-console`. No server-side auth — role gating happens client-side on each page (see [Auth & Roles](/documentation?page=backend/auth-and-roles)).
 
 ## Auth (`/api/auth`)
 
@@ -56,7 +56,7 @@ Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (das
 
 ## Knowledge base (`/api/kb`) — manager-facing
 
-Upload & ingestion: `POST /upload` (multipart; async job), `GET /upload/status/{job_id}`, `POST /generate-from-input`, `GET /generate-status/{job_id}`.
+Upload & ingestion: `POST /upload` (multipart; async job), `GET /upload/status/{job_id}`, `POST /generate-from-input`, `GET /generate-status/{job_id}`. Supported types are `src/core/config.py: SUPPORTED_MIME_TYPES` — text-family (`.txt/.md/.html/.htm/.xml/.csv`), spreadsheets (`.xlsx/.xls`, extracted to text via `openpyxl` at upload time so they join the same chunking pipeline), and native binary media Gemini reads directly (PDF, images, audio, video).
 Documents: `GET /documents`, `POST /validate`, `DELETE /documents/{filename}`, `GET /documents/{filename}/versions`, `POST /documents/{filename}/versions/{version}/restore`.
 Conflicts: `GET /conflicts?status=pending`, `POST /conflicts/{conflict_id}/resolve` (approve/reject + `resolved_by`).
 Path authoring: `POST /learning-path/{path_id}/publish`, `PATCH /learning-path/{path_id}`, `DELETE /learning-path/{path_id}`, `GET /learning-path/{path_id}/full`, `PATCH …/course/{course_id}`, `PATCH …/lesson/{lesson_id}`, `PATCH /quiz/{quiz_id}`, `POST /lesson/{lesson_id}/regenerate`, `POST /quiz/{quiz_id}/regenerate`, `GET /catalog/inputs`, `GET /catalog/learning-paths`.
@@ -108,7 +108,7 @@ ITSM-style ticket lifecycle: `new → in_progress → on_hold → resolved → c
 
 ## UAT (`/api/uat`) — developer-facing
 
-Manual acceptance testing: a **predefined whole-app checklist** (`UAT_CHECKLIST` in `src/api/routes/uat.py`, ~23 items across auth, dashboard, lessons, quiz, catalog, chat, manager tools, developer tools, support, global UI). Starting a run snapshots the checklist into a persistent run doc (`data/uat_runs/<dept>/UAT-<n>.json`), the tester marks each item `pass`/`fail`/`blocked` (+ note), and the report endpoint finalizes the run and writes an AI summary. Every endpoint that touches runs requires `role=developer` (client-trusted).
+Manual acceptance testing: a **predefined whole-app checklist** (`UAT_CHECKLIST` in `src/api/routes/uat.py`, 26 items across auth, dashboard, lessons, quiz, catalog, chat, manager tools, Team Documentation, developer tools, support, global UI). Starting a run snapshots the checklist into a persistent run doc (`data/uat_runs/<dept>/UAT-<n>.json`), the tester marks each item `pass`/`fail`/`blocked` (+ note), and the report endpoint finalizes the run and writes an AI summary. Every endpoint that touches runs requires `role=developer` (client-trusted).
 
 | Endpoint | Purpose |
 |----------|---------|
@@ -120,3 +120,22 @@ Manual acceptance testing: a **predefined whole-app checklist** (`UAT_CHECKLIST`
 | `POST /runs/{run_id}/report` | Finalizes the run (`status=completed`) and generates the report via the `generate_uat_report` prompt template (dev_config `tools`) → `call_gemini_json`; **falls back to a deterministic report** (verdict from pass/fail/blocked/pending counts) when the LLM is unavailable. Re-callable to regenerate. |
 
 Report shape: `{verdict: go|conditional-go|no-go, headline, summary, key_risks[], recommendations[], source: llm|fallback, generated_at}`. Fallback verdict rules: nothing executed → `no-go`; clean and complete → `go`; ≥25% failed → `no-go`; otherwise `conditional-go`.
+
+## Team Documentation (`/api/team-docs`) — manager/employee-facing
+
+A team's own project documentation (`src/api/routes/team_docs.py`): any number of **projects** per department (`data/team_docs/<dept>/PROJ-<n>.json`), each holding markdown **pages** that start blank or are built from a Knowledge Vault upload. Every endpoint requires `role=manager` or `role=individual_contributor` (client-trusted, `_require_team_member`) — developers are excluded (they have `/documentation`). Creating and deleting a whole project additionally requires the manager role — an employee can open, edit, and add pages to any existing project, but cannot start or remove one.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /projects?role=…` | Project overviews (name, description, page_count, created_by, updated_at), latest-updated first. |
+| `POST /projects` | **Manager-only.** Create a project. Body `{name, description?, role, user_id, display_name}`. Sequential ids (`PROJ-0001`); 400 on a blank name. |
+| `GET /projects/{id}?role=…` | One full project (metadata + all pages). |
+| `PATCH /projects/{id}` | Rename / re-describe. Body `{role, name?, description?}`. |
+| `DELETE /projects/{id}?role=…` | **Manager-only.** Removes the project and all of its pages. |
+| `GET /sources?role=…` | Knowledge Vault uploads usable as page material — the `*_chunks` docs written at upload time (`{doc_id, filename, uploaded_at, chunk_count, topics}`); generated course docs are excluded. |
+| `PUT /projects/{id}/sources` | Replace a project's `linked_sources` list wholesale (the set of Knowledge Vault uploads its documentation should be synthesized from — independent of which already have their own page). Body `{role, source_doc_ids}`; 404 on an unknown doc id. |
+| `POST /projects/{id}/pages` | Add a page. Body `{role, user_id, display_name, mode, title?, content?, source_doc_id?}`. `mode=blank` needs a title; `mode=import` copies the upload's text (original raw file when readable, else the chunk text — media uploads store their Gemini summary there); `mode=ai_draft` runs the source through the `draft_team_doc_page` prompt template → `call_gemini_json` and **falls back to a plain import** when the LLM is unavailable. Sequential per-project ids (`page-0001`); pages carry `source` + `drafted_by` (`manual`/`import`/`ai`) provenance. |
+| `PUT /projects/{id}/pages/{page_id}` | Save an edit. Body `{role, content, title?}`; 400 on empty content. |
+| `DELETE /projects/{id}/pages/{page_id}?role=…` | Remove a page (any team member). |
+| `POST /projects/{id}/generate-documentation` | **Documentation Master.** Synthesizes the project's full documentation set from every source in `linked_sources` via `generate_project_documentation` (`src/services/documentation_service.py`) — the same function the ADK orchestrator calls from chat. 400 if no sources are linked; 502 if the LLM call fails or returns an unusable shape (there's no sound deterministic fallback for writing a whole document from scratch). On success, replaces any pages from a previous synthesis run (`drafted_by == "ai_synthesis"`) while leaving manually-written/imported pages untouched. |
+| `GET /projects/{id}/export?format=txt|pdf&scope=all|<page_id>&role=…` | Download one page or the whole project via the shared `src/core/doc_export.py` renderer (same TXT/PDF output as `/api/docs/export`). |

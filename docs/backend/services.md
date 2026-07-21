@@ -39,6 +39,11 @@
 - `read_kpi_payloads(...)` — Tier-3 read (via `KPIStoreReader`).
 - `generate_executive_email(...)` — formats an executive summary from KPI payloads (+ `_generate_recommendations`).
 
+## documentation_service.py — Documentation Master synthesis
+
+- `generate_project_documentation(project_id, department)` — reads a Team Documentation project's `linked_sources`, resolves each to raw text (`store.read_raw_document`) or a native binary `types.Part` (`store.read_raw_document_bytes` + `Part.from_bytes`, for PDF/image/audio/video) via `_resolve_source`, and makes one multimodal `call_gemini_json` call (prompt template `generate_project_documentation` in dev_config) asking for a structured, domain-agnostic multi-page documentation set. Writes the resulting pages tagged `drafted_by: "ai_synthesis"`, replacing only pages from a prior synthesis run — manually-written or single-page `ai_draft` pages are untouched. Returns `{"status": "no_sources"|"not_found"|"error"|"success", ...}`; there is no deterministic fallback for "write a whole document," so an LLM failure is reported honestly rather than papered over.
+- Both an ADK tool (`_FUNCTION_TOOLS` in `agent.py`, skill `documentation-master`) and the direct implementation behind `POST /api/team-docs/projects/{id}/generate-documentation` — same "one function, two callers" pattern as `trigger_curriculum_generation`.
+
 ## llm_client.py — the only Gemini gateway
 
 - `get_gemini_client()` — Vertex AI client via ADC (env: `GOOGLE_GENAI_USE_VERTEXAI`, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`).

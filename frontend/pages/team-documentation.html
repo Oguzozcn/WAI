@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Team Docs — WisdomAI</title>
+<meta name="description" content="Team documentation workspace: per-project docs built from Knowledge Vault uploads.">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="/css/dark-mode.css" rel="stylesheet">
+<script id="tailwind-config">try{
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-variant": "#dfe3e6",
+          "surface-bright": "#f6fafd",
+          "on-secondary-container": "#004966",
+          "secondary-fixed": "#c5e7ff",
+          "on-tertiary-fixed-variant": "#1f5100",
+          "on-surface-variant": "#404750",
+          "error-container": "#ffdad6",
+          "surface-container-low": "#f0f4f7",
+          "outline": "#707881",
+          "outline-variant": "#c0c7d1",
+          "primary": "#005787",
+          "on-primary-container": "#e0eeff",
+          "on-background": "#171c1f",
+          "on-error": "#ffffff",
+          "primary-container": "#0070ad",
+          "on-secondary": "#ffffff",
+          "on-surface": "#171c1f",
+          "tertiary-container": "#327a00",
+          "on-tertiary-container": "#bbff92",
+          "error": "#ba1a1a",
+          "secondary": "#00658c",
+          "surface-dim": "#d6dbdd",
+          "surface-container-lowest": "#ffffff",
+          "surface-container": "#eaeef1",
+          "surface-container-high": "#e5e9ec",
+          "tertiary": "#255f00",
+          "on-tertiary": "#ffffff",
+          "on-error-container": "#93000a",
+          "surface": "#f6fafd",
+          "secondary-container": "#2abcfd",
+          "on-primary": "#ffffff",
+          "background": "#f6fafd"
+        },
+        fontFamily: {
+          "display": ["Hanken Grotesk"],
+          "body": ["Inter"],
+          "mono": ["JetBrains Mono"]
+        }
+      }
+    }
+  }
+}catch(e){}</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background: #f6fafd; color: #171c1f; }
+  .font-display { font-family: 'Hanken Grotesk', sans-serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Rendered markdown (WisdomMarkdown output) ── */
+  #doc-view { line-height: 1.65; font-size: 14.5px; }
+  #doc-view .md-h1 { font-family: 'Hanken Grotesk', sans-serif; font-size: 1.9rem; font-weight: 800; margin: 0 0 1rem; line-height: 1.2; }
+  #doc-view .md-h2 { font-family: 'Hanken Grotesk', sans-serif; font-size: 1.35rem; font-weight: 700; margin: 2rem 0 .6rem; padding-top: .75rem; border-top: 1px solid #c0c7d1; }
+  #doc-view .md-h3 { font-family: 'Hanken Grotesk', sans-serif; font-size: 1.08rem; font-weight: 700; margin: 1.4rem 0 .4rem; }
+  #doc-view .md-h4 { font-size: .95rem; font-weight: 700; margin: 1.1rem 0 .3rem; }
+  #doc-view .md-p { margin: 0 0 .8rem; }
+  #doc-view .md-ul, #doc-view .md-ol { margin: 0 0 .9rem; padding-left: 1.4rem; }
+  #doc-view .md-ul { list-style: disc; }
+  #doc-view .md-ul-nested { margin: .2rem 0; list-style: circle; }
+  #doc-view .md-ol { list-style: decimal; }
+  #doc-view li { margin: .2rem 0; }
+  #doc-view .md-code-inline { font-family: 'JetBrains Mono', monospace; font-size: .85em; background: #eaeef1; border: 1px solid #dfe3e6; border-radius: 5px; padding: .08em .35em; }
+  #doc-view .md-pre { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.55; background: #eef2f5; border: 1px solid #dfe3e6; border-radius: 10px; padding: .9rem 1.1rem; margin: 0 0 1rem; overflow-x: auto; }
+  #doc-view .md-quote { border-left: 3px solid #005787; background: #eef4f9; border-radius: 0 8px 8px 0; padding: .6rem .9rem; margin: 0 0 .9rem; color: #33414d; }
+  #doc-view .md-hr { border: 0; border-top: 1px solid #c0c7d1; margin: 1.4rem 0; }
+  #doc-view .md-link { color: #005787; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+  #doc-view .md-table-wrap { overflow-x: auto; margin: 0 0 1rem; border: 1px solid #c0c7d1; border-radius: 10px; }
+  #doc-view .md-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  #doc-view .md-table th { text-align: left; font-weight: 700; background: #eaeef1; padding: .5rem .75rem; border-bottom: 1px solid #c0c7d1; white-space: nowrap; }
+  #doc-view .md-table td { padding: .45rem .75rem; border-bottom: 1px solid #dfe3e6; vertical-align: top; }
+  #doc-view .md-table tr:last-child td { border-bottom: 0; }
+
+  .dark #doc-view .md-h2 { border-top-color: #374151; }
+  .dark #doc-view .md-code-inline { background: #1f2937; border-color: #374151; }
+  .dark #doc-view .md-pre { background: #111827; border-color: #374151; }
+  .dark #doc-view .md-quote { background: #17222c; color: #b7c3cd; border-left-color: #2abcfd; }
+  .dark #doc-view .md-hr { border-top-color: #374151; }
+  .dark #doc-view .md-link { color: #7cc7ff; }
+  .dark #doc-view .md-table-wrap { border-color: #374151; }
+  .dark #doc-view .md-table th { background: #1f2937; border-bottom-color: #374151; }
+  .dark #doc-view .md-table td { border-bottom-color: #263241; }
+
+  #doc-editor-textarea { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; min-height: 55vh; }
+  .doc-nav-page.is-active { background: #e0eeff; color: #005787; font-weight: 600; }
+  .dark .doc-nav-page.is-active { background: #12324a; color: #7cc7ff; }
+  #download-menu { min-width: 220px; }
+</style>
+</head>
+<body class="min-h-screen bg-background text-on-background">
+    <script src="/js/auth.js"></script>
+
+<div id="sidebar-mount"></div>
+
+<main class="flex-1 overflow-y-auto sidebar-offset">
+  <header class="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-outline-variant px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">article</span>
+      <h1 class="font-display font-bold text-xl text-on-surface whitespace-nowrap">Team Docs</h1>
+      <span id="header-subtitle" class="text-xs text-on-surface-variant hidden lg:inline truncate">Your team's project documentation, built from Knowledge Vault uploads</span>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <!-- Projects view action -->
+      <button id="new-project-btn" type="button"
+        class="flex items-center gap-1.5 h-10 bg-primary text-on-primary text-sm font-semibold px-4 rounded-lg hover:opacity-90 transition-opacity">
+        <span class="material-symbols-outlined text-base">add</span> New Project
+      </button>
+      <!-- Project view actions -->
+      <button id="manage-sources-btn" type="button"
+        class="hidden items-center gap-1.5 h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-base">folder_managed</span> Manage Sources
+      </button>
+      <button id="generate-docs-btn" type="button"
+        class="hidden items-center gap-1.5 h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-base">auto_awesome</span> <span id="generate-docs-label">Generate Full Documentation</span>
+      </button>
+      <button id="add-page-btn" type="button"
+        class="hidden items-center gap-1.5 h-10 bg-primary text-on-primary text-sm font-semibold px-4 rounded-lg hover:opacity-90 transition-opacity">
+        <span class="material-symbols-outlined text-base">note_add</span> Add Page
+      </button>
+      <div class="relative">
+        <button id="download-btn" type="button"
+          class="hidden items-center gap-1.5 h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-base">download</span> Download
+          <span class="material-symbols-outlined text-base">expand_more</span>
+        </button>
+        <div id="download-menu" class="hidden absolute right-0 mt-2 bg-surface-container-lowest dark:bg-gray-800 border border-outline-variant rounded-xl shadow-lg py-2 z-30">
+          <div class="px-4 pt-1 pb-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">This page</div>
+          <button data-export="page-txt" class="download-option w-full text-left px-4 py-2 text-sm hover:bg-surface-container flex items-center gap-2"><span class="material-symbols-outlined text-base">article</span> Download as TXT</button>
+          <button data-export="page-pdf" class="download-option w-full text-left px-4 py-2 text-sm hover:bg-surface-container flex items-center gap-2"><span class="material-symbols-outlined text-base">picture_as_pdf</span> Download as PDF</button>
+          <div class="border-t border-outline-variant my-2"></div>
+          <div class="px-4 pt-1 pb-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Whole project</div>
+          <button data-export="all-txt" class="download-option w-full text-left px-4 py-2 text-sm hover:bg-surface-container flex items-center gap-2"><span class="material-symbols-outlined text-base">article</span> Download as TXT</button>
+          <button data-export="all-pdf" class="download-option w-full text-left px-4 py-2 text-sm hover:bg-surface-container flex items-center gap-2"><span class="material-symbols-outlined text-base">picture_as_pdf</span> Download as PDF</button>
+        </div>
+      </div>
+      <button id="edit-btn" type="button"
+        class="hidden items-center gap-1.5 h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-base">edit</span> Edit
+      </button>
+    </div>
+  </header>
+
+  <div class="px-6 py-6 max-w-[1280px] mx-auto">
+    <div id="td-error" class="hidden text-sm text-error mb-4 items-center gap-1">
+      <span class="material-symbols-outlined text-base align-middle">error</span>
+      <span id="td-error-msg"></span>
+    </div>
+
+    <!-- ═══ Projects view ═══ -->
+    <section id="projects-view">
+      <div id="projects-loading" class="text-sm text-on-surface-variant py-16 text-center">Loading projects…</div>
+      <div id="projects-empty" class="hidden text-center py-20">
+        <span class="material-symbols-outlined text-6xl text-on-surface-variant/40">topic</span>
+        <h2 class="font-display font-bold text-xl mt-3">No projects yet</h2>
+        <p id="projects-empty-copy" class="text-sm text-on-surface-variant mt-1 max-w-md mx-auto">Create your team's first project, then fill it with pages — written by hand or built from Knowledge Vault uploads.</p>
+        <button id="empty-new-project-btn" type="button"
+          class="mt-5 inline-flex items-center gap-1.5 h-10 bg-primary text-on-primary text-sm font-semibold px-5 rounded-lg hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-base">add</span> Create your first project
+        </button>
+      </div>
+      <div id="projects-grid" class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ═══ Project view ═══ -->
+    <section id="project-view" class="hidden">
+      <button id="back-btn" type="button" class="flex items-center gap-1 text-sm font-semibold text-primary hover:underline mb-4">
+        <span class="material-symbols-outlined text-base">arrow_back</span> All projects
+      </button>
+
+      <div class="flex gap-8 items-start">
+        <!-- Pages nav -->
+        <nav id="pages-nav" class="hidden md:block w-60 flex-shrink-0 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+          <div class="flex items-center gap-2 px-2 mb-1.5 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+            <span class="material-symbols-outlined text-[16px]">folder_open</span>
+            <span id="nav-project-name" class="truncate"></span>
+          </div>
+          <div id="pages-nav-list"></div>
+        </nav>
+
+        <!-- Content pane -->
+        <article class="flex-1 min-w-0">
+          <div id="doc-meta" class="hidden mb-4">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div class="flex items-center gap-2 text-xs text-on-surface-variant min-w-0">
+                <span id="doc-breadcrumb" class="font-semibold uppercase tracking-wide truncate"></span>
+                <span>·</span>
+                <span>Updated <span id="doc-updated-at"></span></span>
+                <span id="doc-origin" class="hidden items-center gap-1 border border-outline-variant rounded-full px-2 py-0.5"></span>
+              </div>
+              <button id="delete-page-btn" type="button"
+                class="flex items-center gap-1 text-xs font-semibold text-error hover:underline">
+                <span class="material-symbols-outlined text-sm">delete</span> Delete page
+              </button>
+            </div>
+          </div>
+
+          <div id="project-empty" class="hidden text-center py-20">
+            <span class="material-symbols-outlined text-6xl text-on-surface-variant/40">note_add</span>
+            <h2 class="font-display font-bold text-xl mt-3">This project has no pages yet</h2>
+            <p class="text-sm text-on-surface-variant mt-1 max-w-md mx-auto">Add the first page — start from scratch, or let AI draft it from a Knowledge Vault document.</p>
+            <button id="empty-add-page-btn" type="button"
+              class="mt-5 inline-flex items-center gap-1.5 h-10 bg-primary text-on-primary text-sm font-semibold px-5 rounded-lg hover:opacity-90 transition-opacity">
+              <span class="material-symbols-outlined text-base">note_add</span> Add the first page
+            </button>
+          </div>
+
+          <div id="doc-view" class="hidden text-on-surface"></div>
+
+          <!-- Editor -->
+          <div id="doc-editor" class="hidden">
+            <div class="flex items-center justify-between mb-3 gap-3 flex-wrap">
+              <input id="doc-editor-title" type="text" placeholder="Page title"
+                class="flex-1 min-w-[220px] h-9 rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-gray-900 text-on-surface text-sm font-semibold px-3 focus:ring-primary focus:border-primary">
+              <div class="flex items-center gap-2">
+                <button id="editor-cancel-btn" type="button"
+                  class="h-9 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">Cancel</button>
+                <button id="editor-save-btn" type="button"
+                  class="h-9 bg-primary text-on-primary text-sm font-semibold px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-base">save</span> Save
+                </button>
+              </div>
+            </div>
+            <textarea id="doc-editor-textarea" spellcheck="false"
+              class="w-full rounded-xl border border-outline-variant bg-surface-container-lowest dark:bg-gray-900 text-on-surface p-4 focus:ring-primary focus:border-primary"></textarea>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ═══ Project modal (create / edit) ═══ -->
+<div id="project-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
+  <div class="bg-surface-container-lowest dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6">
+    <h2 id="project-modal-title" class="font-display font-bold text-lg mb-4">New project</h2>
+    <label class="block text-sm font-semibold mb-1" for="project-name-input">Project name</label>
+    <input id="project-name-input" type="text" maxlength="80" placeholder="e.g. Warehouse Relocation 2026"
+      class="w-full h-10 rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-gray-900 text-on-surface text-sm px-3 focus:ring-primary focus:border-primary">
+    <label class="block text-sm font-semibold mt-4 mb-1" for="project-desc-input">Description <span class="font-normal text-on-surface-variant">(optional)</span></label>
+    <textarea id="project-desc-input" rows="3" maxlength="300" placeholder="What is this project about?"
+      class="w-full rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-gray-900 text-on-surface text-sm px-3 py-2 focus:ring-primary focus:border-primary"></textarea>
+    <div class="flex justify-end gap-2 mt-5">
+      <button id="project-modal-cancel" type="button" class="h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">Cancel</button>
+      <button id="project-modal-save" type="button" class="h-10 bg-primary text-on-primary text-sm font-semibold px-5 rounded-lg hover:opacity-90 transition-opacity">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Add page modal ═══ -->
+<div id="page-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
+  <div class="bg-surface-container-lowest dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg p-6">
+    <h2 class="font-display font-bold text-lg mb-4">Add a page</h2>
+
+    <div class="grid grid-cols-2 gap-2 mb-4">
+      <label class="page-mode-card flex items-start gap-2 border border-outline-variant rounded-xl p-3 cursor-pointer hover:bg-surface-container transition-colors">
+        <input type="radio" name="page-mode" value="blank" class="mt-0.5" checked>
+        <span>
+          <span class="block text-sm font-semibold">Blank page</span>
+          <span class="block text-xs text-on-surface-variant">Start from scratch and write markdown.</span>
+        </span>
+      </label>
+      <label class="page-mode-card flex items-start gap-2 border border-outline-variant rounded-xl p-3 cursor-pointer hover:bg-surface-container transition-colors">
+        <input type="radio" name="page-mode" value="vault" class="mt-0.5">
+        <span>
+          <span class="block text-sm font-semibold">From Knowledge Vault</span>
+          <span class="block text-xs text-on-surface-variant">Build the page from an uploaded document.</span>
+        </span>
+      </label>
+    </div>
+
+    <label class="block text-sm font-semibold mb-1" for="page-title-input">Page title <span id="page-title-optional" class="hidden font-normal text-on-surface-variant">(optional — AI/import will name it)</span></label>
+    <input id="page-title-input" type="text" maxlength="80" placeholder="e.g. Rollout Checklist"
+      class="w-full h-10 rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-gray-900 text-on-surface text-sm px-3 focus:ring-primary focus:border-primary">
+
+    <div id="vault-options" class="hidden mt-4">
+      <label class="block text-sm font-semibold mb-1" for="page-source-select">Knowledge Vault document</label>
+      <select id="page-source-select"
+        class="w-full h-10 rounded-lg border border-outline-variant bg-surface-container-lowest dark:bg-gray-900 text-on-surface text-sm px-3 focus:ring-primary focus:border-primary">
+        <option value="">Loading…</option>
+      </select>
+      <label class="flex items-center gap-2 mt-3 text-sm cursor-pointer">
+        <input id="page-ai-toggle" type="checkbox" checked class="rounded border-outline-variant text-primary focus:ring-primary">
+        <span><span class="font-semibold">Let AI draft the page</span> <span class="text-on-surface-variant">— restructures the upload into clean documentation (falls back to a plain import if unavailable)</span></span>
+      </label>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-5">
+      <button id="page-modal-cancel" type="button" class="h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">Cancel</button>
+      <button id="page-modal-save" type="button" class="h-10 bg-primary text-on-primary text-sm font-semibold px-5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base">note_add</span> <span id="page-modal-save-label">Add page</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Manage Sources modal ═══ -->
+<div id="sources-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
+  <div class="bg-surface-container-lowest dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg p-6">
+    <h2 class="font-display font-bold text-lg mb-1">Manage sources</h2>
+    <p class="text-sm text-on-surface-variant mb-4">Pick which Knowledge Vault uploads this project's documentation should be built from. "Generate Full Documentation" synthesizes a complete doc set from everything checked here.</p>
+    <div id="sources-list" class="max-h-72 overflow-y-auto border border-outline-variant rounded-xl divide-y divide-outline-variant">
+      <div class="px-4 py-3 text-sm text-on-surface-variant">Loading…</div>
+    </div>
+    <div class="flex justify-end gap-2 mt-5">
+      <button id="sources-modal-cancel" type="button" class="h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">Cancel</button>
+      <button id="sources-modal-save" type="button" class="h-10 bg-primary text-on-primary text-sm font-semibold px-5 rounded-lg hover:opacity-90 transition-opacity">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/sidebar.js"></script>
+<script src="/js/markdown.js"></script>
+<script>
+// Managers and employees share this workspace; developers have their own
+// Documentation section, so they get bounced back to the dashboard.
+const wisdomSession = window.WisdomAuth.requireAuth();
+if (wisdomSession && wisdomSession.role === 'developer') window.location.replace('/');
+
+const esc = window.WisdomMarkdown.escapeHtml;
+const roleQ = 'role=' + encodeURIComponent(wisdomSession ? wisdomSession.role : '');
+const isManager = wisdomSession && wisdomSession.role === 'manager';
+
+// Named "notify" (not "showToast") so it never shadows window.showToast —
+// WisdomSidebar.toast() checks for that global and delegates to it, so a
+// same-named wrapper here would recurse into itself forever.
+function notify(msg, type) {
+  if (window.WisdomSidebar && window.WisdomSidebar.toast) window.WisdomSidebar.toast(msg, type);
+  else alert(msg);
+}
+
+function setError(msg) {
+  const box = document.getElementById('td-error');
+  box.classList.toggle('hidden', !msg);
+  if (msg) document.getElementById('td-error-msg').textContent = msg;
+}
+
+async function api(path, opts) {
+  const res = await fetch('/api/team-docs' + path, opts);
+  if (!res.ok) {
+    const detail = (await res.json().catch(() => ({}))).detail || ('HTTP ' + res.status);
+    throw new Error(detail);
+  }
+  return res.json();
+}
+
+function jsonBody(extra) {
+  return {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({
+      role: wisdomSession.role,
+      user_id: wisdomSession.user_id,
+      display_name: wisdomSession.display_name || wisdomSession.user_id,
+    }, extra)),
+  };
+}
+
+let currentProject = null;   // full project doc while in project view
+let currentPageId = null;
+let vaultSources = null;     // cached /sources result
+
+// ── View switching + URL state ───────────────────────────────────────────────
+
+function show(id, on) { document.getElementById(id).classList.toggle('hidden', !on); }
+function showFlex(id, on) {
+  const el = document.getElementById(id);
+  el.classList.toggle('hidden', !on);
+  el.classList.toggle('flex', on);
+}
+
+function showProjectsView(push) {
+  currentProject = null;
+  currentPageId = null;
+  show('project-view', false);
+  show('projects-view', true);
+  showFlex('new-project-btn', isManager);
+  showFlex('manage-sources-btn', false);
+  showFlex('generate-docs-btn', false);
+  showFlex('add-page-btn', false);
+  showFlex('download-btn', false);
+  showFlex('edit-btn', false);
+  document.getElementById('header-subtitle').textContent = "Your team's project documentation, built from Knowledge Vault uploads";
+  if (push) history.pushState({}, '', '/team-documentation');
+  loadProjects();
+}
+
+function urlState() {
+  const params = new URLSearchParams(window.location.search);
+  return { project: params.get('project'), page: params.get('page') };
+}
+
+function pushProjectUrl() {
+  let url = '/team-documentation?project=' + encodeURIComponent(currentProject.project_id);
+  if (currentPageId) url += '&page=' + encodeURIComponent(currentPageId);
+  history.pushState({}, '', url);
+}
+
+// ── Projects view ────────────────────────────────────────────────────────────
+
+async function loadProjects() {
+  try {
+    const data = await api('/projects?' + roleQ);
+    show('projects-loading', false);
+    show('projects-empty', data.count === 0);
+    show('projects-grid', data.count > 0);
+    if (data.count > 0) renderProjectCards(data.projects);
+    setError('');
+  } catch (err) {
+    show('projects-loading', false);
+    setError('Could not load projects — ' + err.message);
+  }
+}
+
+function renderProjectCards(projects) {
+  const isManager = wisdomSession.role === 'manager';
+  const grid = document.getElementById('projects-grid');
+  grid.innerHTML = projects.map(p => {
+    const updated = p.updated_at ? new Date(p.updated_at).toLocaleDateString() : '—';
+    return '<div class="border border-outline-variant rounded-2xl bg-surface-container-lowest dark:bg-gray-800 p-5 flex flex-col gap-2 hover:shadow-md transition-shadow cursor-pointer" data-open="' + esc(p.project_id) + '">' +
+      '<div class="flex items-start justify-between gap-2">' +
+        '<div class="flex items-center gap-2 min-w-0">' +
+          '<span class="material-symbols-outlined text-primary">topic</span>' +
+          '<h3 class="font-display font-bold text-base truncate">' + esc(p.name) + '</h3>' +
+        '</div>' +
+        '<div class="flex items-center gap-1 flex-shrink-0">' +
+          '<button data-edit="' + esc(p.project_id) + '" title="Edit project" class="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container"><span class="material-symbols-outlined text-base">edit</span></button>' +
+          (isManager ? '<button data-delete="' + esc(p.project_id) + '" title="Delete project" class="p-1 rounded-lg text-error hover:bg-error-container"><span class="material-symbols-outlined text-base">delete</span></button>' : '') +
+        '</div>' +
+      '</div>' +
+      '<p class="text-sm text-on-surface-variant line-clamp-2 min-h-[2.4em]">' + (p.description ? esc(p.description) : '<span class="italic">No description</span>') + '</p>' +
+      '<div class="flex items-center gap-3 text-xs text-on-surface-variant mt-auto pt-2">' +
+        '<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">description</span>' + p.page_count + ' page' + (p.page_count === 1 ? '' : 's') + '</span>' +
+        '<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">update</span>' + updated + '</span>' +
+        '<span class="font-mono">' + esc(p.project_id) + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  grid.querySelectorAll('[data-open]').forEach(card => {
+    card.addEventListener('click', () => openProject(card.getAttribute('data-open'), null, true));
+  });
+  grid.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openProjectModal(projects.find(p => p.project_id === btn.getAttribute('data-edit')));
+    });
+  });
+  grid.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-delete');
+      if (!confirm('Delete project ' + id + ' and all of its pages? This cannot be undone.')) return;
+      try {
+        await api('/projects/' + id + '?' + roleQ, { method: 'DELETE' });
+        notify('Project deleted');
+        loadProjects();
+      } catch (err) { notify('Delete failed: ' + err.message, 'warn'); }
+    });
+  });
+}
+
+// ── Project modal (create / edit) ────────────────────────────────────────────
+
+let editingProjectId = null;
+
+function openProjectModal(existing) {
+  editingProjectId = existing ? existing.project_id : null;
+  document.getElementById('project-modal-title').textContent = existing ? 'Edit project' : 'New project';
+  document.getElementById('project-modal-save').textContent = existing ? 'Save' : 'Create';
+  document.getElementById('project-name-input').value = existing ? existing.name : '';
+  document.getElementById('project-desc-input').value = existing ? (existing.description || '') : '';
+  showFlex('project-modal', true);
+  document.getElementById('project-name-input').focus();
+}
+
+document.getElementById('new-project-btn').addEventListener('click', () => openProjectModal(null));
+document.getElementById('empty-new-project-btn').addEventListener('click', () => openProjectModal(null));
+document.getElementById('project-modal-cancel').addEventListener('click', () => showFlex('project-modal', false));
+
+document.getElementById('project-modal-save').addEventListener('click', async () => {
+  const name = document.getElementById('project-name-input').value.trim();
+  const description = document.getElementById('project-desc-input').value.trim();
+  if (!name) { notify('Give the project a name', 'warn'); return; }
+  try {
+    if (editingProjectId) {
+      await api('/projects/' + editingProjectId, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: wisdomSession.role, name: name, description: description }),
+      });
+      notify('Project updated');
+    } else {
+      const project = await api('/projects', jsonBody({ name: name, description: description }));
+      notify('Project "' + project.name + '" created');
+    }
+    showFlex('project-modal', false);
+    loadProjects();
+  } catch (err) { notify('Save failed: ' + err.message, 'warn'); }
+});
+
+// ── Project view ─────────────────────────────────────────────────────────────
+
+async function openProject(projectId, pageId, push) {
+  try {
+    currentProject = await api('/projects/' + encodeURIComponent(projectId) + '?' + roleQ);
+  } catch (err) {
+    setError('Could not open project "' + projectId + '" — ' + err.message);
+    showProjectsView(false);
+    return;
+  }
+  show('projects-view', false);
+  show('project-view', true);
+  showFlex('new-project-btn', false);
+  showFlex('manage-sources-btn', true);
+  showFlex('generate-docs-btn', true);
+  showFlex('add-page-btn', true);
+  document.getElementById('header-subtitle').textContent = currentProject.name;
+  document.getElementById('nav-project-name').textContent = currentProject.name;
+
+  const pages = currentProject.pages;
+  currentPageId = (pageId && pages.some(p => p.id === pageId)) ? pageId : (pages.length ? pages[0].id : null);
+  renderPagesNav();
+  renderCurrentPage();
+  if (push) pushProjectUrl();
+  setError('');
+  window.scrollTo(0, 0);
+}
+
+function renderPagesNav() {
+  const list = document.getElementById('pages-nav-list');
+  list.innerHTML = currentProject.pages.map(p =>
+    '<a href="#" data-page="' + esc(p.id) + '" class="doc-nav-page block px-3 py-1.5 rounded-lg text-sm text-on-surface hover:bg-surface-container transition-colors' +
+    (p.id === currentPageId ? ' is-active' : '') + '">' + esc(p.title) + '</a>'
+  ).join('') || '<div class="px-3 py-2 text-xs text-on-surface-variant italic">No pages yet</div>';
+  list.querySelectorAll('a[data-page]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentPageId = a.getAttribute('data-page');
+      exitEditMode();
+      renderPagesNav();
+      renderCurrentPage();
+      pushProjectUrl();
+      window.scrollTo(0, 0);
+    });
+  });
+}
+
+function currentPage() {
+  return currentProject.pages.find(p => p.id === currentPageId) || null;
+}
+
+function renderCurrentPage() {
+  const page = currentPage();
+  const hasPages = currentProject.pages.length > 0;
+  show('project-empty', !hasPages);
+  show('doc-meta', !!page);
+  show('doc-view', !!page);
+  showFlex('download-btn', !!page);
+  showFlex('edit-btn', !!page);
+  if (!page) return;
+
+  document.getElementById('doc-view').innerHTML = window.WisdomMarkdown.render(page.content);
+  document.getElementById('doc-breadcrumb').textContent = currentProject.name + ' / ' + page.title;
+  document.getElementById('doc-updated-at').textContent = page.updated_at
+    ? new Date(page.updated_at).toLocaleString() : '—';
+
+  const origin = document.getElementById('doc-origin');
+  if (page.source && page.source.type === 'vault_synthesis') {
+    const count = (page.source.filenames || page.source.doc_ids || []).length;
+    origin.innerHTML = '<span class="material-symbols-outlined text-sm">auto_awesome</span>' +
+      esc('Synthesized by Documentation Master from ' + count + ' source' + (count === 1 ? '' : 's'));
+    showFlex('doc-origin', true);
+  } else if (page.source && page.source.type === 'vault') {
+    const label = page.drafted_by === 'ai' ? 'AI-drafted from' : 'Imported from';
+    origin.innerHTML = '<span class="material-symbols-outlined text-sm">' +
+      (page.drafted_by === 'ai' ? 'auto_awesome' : 'folder') + '</span>' +
+      esc(label + ' ' + (page.source.filename || page.source.doc_id));
+    showFlex('doc-origin', true);
+  } else {
+    showFlex('doc-origin', false);
+  }
+}
+
+document.getElementById('back-btn').addEventListener('click', () => showProjectsView(true));
+
+document.getElementById('delete-page-btn').addEventListener('click', async () => {
+  const page = currentPage();
+  if (!page) return;
+  if (!confirm('Delete the page "' + page.title + '"?')) return;
+  try {
+    const data = await api('/projects/' + currentProject.project_id + '/pages/' + page.id + '?' + roleQ,
+                           { method: 'DELETE' });
+    currentProject = data.project;
+    currentPageId = currentProject.pages.length ? currentProject.pages[0].id : null;
+    renderPagesNav();
+    renderCurrentPage();
+    pushProjectUrl();
+    notify('Page deleted');
+  } catch (err) { notify('Delete failed: ' + err.message, 'warn'); }
+});
+
+// ── Edit mode ────────────────────────────────────────────────────────────────
+
+function enterEditMode() {
+  const page = currentPage();
+  if (!page) return;
+  show('doc-view', false);
+  show('doc-editor', true);
+  document.getElementById('doc-editor-title').value = page.title;
+  document.getElementById('doc-editor-textarea').value = page.content;
+  showFlex('edit-btn', false);
+}
+
+function exitEditMode() {
+  show('doc-editor', false);
+  if (currentPage()) {
+    show('doc-view', true);
+    showFlex('edit-btn', true);
+  }
+}
+
+document.getElementById('edit-btn').addEventListener('click', enterEditMode);
+document.getElementById('editor-cancel-btn').addEventListener('click', exitEditMode);
+document.getElementById('editor-save-btn').addEventListener('click', async () => {
+  const page = currentPage();
+  if (!page) return;
+  const content = document.getElementById('doc-editor-textarea').value;
+  const title = document.getElementById('doc-editor-title').value.trim();
+  try {
+    await api('/projects/' + currentProject.project_id + '/pages/' + page.id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: wisdomSession.role, content: content, title: title }),
+    });
+    page.content = content;
+    if (title) page.title = title;
+    exitEditMode();
+    renderPagesNav();
+    renderCurrentPage();
+    notify('Page saved');
+  } catch (err) { notify('Save failed: ' + err.message, 'warn'); }
+});
+
+// ── Add page modal ───────────────────────────────────────────────────────────
+
+function pageModalMode() {
+  return document.querySelector('input[name="page-mode"]:checked').value; // blank | vault
+}
+
+function syncPageModal() {
+  const vault = pageModalMode() === 'vault';
+  show('vault-options', vault);
+  show('page-title-optional', vault);
+  if (vault && vaultSources === null) loadVaultSources();
+}
+
+async function loadVaultSources() {
+  const select = document.getElementById('page-source-select');
+  try {
+    const data = await api('/sources?' + roleQ);
+    vaultSources = data.sources;
+    select.innerHTML = vaultSources.length
+      ? vaultSources.map(s => '<option value="' + esc(s.doc_id) + '">' + esc(s.filename) + '</option>').join('')
+      : '<option value="">No uploads in the Knowledge Vault yet</option>';
+  } catch (err) {
+    select.innerHTML = '<option value="">Could not load sources</option>';
+    notify('Could not load Knowledge Vault sources: ' + err.message, 'warn');
+  }
+}
+
+function openPageModal() {
+  document.getElementById('page-title-input').value = '';
+  syncPageModal();
+  showFlex('page-modal', true);
+  document.getElementById('page-title-input').focus();
+}
+
+document.querySelectorAll('input[name="page-mode"]').forEach(r => r.addEventListener('change', syncPageModal));
+document.getElementById('add-page-btn').addEventListener('click', openPageModal);
+document.getElementById('empty-add-page-btn').addEventListener('click', openPageModal);
+document.getElementById('page-modal-cancel').addEventListener('click', () => showFlex('page-modal', false));
+
+document.getElementById('page-modal-save').addEventListener('click', async () => {
+  const saveBtn = document.getElementById('page-modal-save');
+  const saveLabel = document.getElementById('page-modal-save-label');
+  const title = document.getElementById('page-title-input').value.trim();
+  const isVault = pageModalMode() === 'vault';
+  const body = { mode: 'blank', title: title };
+
+  if (isVault) {
+    const sourceDocId = document.getElementById('page-source-select').value;
+    if (!sourceDocId) { notify('Pick a Knowledge Vault document first', 'warn'); return; }
+    body.mode = document.getElementById('page-ai-toggle').checked ? 'ai_draft' : 'import';
+    body.source_doc_id = sourceDocId;
+  } else if (!title) {
+    notify('Give the page a title', 'warn');
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveLabel.textContent = body.mode === 'ai_draft' ? 'Drafting with AI…' : 'Adding…';
+  try {
+    const data = await api('/projects/' + currentProject.project_id + '/pages', jsonBody(body));
+    currentProject = data.project;
+    currentPageId = data.page_id;
+    showFlex('page-modal', false);
+    renderPagesNav();
+    renderCurrentPage();
+    pushProjectUrl();
+    notify('Page added');
+  } catch (err) {
+    notify('Could not add the page: ' + err.message, 'warn');
+  } finally {
+    saveBtn.disabled = false;
+    saveLabel.textContent = 'Add page';
+  }
+});
+
+// ── Manage Sources modal ─────────────────────────────────────────────────────
+
+async function openSourcesModal() {
+  const list = document.getElementById('sources-list');
+  list.innerHTML = '<div class="px-4 py-3 text-sm text-on-surface-variant">Loading…</div>';
+  showFlex('sources-modal', true);
+  if (vaultSources === null) {
+    try {
+      vaultSources = (await api('/sources?' + roleQ)).sources;
+    } catch (err) {
+      list.innerHTML = '<div class="px-4 py-3 text-sm text-error">Could not load sources: ' + esc(err.message) + '</div>';
+      return;
+    }
+  }
+  const linked = new Set(currentProject.linked_sources || []);
+  list.innerHTML = vaultSources.length
+    ? vaultSources.map(s =>
+        '<label class="flex items-center gap-2 px-4 py-2.5 text-sm cursor-pointer hover:bg-surface-container">' +
+          '<input type="checkbox" value="' + esc(s.doc_id) + '" ' + (linked.has(s.doc_id) ? 'checked' : '') +
+          ' class="rounded border-outline-variant text-primary focus:ring-primary">' +
+          '<span class="truncate">' + esc(s.filename) + '</span>' +
+        '</label>'
+      ).join('')
+    : '<div class="px-4 py-3 text-sm text-on-surface-variant italic">No uploads in the Knowledge Vault yet.</div>';
+}
+
+document.getElementById('manage-sources-btn').addEventListener('click', openSourcesModal);
+document.getElementById('sources-modal-cancel').addEventListener('click', () => showFlex('sources-modal', false));
+
+document.getElementById('sources-modal-save').addEventListener('click', async () => {
+  const checked = Array.from(document.querySelectorAll('#sources-list input[type="checkbox"]:checked'))
+    .map(cb => cb.value);
+  try {
+    currentProject = await api('/projects/' + currentProject.project_id + '/sources', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: wisdomSession.role, source_doc_ids: checked }),
+    });
+    showFlex('sources-modal', false);
+    notify('Sources updated (' + checked.length + ' linked)');
+  } catch (err) {
+    notify('Could not save sources: ' + err.message, 'warn');
+  }
+});
+
+// ── Generate Full Documentation ──────────────────────────────────────────────
+
+document.getElementById('generate-docs-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('generate-docs-btn');
+  const label = document.getElementById('generate-docs-label');
+  const linkedCount = (currentProject.linked_sources || []).length;
+  if (linkedCount === 0) {
+    notify('Link some Knowledge Vault sources first (Manage Sources)', 'warn');
+    return;
+  }
+  if (!confirm('Generate full documentation from ' + linkedCount + ' linked source' +
+              (linkedCount === 1 ? '' : 's') + '? This replaces any previously AI-synthesized pages.')) {
+    return;
+  }
+  btn.disabled = true;
+  label.textContent = 'Synthesizing full documentation… this can take a minute';
+  try {
+    const data = await api('/projects/' + currentProject.project_id + '/generate-documentation', jsonBody({}));
+    currentProject = data.project;
+    currentPageId = currentProject.pages.length ? currentProject.pages[currentProject.pages.length - 1].id : null;
+    renderPagesNav();
+    renderCurrentPage();
+    pushProjectUrl();
+    notify('Documentation generated: ' + data.pages_written.length + ' page' +
+          (data.pages_written.length === 1 ? '' : 's') + ' written');
+  } catch (err) {
+    notify('Documentation generation failed: ' + err.message, 'warn');
+  } finally {
+    btn.disabled = false;
+    label.textContent = 'Generate Full Documentation';
+  }
+});
+
+// ── Download menu ────────────────────────────────────────────────────────────
+
+const downloadBtn = document.getElementById('download-btn');
+const downloadMenu = document.getElementById('download-menu');
+downloadBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  downloadMenu.classList.toggle('hidden');
+});
+document.addEventListener('click', () => downloadMenu.classList.add('hidden'));
+downloadMenu.querySelectorAll('.download-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const kind = btn.getAttribute('data-export'); // page-txt | page-pdf | all-txt | all-pdf
+    const format = kind.endsWith('pdf') ? 'pdf' : 'txt';
+    const scope = kind.startsWith('all') ? 'all' : currentPageId;
+    downloadMenu.classList.add('hidden');
+    if (!scope) return;
+    window.location.href = '/api/team-docs/projects/' + encodeURIComponent(currentProject.project_id) +
+      '/export?format=' + format + '&scope=' + encodeURIComponent(scope) + '&' + roleQ;
+  });
+});
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('popstate', () => {
+  const state = urlState();
+  if (state.project) openProject(state.project, state.page, false);
+  else showProjectsView(false);
+});
+
+(function init() {
+  // Only a manager can create a project — employees can still open, read,
+  // and contribute pages to any existing one.
+  if (!isManager) {
+    document.getElementById('empty-new-project-btn').classList.add('hidden');
+    document.getElementById('projects-empty-copy').textContent =
+      'Ask your manager to create the project — you can add pages to it once it exists.';
+  }
+
+  const state = urlState();
+  if (state.project) {
+    show('projects-view', false);
+    openProject(state.project, state.page, false);
+  } else {
+    showProjectsView(false);
+  }
+})();
+</script>
+</body>
+</html>

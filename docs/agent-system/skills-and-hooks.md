@@ -1,8 +1,10 @@
 # Skills & Hooks
 
-## The five declarative skills (`.agents/skills/`)
+## The six declarative skills (`.agents/skills/`)
 
-Each skill is a directory containing a single `SKILL.md`: YAML frontmatter (`name`, `description`) plus a markdown instruction body — the persona the orchestrator adopts when it routes a conversation there. All five are editable live in the Agent Console (writes go through `PATCH /api/dev/config/skill/{skill_id}` → `_write_skill_file`).
+Each skill is a directory containing a single `SKILL.md`: YAML frontmatter (`name`, `description`) plus a markdown instruction body — the persona the orchestrator adopts when it routes a conversation there. All six are editable live in the Agent Console (writes go through `PATCH /api/dev/config/skill/{skill_id}` → `_write_skill_file`).
+
+**Frontmatter gotcha**: the loader parses `name:`/`description:` with a real YAML parser, so a bare `: ` (colon-space) anywhere inside the `description` value breaks it ("mapping values are not allowed here") — use an em dash or rephrase instead of a colon in that one line.
 
 | Skill | Persona / job |
 |-------|---------------|
@@ -11,14 +13,31 @@ Each skill is a directory containing a single `SKILL.md`: YAML frontmatter (`nam
 | `kb-validator` | Reviews knowledge-base uploads, surfaces conflicts with existing content for human resolution. |
 | `department-reporter` | Synthesizes department KPIs; answers manager questions from aggregates, never raw records. |
 | `corporate-report-agent` | Executive tier: reads only the PII-stripped KPI store (Tier 3), drafts executive summaries/emails. |
+| `documentation-master` | Synthesizes a Team Documentation project's full doc set (overview, business context, requirements, process flow, glossary, code snippets where genuinely present) from every Knowledge Vault source linked to the project — any project domain, not just software. |
 
 Skills are re-read from disk on every agent build, so a persona edit is live on the next chat message.
 
 ### Editing rules
 
-- Keep frontmatter to `name:` and `description:` — the loader expects exactly that shape.
+- Frontmatter is `name:`, `description:`, and (if the skill has tools) a `metadata: { adk_additional_tools: [...] }` block — see the gotcha below before touching this by hand.
 - The body is instruction text, not documentation: write imperatives ("When the user asks X, call tool Y").
 - Never instruct a skill to decide remediation — that is code policy (see below and [Remediation System](/documentation?page=learning-engine/remediation)).
+
+### Critical gotcha: `adk_additional_tools` — without it, a skill's tools are invisible to the model
+
+The installed `google-adk` version's `SkillToolset` does **not** flatly expose every `additional_tools` function to the model on every turn. A function tool only becomes callable once the model has activated its skill (via the `load_skill` meta-tool) **and** that skill's frontmatter lists the tool under `metadata.adk_additional_tools`. Omit that key and the model can still route to the skill (it reads the persona fine) but any attempt to call its tool fails with `Tool '<name>' not found` — or, worse, the model just improvises a plausible-sounding answer in chat instead of actually calling the tool, so nothing looks broken until you check whether real work happened server-side (a stored quiz, a written page, etc.).
+
+`_write_skill_file` (`dev_console.py`) always re-derives this metadata from `SKILL_TOOL_GROUPS` — the same mapping the graph view uses — rather than trusting whatever was on disk, so a persona edit through the Agent Console can never silently drop it. **If you add a tool to `SKILL_TOOL_GROUPS`, the fix is automatic on the next console save; if you're hand-editing a SKILL.md file directly, add the block yourself:**
+```yaml
+---
+name: my-skill
+description: ...
+metadata:
+  adk_additional_tools:
+    - my_tool_function
+---
+```
+This was discovered (and every existing skill's SKILL.md fixed) while building Documentation Master (July 2026) — chat-driven tool calls for all six skills were silently non-functional before this fix, not just the new one.
 
 ## luck_elimination_hook (`src/agents/hooks.py`)
 

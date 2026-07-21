@@ -28,13 +28,14 @@ Every page's `<head>` carries the same boilerplate (copy it from `dev-console.ht
 | `/support` | support.html | employee/manager | Report-an-issue form (area, issue type, subject, description) + "My tickets" tracker with comments. Developers get redirected to the console |
 | `/support-console` | support-console.html | developer | ServiceNow-style queue: status stat cards, filters/search, triage panel (status/priority/assignee/work notes), activity timeline |
 | `/qa-console` | qa-console.html | developer | Manual UAT: predefined whole-app checklist grouped by area, per-item Launch pop-up + pass/fail/blocked buttons with notes, AI-generated run report (verdict/risks/recommendations), persistent run history |
+| `/team-documentation` | team-documentation.html | employee/manager | Team Docs: per-project documentation workspace — project card grid, docs-style page viewer/editor (`markdown.js`), Add-Page modal (blank / import from Knowledge Vault / AI-drafted), Manage Sources modal (curates a project's `linked_sources`), "Generate Full Documentation" button (Documentation Master — synthesizes the whole doc set from every linked source in one pass), TXT/PDF export. Only a manager can create or delete a project; employees can open, edit, and add pages to any existing one. Developers get redirected to `/` (they have `/documentation`) |
 
 ## Sidebar (`frontend/js/sidebar.js`)
 
 A single IIFE that renders into `<div id="sidebar-mount">` on every page.
 
-- `NAV_LINKS` — the base list (Dashboard, Learning Path, Knowledge Vault, Team Dashboards, Catalog).
-- `visibleNavLinks()` — role filtering: non-managers lose the manager-only hrefs; developers get `Agent Console` (`/dev-console`), `Documentation` (`/documentation`) and `UAT Console` (`/qa-console`) appended.
+- `NAV_LINKS` — the base list (Dashboard, Learning Path, Knowledge Vault, Team Dashboards, Catalog, Team Docs).
+- `visibleNavLinks()` — role filtering: non-managers lose the manager-only hrefs; developers lose the team-only hrefs (`/team-documentation`) and get `Agent Console` (`/dev-console`), `Documentation` (`/documentation`) and `UAT Console` (`/qa-console`) appended.
 - Bottom block: account card (name/role/logout), theme toggle, Settings link. The Support link is role-aware: developers go to `/support-console`, everyone else to `/support`.
 - `isActive(href)` — **exact** pathname match (trailing slashes stripped; `/` only matches root). Query strings don't break matching — which is why multi-view pages (documentation, lesson, quiz) use query params, never sub-paths.
 - Collapse state persists in `localStorage`; the access-denied toast fires when the URL carries `?denied=…` (then strips it via `history.replaceState`).
