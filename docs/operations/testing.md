@@ -35,7 +35,7 @@ python3 -m pytest tests/ -q          # the regression gate — keep it green
 python3 -m pytest tests/unit -q      # fast inner loop
 ```
 
-Suite status as of 2026-07-21: **184 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`.
+Suite status as of 2026-07-22: **187 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`.
 
 ## Conventions
 

@@ -11,6 +11,7 @@
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet">
     <script id="tailwind-config">try {
             tailwind.config = {
                 darkMode: "class",
@@ -127,15 +128,14 @@
             </div>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-3">
-                    <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+                    <div id="header-avatar-mount"></div>
                 </div>
             </div>
         </header>
         <!-- Page Content -->
         <main class="flex-1 w-full max-w-[1200px] mx-auto p-margin-mobile md:p-margin-desktop sidebar-offset">
             <!-- Header -->
-            <div class="mb-8">
+            <div class="mb-8 fade-up">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h2 class="font-headline-lg text-headline-lg text-on-surface">Catalog</h2>
@@ -145,7 +145,7 @@
                 </div>
             </div>
             <!-- Path Grid -->
-            <div id="paths-grid" class="grid grid-cols-1 md:grid-cols-2 gap-card-gap">
+            <div id="paths-grid" class="grid grid-cols-1 md:grid-cols-2 gap-card-gap fade-up-2">
                 <!-- Loading placeholder -->
                 <div class="col-span-full text-center py-12 text-on-surface-variant">
                     <span class="material-symbols-outlined text-4xl mb-2 block animate-spin">sync</span>

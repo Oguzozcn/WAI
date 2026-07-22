@@ -10,7 +10,7 @@
     "lp_ff5b91ff"
   ],
   "completed_courses": [],
-  "current_course_id": "course_fae3a35f",
+  "current_course_id": "course_03",
   "quiz_attempts": [
     {
       "quiz_id": "quiz_039e4c68",
@@ -144,7 +144,7 @@
   },
   "bypass_locked": false,
   "bypass_attempts": 0,
-  "readiness_score": 0.15,
+  "readiness_score": 0.07,
   "is_at_risk": true,
   "blocked_by": "",
   "manager_id": "manager",
@@ -192,8 +192,8 @@
     }
   },
   "enrolled_at": "2026-06-25T09:00:00Z",
-  "last_activity_at": "2026-07-20T06:46:37.300151",
-  "last_updated": "2026-07-21T07:43:59.429822+00:00",
+  "last_activity_at": "2026-07-22T12:57:25.028396+00:00",
+  "last_updated": "2026-07-22T12:57:25.030022+00:00",
   "psychometric_ability": -4.0,
   "remedial_courses": [
     {

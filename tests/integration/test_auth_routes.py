@@ -35,3 +35,22 @@ def test_login_wrong_password_401(client):
 def test_login_unknown_user_401(client):
     resp = client.post("/api/auth/login", json={"user_id": "nobody", "password": "whatever"})
     assert resp.status_code == 401
+
+
+def test_directory_lookup_returns_display_name_without_password(client):
+    resp = client.get("/api/auth/directory/manager")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body == {"user_id": "manager", "display_name": "Jordan Lee", "role": "manager"}
+    assert "password" not in body
+
+
+def test_directory_lookup_unknown_user_404(client):
+    resp = client.get("/api/auth/directory/nobody")
+    assert resp.status_code == 404
+
+
+def test_profile_page_serves(client):
+    resp = client.get("/profile")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers["content-type"]

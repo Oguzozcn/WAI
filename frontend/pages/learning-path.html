@@ -5,6 +5,7 @@
 <title class="">WisdomAI - Learning Path</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <style>
@@ -138,7 +139,7 @@
 <!-- TopNavBar -->
 <header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-20 sticky top-0 z-50 bg-surface border-b border-outline-variant sidebar-offset sidebar-offset-header">
 <div class="flex items-center gap-8"><button id="mobile-menu-btn" class="md:hidden p-2"><span class="material-symbols-outlined">menu</span></button><div class="relative hidden sm:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span><input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-56 md:w-64 lg:w-80 focus:ring-2 focus:ring-primary text-sm h-10" id="global-search-input" placeholder="Search courses, paths..." type="text"></div></div>
-<div class="flex items-center gap-4"><div class="flex items-center gap-3"><img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY"></div></div>
+<div class="flex items-center gap-4"><div id="header-avatar-mount"></div></div>
 </header>
 <div class="flex max-w-[1200px] mx-auto">
 <!-- SideNavBar (shared component) -->
@@ -146,7 +147,7 @@
 <!-- Main Content Area -->
 <main class="sidebar-offset p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
 <!-- Learning Path Central Column -->
-<div class="xl:col-span-8 flex flex-col items-center">
+<div class="xl:col-span-8 flex flex-col items-center fade-up">
 <!-- Path Header -->
 <div class="w-full mb-12 text-center lg:text-left">
 <div class="flex items-center gap-2 mb-4 justify-center lg:justify-start">
@@ -166,7 +167,7 @@
 <div id="learning-path-container" class="serpentine-path w-full"></div>
 </div>
 <!-- Path Stats Sidebar -->
-<div id="lp-stats-sidebar" class="xl:col-span-4 space-y-6">
+<div id="lp-stats-sidebar" class="xl:col-span-4 space-y-6 fade-up-2">
 <!-- Progress Card -->
 <section id="lp-stats-section" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
 <h4 class="font-headline-md text-on-surface mb-4">Path Stats</h4>

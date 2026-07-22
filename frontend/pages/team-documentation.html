@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet">
 <script id="tailwind-config">try{
   tailwind.config = {
     darkMode: "class",
@@ -153,6 +154,7 @@
         class="hidden items-center gap-1.5 h-10 border border-outline-variant text-on-surface text-sm font-semibold px-4 rounded-lg hover:bg-surface-container transition-colors">
         <span class="material-symbols-outlined text-base">edit</span> Edit
       </button>
+      <div id="header-avatar-mount"></div>
     </div>
   </header>
 
@@ -163,7 +165,7 @@
     </div>
 
     <!-- ═══ Projects view ═══ -->
-    <section id="projects-view">
+    <section id="projects-view" class="fade-up">
       <div id="projects-loading" class="text-sm text-on-surface-variant py-16 text-center">Loading projects…</div>
       <div id="projects-empty" class="hidden text-center py-20">
         <span class="material-symbols-outlined text-6xl text-on-surface-variant/40">topic</span>
@@ -178,7 +180,7 @@
     </section>
 
     <!-- ═══ Project view ═══ -->
-    <section id="project-view" class="hidden">
+    <section id="project-view" class="hidden fade-up">
       <button id="back-btn" type="button" class="flex items-center gap-1 text-sm font-semibold text-primary hover:underline mb-4">
         <span class="material-symbols-outlined text-base">arrow_back</span> All projects
       </button>

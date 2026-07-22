@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet">
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -130,9 +131,8 @@
 </div>
 </div>
 <div class="flex items-center gap-6">
-<div class="flex items-center gap-3">
-<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvkqfsn8zgmmZlLSYYnIrP6Mv2FcPJT3H5troA3U6-0ACK6daZ405Y_vsgx-RYYmm5J6SRXxPNAnh20CtOrQCX1exrljUQoNhLFaG30H9ZBUhuJ7xWcraztgpBJLXIK4jS5w1Acj-HUFIQl4XnXXBd_Q8HysY7nHEp8iWn9vGPL0fJIM8i1H1p8d6Exq22_bZxjsEFriSkNoeXw-E2G0CUx8NNK0NsQuYdEAU7vCdCkyFtFAU68kHZ">
-</div></div></header>
+<div id="header-avatar-mount"></div>
+</div></header>
 <div class="flex min-h-[calc(100vh-64px)]">
 <!-- Main Canvas -->
 <main class="flex-1 sidebar-offset p-gutter md:p-margin-desktop max-w-[1200px] mx-auto w-full">
@@ -146,7 +146,7 @@
 </nav>
 <div class="grid grid-cols-12 gap-gutter">
 <!-- Content Area -->
-<div class="col-span-12 lg:col-span-8">
+<div class="col-span-12 lg:col-span-8 fade-up">
 <!-- Lesson Hero Card -->
 <section class="bg-primary-container text-on-primary-container rounded-3xl p-8 mb-gutter relative overflow-hidden shadow-lg">
 <div class="relative z-10">
@@ -189,7 +189,7 @@
 </div>
 </div>
 <!-- Sidebar Progress -->
-<aside class="col-span-12 lg:col-span-4 space-y-gutter">
+<aside class="col-span-12 lg:col-span-4 space-y-gutter fade-up-2">
 <!-- Progress Sidebar Card -->
 <div class="bg-surface border border-outline-variant rounded-3xl p-6">
 <h3 class="font-headline-md text-headline-md mb-6">Content Progress</h3>

@@ -45,7 +45,7 @@ Backs `data/dev_config.json` with self-healing defaults (`_deep_merge_defaults` 
 
 ## doc_export.py — shared TXT/PDF rendering
 
-`export_txt(title, entries)` / `export_pdf(title, entries)` render a list of `{section_title, page_title, content}` markdown pages into a downloadable plain-text bundle or an fpdf2-generated PDF (cover page + TOC when multi-page; latin-1-safe character mapping). Extracted from `docs.py` (July 2026) so the developer docs (`/api/docs/export`) and Team Documentation (`/api/team-docs/projects/{id}/export`) share one renderer.
+`export_txt(title, entries)` / `export_pdf(title, entries)` render a list of `{section_title, page_title, content}` markdown pages into a downloadable plain-text bundle or an fpdf2-generated PDF (cover page + TOC when multi-page; latin-1-safe character mapping). Extracted from `docs.py` (July 2026) so the developer docs (`/api/docs/export`) and Team Documentation (`/api/team-docs/projects/{id}/export`) share one renderer. Body text renders left-aligned (`align="L"`) rather than fpdf2's justify default, which stretches word spacing on every wrapped line and reads as broken formatting; markdown tables are collected as a contiguous `|...|` block and rendered as a real bordered `fpdf2` table (`_parse_table_block` splits header/body on the `---|---` separator row) instead of one raw pipe-delimited line at a time.
 
 ## data_compliance_gate.py — GDPR gate
 

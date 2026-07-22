@@ -1,6 +1,7 @@
 <!DOCTYPE html><html class="light" lang="en"><head>
 <script>(function(){try{var t=localStorage.getItem('wai-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();</script><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="/css/dark-mode.css" rel="stylesheet"><script id="tailwind-config">try{
+<link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet"><script id="tailwind-config">try{
   tailwind.config = {
     darkMode: "class",
     theme: {
@@ -125,16 +126,14 @@
 </div>
 <div class="flex items-center gap-6">
 <!-- Profile Avatar -->
-<div class="flex items-center gap-3">
-<img id="profile-avatar" alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
-</div>
+<div id="header-avatar-mount"></div>
 </div>
 </header>
 <!-- Main Canvas -->
 <main class="sidebar-offset p-margin-mobile md:p-margin-desktop bg-background min-h-[calc(100vh-4rem)]">
 <div class="max-w-[1200px] mx-auto w-full flex flex-col xl:flex-row gap-gutter items-start">
 <!-- Middle Column -->
-<div class="flex-1 w-full flex flex-col gap-8">
+<div class="flex-1 w-full flex flex-col gap-8 fade-up">
 <!-- Hero Section -->
 <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 lg:p-8 flex flex-col shadow-sm relative overflow-hidden">
 <div class="absolute top-0 left-0 w-2 h-full bg-primary"></div>
@@ -173,7 +172,7 @@ Start <span class="material-symbols-outlined">chevron_right</span>
 </div>
 </div>
 <!-- Right Sidebar -->
-<aside class="w-full xl:w-80 flex-shrink-0 flex flex-col gap-6 px-6">
+<aside class="w-full xl:w-80 flex-shrink-0 flex flex-col gap-6 px-6 fade-up-2">
 <!-- Progress -->
 <div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-4">
 <h3 class="font-headline-md text-lg mb-4 text-on-surface">Progress</h3>
@@ -182,14 +181,14 @@ Start <span class="material-symbols-outlined">chevron_right</span>
 <div class="w-8 h-8 flex-shrink-0 bg-surface-container-low rounded-lg flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">menu_book</span></div>
 <div>
 <p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 truncate">Courses</p>
-<p class="font-stats-number text-xl leading-none text-on-surface" id="dash-course-count">12</p>
+<p class="font-stats-number text-xl leading-none text-on-surface" id="dash-course-count">—</p>
 </div>
 </div>
 <div class="flex items-center gap-2 overflow-hidden">
 <div class="w-8 h-8 flex-shrink-0 bg-surface-container-low rounded-lg flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">school</span></div>
 <div>
 <p class="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5 truncate">Lessons</p>
-<p class="font-stats-number text-xl leading-none text-on-surface" id="dash-lesson-count">156</p>
+<p class="font-stats-number text-xl leading-none text-on-surface" id="dash-lesson-count">—</p>
 </div>
 </div>
 </div>
@@ -254,12 +253,7 @@ document.querySelectorAll('.squishy-button').forEach(button => {
     button.addEventListener('mouseleave', () => { button.style.transform = 'scale(1) translateY(0)'; });
 });
 
-// ─── Mobile menu toggle + Support/Settings toasts are handled by sidebar.js ───
-
-const profileAvatar = document.getElementById('profile-avatar');
-if (profileAvatar) {
-    profileAvatar.addEventListener('click', () => { window.location.href = '/settings'; });
-}
+// ─── Mobile menu toggle + Support/Settings toasts + header avatar are handled by sidebar.js ───
 
 // ─── Tab Switcher ─────────────────────────────────────────────────────────────
 let activeTab = 'activities';

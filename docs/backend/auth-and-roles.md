@@ -10,6 +10,8 @@
 
 Roles come from `job_level` in credentials: `manager`, `developer`, or `individual_contributor`.
 
+`GET /api/auth/directory/{user_id}` is a small public identity lookup (display_name + role, never the password) used by `profile.html` to resolve a `manager_id` like `"manager"` into a real name ("Reports to Jordan Lee") — 404 if the user_id is unknown.
+
 ## Client-side gating (`frontend/js/auth.js`)
 
 `window.WisdomAuth` exposes:
@@ -25,7 +27,7 @@ Every page calls one of these in its inline script, immediately after `sidebar.j
 
 | Page | Requirement |
 |------|-------------|
-| `/`, `/learning-path`, `/lesson`, `/quiz`, `/catalog`, `/chat`, `/learning-paths`, `/settings` | any authenticated user |
+| `/`, `/learning-path`, `/lesson`, `/quiz`, `/catalog`, `/chat`, `/learning-paths`, `/settings`, `/profile` | any authenticated user |
 | `/support` | any authenticated user (developers are redirected to `/support-console`) |
 | `/team-documentation` | `requireAuth()` + in-page redirect: developers are bounced to `/` (they have `/documentation`) |
 | `/knowledge-vault`, `/manager-dashboard`, `/edit-learning-path`, `/learning-materials` | `requireRole('manager')` |

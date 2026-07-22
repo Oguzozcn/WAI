@@ -18,7 +18,8 @@ Every page's `<head>` carries the same boilerplate (copy it from `dev-console.ht
 | `/catalog` | catalog.html | any user | Published paths; click to enroll |
 | `/learning-paths` | learning-paths.html | any user | Enrolled/available paths overview (manager: drafts + publish) |
 | `/chat` | chat.html | any user | Coach chat → `POST /api/chat` (ADK agent) |
-| `/settings` | settings.html | any user | Account info, theme toggle, logout |
+| `/settings` | settings.html | any user | Compact account summary (links to `/profile`), theme toggle, logout |
+| `/profile` | profile.html | any user | Read-only identity (avatar, role, reports-to) + learning snapshot (courses completed, quizzes taken, readiness score, active gaps, status, member since) sourced from `GET /api/user/{id}/progress` |
 | `/knowledge-vault` | knowledge-vault.html | manager | Document upload, ingestion jobs, conflict review |
 | `/learning-materials` | learning-materials.html | manager | KB document management, versions |
 | `/edit-learning-path` | edit-learning-path.html | manager | Course/lesson/quiz editing with markdown preview + regenerate |
@@ -39,7 +40,8 @@ A single IIFE that renders into `<div id="sidebar-mount">` on every page.
 - Bottom block: account card (name/role/logout), theme toggle, Settings link. The Support link is role-aware: developers go to `/support-console`, everyone else to `/support`.
 - `isActive(href)` — **exact** pathname match (trailing slashes stripped; `/` only matches root). Query strings don't break matching — which is why multi-view pages (documentation, lesson, quiz) use query params, never sub-paths.
 - Collapse state persists in `localStorage`; the access-denied toast fires when the URL carries `?denied=…` (then strips it via `history.replaceState`).
-- Public surface: `window.WisdomSidebar = { toast, isActive, applyTheme, isDarkMode }`.
+- Public surface: `window.WisdomSidebar = { toast, isActive, applyTheme, isDarkMode, initials }`.
+- Header avatar: a page adds `<div id="header-avatar-mount"></div>` to its TopAppBar and `sidebar.js` fills it with a session-driven initials circle linking to `/profile` — the single source for what used to be 10 pages' worth of hand-copied, unrelated-to-the-user stock-photo `<img>` tags.
 
 ## Adding a new page — checklist
 

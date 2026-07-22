@@ -8,6 +8,7 @@
     <title>WisdomAI | Learning Materials</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
         rel="stylesheet">
@@ -154,8 +155,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-3">
-                    <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
+                    <div id="header-avatar-mount"></div>
                 </div>
             </div>
         </header>
@@ -172,7 +172,7 @@
                     <span class="text-on-surface font-semibold">Learning Materials</span>
                 </nav>
                 <!-- Header Section -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 fade-up">
                     <div>
                         <h2 class="font-headline-lg text-headline-lg text-on-surface">Learning Materials</h2>
                         <p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage and access your
@@ -194,7 +194,7 @@
                     </div>
                 </div>
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 fade-up-2">
                     <div
                         class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant flex items-center justify-between">
                         <div>
@@ -228,7 +228,7 @@
                 </div>
                 <!-- File List Table -->
                 <div
-                    class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm fade-up-3">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>

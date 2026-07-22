@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="/css/dark-mode.css" rel="stylesheet">
+<link href="/css/entrance.css" rel="stylesheet">
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -187,16 +188,14 @@
 </div>
 </div>
 <div class="flex items-center gap-3">
-<div class="flex items-center gap-3">
-<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQsLx4P-wDSGQt3OQrRZc8HYdX1FUO1QKbzEN2_sXu1L3yHjY41XJHgf6jksbMkfF3iFJhIZkBR1FrSNjZEVDd9TQWSigo7Nfq9JTNGt_1tIBjS3ZEfi_hulmdTwU9wMLbuuInpw5eg33JGvL_GAkgT8JIU0MGFhBNN1gBIS5gOUIKk6Ddh-ewjIJV2n8x3As-hOphiIJPTN0Nc9oUU5bn8rRBGU5r3C5nQhT2XPuTA60EqYNGCExY">
-</div>
+<div id="header-avatar-mount"></div>
 </div>
 </header>
 <!-- Quiz Container -->
 <div class="p-margin-desktop flex-1 overflow-auto">
 <div class="max-w-[1200px] mx-auto grid grid-cols-12 gap-gutter">
 <!-- Left Column: Quiz Content (8 cols) -->
-<div class="col-span-8 flex flex-col gap-6">
+<div class="col-span-8 flex flex-col gap-6 fade-up">
 <!-- Title Section -->
 <div class="flex flex-col gap-1">
 <div class="flex items-center gap-2 text-primary">
@@ -204,7 +203,7 @@
 <span class="font-label-md text-label-md uppercase tracking-wider" data-quiz="subtitle">Knowledge Check</span>
 </div>
 <h1 class="font-headline-lg text-headline-lg text-on-surface" data-quiz="title">Loading Quiz...</h1>
-<p class="text-on-surface-variant font-body-lg text-body-lg mt-2">Demonstrate your proficiency in configuring multi-agent orchestration within the Enterprise environment.</p>
+<p class="text-on-surface-variant font-body-lg text-body-lg mt-2" data-quiz="description">Loading quiz details...</p>
 </div>
 <!-- Question Card -->
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col gap-8 transition-all hover:border-outline">
@@ -249,7 +248,7 @@
 </div>
 </div>
 <!-- Right Column: Stats & Progress (4 cols) -->
-<div class="col-span-4 flex flex-col gap-gutter">
+<div class="col-span-4 flex flex-col gap-gutter fade-up-2">
 <!-- Quiz Progress Card -->
 <div class="bg-surface-container-low rounded-2xl p-6 border border-outline-variant space-y-6">
 <h3 class="font-headline-md text-headline-md">Quiz Progress</h3>
@@ -264,7 +263,7 @@
 <div class="flex-1 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
 <span class="font-label-md text-on-surface-variant block uppercase text-[10px] tracking-widest font-bold">Passing Score</span>
 <div class="flex items-baseline gap-1">
-<span class="font-headline-md text-headline-md text-primary" data-quiz="passing-score">80</span>
+<span class="font-headline-md text-headline-md text-primary" data-quiz="passing-score">—</span>
 <span class="text-on-surface-variant text-body-md">%</span>
 </div>
 </div>
@@ -275,7 +274,7 @@
 <span class="material-symbols-outlined text-secondary">info</span>
 <span class="text-body-md">Attempts Left</span>
 </div>
-<span class="font-label-md font-bold text-primary" data-quiz="attempts-left">3 / 3</span>
+<span class="font-label-md font-bold text-primary" data-quiz="attempts-left">— / —</span>
 </div>
 </div>
 </div>

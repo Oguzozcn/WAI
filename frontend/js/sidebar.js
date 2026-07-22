@@ -6,9 +6,12 @@
  * Each page provides a `<div id="sidebar-mount"></div>` where the old
  * hand-copied <aside> used to live, plus a `sidebar-offset` class on the
  * elements that need to sit past the fixed sidebar (see Content offset below).
+ * A page's header can also provide `<div id="header-avatar-mount"></div>` to
+ * get the shared, session-driven initials avatar (links to /profile).
  *
  * Responsibilities:
  *   - Render the canonical sidebar (logo, nav links, Support, Settings).
+ *   - Render the header avatar (see header-avatar-mount above).
  *   - Auto-detect the active link from window.location.pathname.
  *   - Desktop collapse/expand toggle (w-64 <-> w-20), persisted in localStorage.
  *   - Drive dynamic content offset via body.sidebar-expanded / .sidebar-collapsed.
@@ -102,6 +105,29 @@
     return links;
   }
 
+  // First letter of the first two words of a display name, e.g. "Alex Chen" -> "AC".
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+  }
+
+  // Single source of truth for the header avatar: a session-driven initials
+  // circle linking to /profile. Previously every page hand-copied its own
+  // <img src="https://..."> here -- five different hardcoded stock photos
+  // unrelated to whoever was actually logged in, and clickable on only 2 of
+  // the 10 pages that had one. Pages opt in with <div id="header-avatar-mount">.
+  function headerAvatarHtml() {
+    const session = window.WisdomAuth && window.WisdomAuth.getSession();
+    const name = session ? session.display_name : '';
+    return (
+      '<a href="/profile" id="header-avatar-btn" aria-label="View profile" title="' + (name || 'Profile') + '" ' +
+        'class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm flex-shrink-0 hover:opacity-90 transition-opacity">' +
+        initials(name) +
+      '</a>'
+    );
+  }
+
   function accountHtml() {
     const session = window.WisdomAuth && window.WisdomAuth.getSession();
     if (!session) return '';
@@ -168,13 +194,23 @@
     const style = document.createElement('style');
     style.id = 'wai-sidebar-styles';
     style.textContent = [
-      '#sidebar { transition: width .3s ease; }',
+      // Transitions start OFF so the very first state application on page
+      // load (below, in init()) snaps straight into place instead of
+      // animating -- every full page navigation re-mounts this component
+      // from scratch, and without this guard the header/search bar would
+      // visibly slide into its offset position on every single transition,
+      // looking like the sidebar re-opens each time. 'sidebar-ready' is only
+      // added a frame later, so real user-triggered collapse/expand clicks
+      // still animate normally.
+      '#sidebar { transition: none; }',
+      'body.sidebar-ready #sidebar { transition: width .3s ease; }',
+      '.sidebar-offset, .sidebar-offset-header { transition: none; }',
+      'body.sidebar-ready .sidebar-offset, body.sidebar-ready .sidebar-offset-header { transition: margin-left .3s ease, width .3s ease; }',
       '@media (min-width: 768px) {',
       '  body.sidebar-expanded  .sidebar-offset { margin-left: 16rem !important; }',
       '  body.sidebar-collapsed .sidebar-offset { margin-left: 5rem  !important; }',
       '  body.sidebar-expanded  .sidebar-offset-header { width: calc(100% - 16rem) !important; }',
       '  body.sidebar-collapsed .sidebar-offset-header { width: calc(100% - 5rem)  !important; }',
-      '  .sidebar-offset, .sidebar-offset-header { transition: margin-left .3s ease, width .3s ease; }',
       '  #sidebar.is-collapsed .sidebar-label { display: none; }',
       '  #sidebar.is-collapsed .sidebar-wordmark { display: none; }',
       '  #sidebar.is-collapsed .sidebar-collapse-btn { margin-left: 0; }',
@@ -278,15 +314,26 @@
     injectStyles();
     const mount = document.getElementById('sidebar-mount');
     if (mount) mount.innerHTML = renderSidebarHtml();
+    const avatarMount = document.getElementById('header-avatar-mount');
+    if (avatarMount) avatarMount.innerHTML = headerAvatarHtml();
     applyState(isCollapsed());
     wireEvents();
     showAccessDeniedToastIfNeeded();
+    // Wait a frame (two, to be safe against browsers batching the first
+    // paint) before allowing transitions, so the initial mount never animates.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        document.body.classList.add('sidebar-ready');
+      });
+    });
   }
 
   // Expose a tiny hook so pages can react after the sidebar is mounted.
   // applyTheme is exposed so other in-page controls (e.g. the Settings page's
   // own theme toggle) can flip the theme and keep this sidebar's button in sync.
-  window.WisdomSidebar = { toast: toast, isActive: isActive, applyTheme: applyTheme, isDarkMode: isDarkMode };
+  // initials is exposed so Profile/Settings can render the same avatar math
+  // instead of re-deriving it (see headerAvatarHtml above for the header copy).
+  window.WisdomSidebar = { toast: toast, isActive: isActive, applyTheme: applyTheme, isDarkMode: isDarkMode, initials: initials };
 
   init();
 })();

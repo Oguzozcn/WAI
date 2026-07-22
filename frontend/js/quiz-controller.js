@@ -941,6 +941,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       subtitleEl.textContent = subtitles[quizTypeParam] || 'Final Assessment';
     }
 
+    const descriptionEl = document.querySelector('[data-quiz="description"]');
+    if (descriptionEl) descriptionEl.textContent = `Demonstrate your understanding of ${quizData.topic || 'this material'}.`;
+
     // Hide skip button for short quizzes and gap reviews (short, focused sets)
     if (quizTypeParam === 'short_quiz' || quizTypeParam === 'gap_review') {
       const skipBtn = document.querySelector('[data-quiz="skip-btn"]');

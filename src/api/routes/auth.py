@@ -43,3 +43,19 @@ async def api_login(req: LoginRequest):
         "role": account.get("job_level", "individual_contributor"),
         "manager_id": account.get("manager_id", ""),
     }
+
+
+@router.get("/directory/{user_id}")
+async def api_get_directory_entry(user_id: str):
+    """Public identity lookup (no password) — lets a page resolve another
+    user_id (e.g. a manager_id) to a display name without exposing credentials.json directly."""
+    credentials = _read_credentials()
+    account = credentials.get(user_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Unknown user_id.")
+
+    return {
+        "user_id": user_id,
+        "display_name": account.get("display_name", user_id),
+        "role": account.get("job_level", "individual_contributor"),
+    }

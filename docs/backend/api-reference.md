@@ -11,6 +11,7 @@ Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (das
 | Endpoint | Purpose |
 |----------|---------|
 | `POST /api/auth/login` | Body `{user_id, password}` → `{user_id, display_name, role, manager_id}` or 401. Plaintext comparison against `data/credentials.json` (demo only). |
+| `GET /api/auth/directory/{user_id}` | `{user_id, display_name, role}` or 404 — never includes the password. Used by `profile.html` to resolve a `manager_id` into a display name. |
 
 ## Progress (`/api/user`)
 
@@ -108,7 +109,7 @@ ITSM-style ticket lifecycle: `new → in_progress → on_hold → resolved → c
 
 ## UAT (`/api/uat`) — developer-facing
 
-Manual acceptance testing: a **predefined whole-app checklist** (`UAT_CHECKLIST` in `src/api/routes/uat.py`, 26 items across auth, dashboard, lessons, quiz, catalog, chat, manager tools, Team Documentation, developer tools, support, global UI). Starting a run snapshots the checklist into a persistent run doc (`data/uat_runs/<dept>/UAT-<n>.json`), the tester marks each item `pass`/`fail`/`blocked` (+ note), and the report endpoint finalizes the run and writes an AI summary. Every endpoint that touches runs requires `role=developer` (client-trusted).
+Manual acceptance testing: a **predefined whole-app checklist** (`UAT_CHECKLIST` in `src/api/routes/uat.py`, 27 items across auth, dashboard, lessons, quiz, catalog, chat, manager tools, Team Documentation, developer tools, support, global UI — including the header avatar / Profile page). Starting a run snapshots the checklist into a persistent run doc (`data/uat_runs/<dept>/UAT-<n>.json`), the tester marks each item `pass`/`fail`/`blocked` (+ note), and the report endpoint finalizes the run and writes an AI summary. Every endpoint that touches runs requires `role=developer` (client-trusted).
 
 | Endpoint | Purpose |
 |----------|---------|

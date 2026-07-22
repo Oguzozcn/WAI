@@ -1,0 +1,18 @@
+/* Shared page-load entrance animation ("fade-up").
+   Every full navigation re-parses the page from scratch (this is a multi-page
+   app, not an SPA), so without this, content just appears instantly and any
+   placeholder->real-data swap (or the sidebar's own offset settling in) reads
+   as an abrupt jump. Applying .fade-up/-2/-3/-4 to a page's top-level content
+   blocks staggers them in over ~0.4s each, which both looks intentional and
+   gives async data loads a little cover to finish before the block is fully
+   visible. Originally unique to manager-dashboard.html; centralized here so
+   every page shares one definition instead of duplicating it. */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.fade-up   { animation: fadeUp .4s ease both; }
+.fade-up-2 { animation: fadeUp .4s .1s ease both; }
+.fade-up-3 { animation: fadeUp .4s .2s ease both; }
+.fade-up-4 { animation: fadeUp .4s .3s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .fade-up-2, .fade-up-3, .fade-up-4 { animation: none; opacity: 1; transform: none; }
+}

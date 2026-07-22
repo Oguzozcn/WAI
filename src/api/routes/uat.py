@@ -154,6 +154,10 @@ UAT_CHECKLIST = [
      "steps": "Collapse the sidebar and navigate between pages.",
      "expected": "The collapsed state persists across pages; the active nav item is highlighted.",
      "launch_url": "/"},
+    {"id": "UI-03", "area": "Global UI", "title": "Header avatar & Profile page",
+     "steps": "Click the header avatar from a few different pages, then review the Profile page it opens, then use its 'Settings' link to come back.",
+     "expected": "The avatar shows your initials and is clickable on every page; Profile shows your real name/role/reports-to and real learning stats (not stuck on placeholders); the Settings link returns you there.",
+     "launch_url": "/profile"},
 ]
 
 
