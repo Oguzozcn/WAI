@@ -1,0 +1,57 @@
+# WisdomAI MVP — Cloud Build CI pipeline (alternative to deploy.sh's source build).
+#
+# Use this when you want builds triggered from GitHub (Cloud Build trigger) rather
+# than run by hand. It builds the image, pushes it to Artifact Registry, and
+# deploys to Cloud Run with the same env contract deploy.sh uses.
+#
+# Substitutions (override per-trigger or with --substitutions):
+#   _REGION   Cloud Run + Artifact Registry region
+#   _SERVICE  Cloud Run service name
+#   _BUCKET   GCS bucket for binary blobs
+#   _SECRET   Secret Manager secret holding credentials.json
+substitutions:
+  _REGION: europe-west1
+  _SERVICE: wisdom-ai
+  _BUCKET: ${PROJECT_ID}-wai-data
+  _SECRET: wai-credentials
+
+images:
+  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/wai/${_SERVICE}:${SHORT_SHA}"
+
+steps:
+  # 1. Build the image (uses the repo Dockerfile).
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/wai/${_SERVICE}:${SHORT_SHA}"
+      - .
+
+  # 2. Push to Artifact Registry.
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/wai/${_SERVICE}:${SHORT_SHA}"
+
+  # 3. Deploy to Cloud Run with the cloud env contract + secret.
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - "${_SERVICE}"
+      - "--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/wai/${_SERVICE}:${SHORT_SHA}"
+      - "--region=${_REGION}"
+      - "--allow-unauthenticated"
+      - "--cpu=1"
+      - "--memory=1Gi"
+      - "--min-instances=0"
+      - "--max-instances=4"
+      - "--set-env-vars=STORAGE=cloud,WAI_GCS_BUCKET=${_BUCKET},WAI_FIRESTORE_DATABASE=(default),WAI_FIRESTORE_PREFIX=wai,GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=global"
+      - "--set-secrets=WAI_CREDENTIALS_JSON=${_SECRET}:latest"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

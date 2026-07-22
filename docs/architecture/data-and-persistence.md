@@ -2,9 +2,11 @@
 
 ## DepartmentScopedStore (Tier A isolation)
 
-`src/core/database.py: DepartmentScopedStore(department_id)` is the only way application code touches `data/`. Every path it builds is prefixed with its department id (`data/<store>/<department_id>/…`); constructing a path for another department raises `IsolationViolationError`. There is no code path that can read across departments — that's the "Tier A namespace isolation" guarantee.
+`src/core/database.py: DepartmentScopedStore(department_id)` is the only way application code touches persisted data. Every relative key it builds is prefixed with its department id (`<store>/<department_id>/…`); constructing a key for another department raises `IsolationViolationError`. There is no code path that can read across departments — that's the "Tier A namespace isolation" guarantee.
 
-Base directory resolution order: explicit constructor arg → `WAI_DATA_DIR` env var (this is how tests point the store at a temp dir) → `data/` at project root.
+`DepartmentScopedStore` holds the *domain* logic; the actual leaf I/O goes through a pluggable **storage backend** chosen by the `STORAGE` env var (see "Storage backend" below). Base directory resolution order (local mode): explicit constructor arg → `WAI_DATA_DIR` env var (this is how tests point the store at a temp dir) → `data/` at project root.
+
+> Product code must go through the store's **methods** — it must not reach into the store's `*_path` `Path` attributes (those exist for local mode / tests only and are meaningless in cloud mode). Need to list or delete something the store doesn't expose yet? Add a method (e.g. `list_learning_paths`, `next_ticket_id`, `list_knowledge_document_ids`) rather than globbing the filesystem from a route.
 
 ### Store areas (all under `data/`, all namespaced by department)
 
@@ -49,8 +51,19 @@ Defined as a dataclass in `src/core/models.py`. Key fields:
 
 ## Concurrency model
 
-Writes are whole-file `json.dumps(indent=2)` replacements. A module-level `threading.Lock` exists but individual helpers don't hold it; the demo runs single-worker uvicorn where request handlers don't interleave file writes in practice. **This is a known demo-scope simplification** — the GCP migration replaces it with real transactional storage.
+Writes are whole-document `json.dumps(indent=2)` replacements. A module-level `threading.Lock` exists but individual helpers don't hold it; the demo runs single-worker uvicorn where request handlers don't interleave writes in practice. **This is a known demo-scope simplification** in local mode; Firestore document writes in cloud mode are atomic per document.
 
-## Planned GCP migration (decided, not yet scheduled)
+## Storage backend (`STORAGE=local|cloud`)
 
-The store API is the migration seam: replace file I/O inside `DepartmentScopedStore` with Firestore documents (progress, paths, quizzes) and GCS objects (raw documents, KB files), keeping method signatures identical. Nothing above `database.py` should need to change. Until then: **no database dependencies in this repo** (explicit product decision, July 2026).
+The migration seam is implemented (July 2026). `src/core/storage_backend.py` defines a small primitive interface (`read_text`/`write_text`, `read_bytes`/`write_bytes`, `exists`, `delete`, `list_files`/`list_files_meta`, `list_dirs`, `delete_dir`) keyed by POSIX-style relative paths. `DepartmentScopedStore` builds those relpaths and calls the backend; a factory (`get_backend`) picks the implementation from the `STORAGE` env var:
+
+| `STORAGE` | Text/JSON | Binary blobs | Notes |
+|-----------|-----------|--------------|-------|
+| `local` (default) | files under `data/` | files under `data/` | Byte-identical to the app's historical behavior — this is what the whole test suite exercises, and what runs offline on any laptop. |
+| `cloud` | Firestore documents | GCS objects | `FirestoreGcsBackend`; requires `WAI_GCS_BUCKET` (+ `GOOGLE_CLOUD_PROJECT`, optional `WAI_FIRESTORE_DATABASE`/`WAI_FIRESTORE_PREFIX`). Used on Cloud Run. |
+
+**Cloud mapping.** Each text/JSON relpath becomes one Firestore document (deterministic id = sha1 of the relpath, so writes are idempotent upserts) carrying `{path, parent, name, text, _updated}` — listings are plain `parent ==` / path-range queries. Each binary relpath becomes one GCS object (object name == relpath); GCS's native prefix+delimiter listing gives the file/subdir split. A single directory can hold both (e.g. catalog inputs: binary files + `.meta.json` sidecars); `list_files` unions Firestore and GCS. Firestore's 1 MiB/document limit applies to text docs (the JSON this app stores sits well under it).
+
+**Deploying / seeding.** See `RUNBOOK.md` — `deploy.sh` provisions Firestore + the GCS bucket and deploys to Cloud Run with `STORAGE=cloud`; `scripts/seed_cloud_storage.py` copies the committed `data/` demo dataset up on first deploy (JSON→Firestore, binary→GCS, via the same backends). The cloud path is verified with the Firestore emulator (runbook §7); the local path is proven by the full test suite.
+
+Non-namespaced areas at the root: `credentials.json` (demo accounts, bcrypt-hashed), `dev_config.json` (live config), `kpi_store/` (Tier 2 — see above).

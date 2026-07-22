@@ -14,7 +14,19 @@ All persisted shapes: `ConceptToken`, `MasteryVector`, `Lesson`, `Course`, `Lear
 
 ## database.py — persistence
 
-`DepartmentScopedStore` + `KPIStoreReader` + `validate_kpi_schema`. Covered in depth in [Data & Persistence](/documentation?page=architecture/data-and-persistence).
+`DepartmentScopedStore` + `KPIStoreReader` + `validate_kpi_schema`. Holds the domain logic; leaf I/O goes through a pluggable backend. Covered in depth in [Data & Persistence](/documentation?page=architecture/data-and-persistence).
+
+## storage_backend.py — pluggable I/O (local ↔ cloud)
+
+The seam that makes the store portable. `StorageBackend` is a small relpath-keyed primitive interface; `LocalStorageBackend` reproduces the historical filesystem behavior byte-for-byte (so the whole test suite keeps proving nothing regressed), and `FirestoreGcsBackend` stores text/JSON in Firestore and binary blobs in GCS. `get_backend()` chooses between them from the `STORAGE` env var (`local` default). See [Data & Persistence](/documentation?page=architecture/data-and-persistence) for the cloud mapping.
+
+## settings.py — deployment env knobs
+
+One place that reads the env contract from `.env.example` (functions, read at call time so tests can monkeypatch): `storage_backend()`/`is_cloud_storage()`, `gcs_bucket()`, `firestore_database()`/`firestore_prefix()`, `gcp_project()`, `credentials_json_env()`/`credentials_path()`, `trust_iap()`. No side effects — importing it touches no cloud service.
+
+## auth_store.py — credentials + password hashing
+
+`load_credentials()` (Secret Manager env → file), `verify_password` (bcrypt, with legacy-plaintext fallback), `hash_password`, and `public_entry` (identity with the hash stripped). Backs `auth.py`; see [Auth & Roles](/documentation?page=backend/auth-and-roles).
 
 ## state_machine.py — the learning journey graph
 

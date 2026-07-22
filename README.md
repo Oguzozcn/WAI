@@ -28,6 +28,13 @@ uvicorn src.api.main:app --reload       # → http://localhost:8000
 
 Requires Python ≥ 3.11.
 
+## Deploying to the cloud
+
+The app runs offline on plain JSON files by default (`STORAGE=local`). For a
+durable Google Cloud deployment (Cloud Run + Firestore + GCS, with company SSO via
+IAP), everything is scripted — see **[`RUNBOOK.md`](RUNBOOK.md)**: edit three
+variables in `deploy.sh` and run it. No AI assistance needed to follow it.
+
 ## Architecture
 
 Two entry points share one service layer:

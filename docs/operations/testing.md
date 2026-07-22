@@ -15,6 +15,9 @@ tests/
 │   ├── test_ingestion.py            # Splitter, sectioning
 │   ├── test_llm_generation.py       # Prompt building, fallback paths
 │   ├── test_documentation_service.py# Documentation Master: source resolution (text vs. native media Part), title cleaning
+│   ├── test_storage_backend.py      # LocalStorageBackend primitive contract; get_backend factory (cloud needs bucket);
+│   │                            # FirestoreGcsBackend path-helper correctness (parent/name/norm)
+│   ├── test_auth_store.py           # bcrypt hash/verify, legacy-plaintext fallback, WAI_CREDENTIALS_JSON precedence, redaction
 │   └── test_skill_tool_metadata.py  # adk_additional_tools frontmatter: _write_skill_file always regenerates it from
 │                            # SKILL_TOOL_GROUPS, and all 6 real on-disk SKILL.md files declare it correctly
 ├── integration/           # FastAPI TestClient against real routes
@@ -35,7 +38,9 @@ python3 -m pytest tests/ -q          # the regression gate — keep it green
 python3 -m pytest tests/unit -q      # fast inner loop
 ```
 
-Suite status as of 2026-07-22: **189 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`. `test_kb_routes.py` also covers the `/documents/{filename}/download` route; `test_team_docs_routes.py`'s `ai_draft`/`generate-documentation` tests poll `GET /api/team-docs/jobs/{job_id}` (FastAPI's `TestClient` runs `BackgroundTasks` synchronously, so the job is already resolved by the time the poll happens).
+Suite status as of 2026-07-22: **208 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`. `test_kb_routes.py` also covers the `/documents/{filename}/download` route; `test_team_docs_routes.py`'s `ai_draft`/`generate-documentation` tests poll `GET /api/team-docs/jobs/{job_id}` (FastAPI's `TestClient` runs `BackgroundTasks` synchronously, so the job is already resolved by the time the poll happens).
+
+The whole suite runs in **`STORAGE=local`** (the default) — so `LocalStorageBackend` is exercised end-to-end by every integration test, which is what proves the storage refactor kept the local path byte-identical. The `STORAGE=cloud` path (Firestore + GCS) can't be unit-tested without emulators/credentials; its pure helpers are unit-tested, and end-to-end cloud verification is done with the Firestore emulator per `RUNBOOK.md` §7.
 
 ## Conventions
 

@@ -7,17 +7,19 @@
 | API server | FastAPI + uvicorn | `src/api/main.py` |
 | Agent framework | google-adk 2.x (`SkillToolset`, `Runner`) | `src/agents/agent.py` |
 | LLM | `gemini-3.5-flash` via Vertex AI ADC | `src/services/llm_client.py` |
-| Persistence | JSON files, department-namespaced | `src/core/database.py` |
+| Persistence | Pluggable: JSON files (local) or Firestore + GCS (cloud), department-namespaced | `src/core/database.py`, `src/core/storage_backend.py` |
 | Frontend | Vanilla HTML/JS, Tailwind Play CDN, Material Symbols | `frontend/` |
+| Auth | bcrypt-hashed credentials; IAP-ready for company SSO | `src/api/routes/auth.py`, `src/core/auth_store.py` |
+| Deploy | Docker → Cloud Run (`$PORT`), `deploy.sh` / `cloudbuild.yaml` | `Dockerfile`, `RUNBOOK.md` |
 | Excel export | openpyxl (in-memory workbook) | `src/api/routes/manager.py` |
 | PDF export (docs) | fpdf2 (pure Python) | `src/api/routes/docs.py` |
 | Tests | pytest + FastAPI TestClient + httpx | `tests/` |
 
 ## Key decisions and their rationale
 
-### JSON files instead of a database
+### JSON files by default, Firestore + GCS for cloud
 
-The MVP is a local, single-department demo. `DepartmentScopedStore` gives us the two properties that actually matter now — namespace isolation and human-readable state you can inspect with a text editor — without infra. The store's API (read/write per entity type) is deliberately shaped so a GCP-backed implementation (Firestore/GCS) can replace the file I/O without touching services or routes. **Decision (2026-07): storage stays file-based until the GCP cloud migration; do not introduce a database before then.**
+The MVP runs as a local, single-department demo on plain JSON files — `DepartmentScopedStore` gives namespace isolation and human-readable state you can inspect with a text editor, no infra required. That store API is the migration seam, and it's now backed by a pluggable backend (`src/core/storage_backend.py`): `STORAGE=local` keeps the file behavior (the default, what tests and offline dev use); `STORAGE=cloud` swaps in Firestore (JSON) + GCS (binary) with **no change to services or routes**. See [Data & Persistence](/documentation?page=architecture/data-and-persistence) for the mapping and `RUNBOOK.md` for deploying. **Decision (2026-07): the cloud backend is opt-in via `STORAGE`; local file mode stays the zero-dependency default so the app is always runnable offline.**
 
 ### Vanilla JS instead of a framework
 
@@ -41,11 +43,10 @@ All three content-generation call sites (`generate_quiz`, `process_document_to_c
 
 ## Dependencies (`requirements.txt`)
 
-```
-fastapi>=0.115.0        uvicorn[standard]>=0.30.0   python-multipart>=0.0.9
-google-adk              python-dotenv>=1.0.0        openpyxl>=3.1
-fpdf2>=2.8              pytest>=7.0                 pytest-asyncio>=0.23
-httpx>=0.27
-```
+Pins are **exact (`==`)** on purpose: the project is developed on a personal laptop and deployed/continued from a different (company) machine + the container, so "works here" must equal "works there." Regenerate with `pip freeze`. Groups: web (fastapi/starlette/uvicorn/pydantic/python-multipart), Google AI (google-adk, google-genai), cloud persistence (google-cloud-firestore, google-cloud-storage), auth (bcrypt, python-dotenv), documents (openpyxl, fpdf2), and test (pytest, pytest-asyncio, httpx).
 
-Keep this list short on purpose. Anything that needs system binaries (weasyprint, wkhtmltopdf) has been deliberately avoided.
+Anything that needs system binaries (weasyprint, wkhtmltopdf) is still deliberately avoided. The container base is `python:3.12-slim` (see `Dockerfile`); local dev may be on 3.14 — the container is the source of truth for what ships.
+
+## Containerization & deploy
+
+`Dockerfile` builds a non-root `python:3.12-slim` image that runs `uvicorn src.api.main:app --port ${PORT}` (Cloud Run injects `$PORT`). `deploy.sh` is a one-shot, idempotent Cloud Run deploy (provisions Firestore, the GCS bucket, and the credentials secret, then builds + deploys with `STORAGE=cloud`); `cloudbuild.yaml` is the CI equivalent. Full step-by-step lives in `RUNBOOK.md`, written to need no AI assistance to follow.

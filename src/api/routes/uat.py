@@ -189,13 +189,7 @@ def _now() -> str:
 
 def _next_run_id(store: DepartmentScopedStore) -> str:
     """Sequential, human-readable run numbers (UAT-0001), like ticket ids."""
-    highest = 0
-    for existing in store.uat_runs_path.glob("UAT-*.json"):
-        try:
-            highest = max(highest, int(existing.stem.split("-", 1)[1]))
-        except (IndexError, ValueError):
-            continue
-    return f"UAT-{highest + 1:04d}"
+    return store.next_uat_run_id()
 
 
 def _compute_summary(run: dict) -> dict:

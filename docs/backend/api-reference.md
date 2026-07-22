@@ -10,8 +10,9 @@ Serves the HTML files in `frontend/pages/` at top-level URLs: `/login`, `/` (das
 
 | Endpoint | Purpose |
 |----------|---------|
-| `POST /api/auth/login` | Body `{user_id, password}` → `{user_id, display_name, role, manager_id}` or 401. Plaintext comparison against `data/credentials.json` (demo only). |
-| `GET /api/auth/directory/{user_id}` | `{user_id, display_name, role}` or 404 — never includes the password. Used by `profile.html` to resolve a `manager_id` into a display name. |
+| `POST /api/auth/login` | Body `{user_id, password}` → `{user_id, display_name, role, manager_id}` or 401. **bcrypt** verification via `auth_store` (credentials from Secret Manager env or `data/credentials.json`). |
+| `GET /api/auth/directory/{user_id}` | `{user_id, display_name, role}` or 404 — never includes the password/hash. Used by `profile.html` to resolve a `manager_id` into a display name. |
+| `GET /api/auth/iap` | IAP-verified `{authenticated, email}` when behind Google IAP with `WAI_TRUST_IAP=true`; otherwise `{authenticated: false}` (the header is ignored unless the flag is on). See [Auth & Roles](/documentation?page=backend/auth-and-roles). |
 
 ## Progress (`/api/user`)
 

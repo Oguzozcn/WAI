@@ -131,9 +131,7 @@ async def api_get_lesson(course_id: str, lesson_id: str, user_id: str = "emp_001
     """Get the content for a specific lesson within a course."""
     store = DepartmentScopedStore(department)
 
-    for path_file in store.learning_paths_path.glob("*.json"):
-        import json as _json
-        path_data = _json.loads(path_file.read_text())
+    for path_data in store.list_learning_paths():
         for course in path_data.get("courses", []):
             if course["course_id"] == course_id:
                 for lesson in course.get("lessons", []):

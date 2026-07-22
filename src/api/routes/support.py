@@ -83,13 +83,7 @@ def _now() -> str:
 
 def _next_ticket_id(store: DepartmentScopedStore) -> str:
     """Sequential, human-readable ticket numbers (TKT-0001), ServiceNow-style."""
-    highest = 0
-    for existing in store.tickets_path.glob("TKT-*.json"):
-        try:
-            highest = max(highest, int(existing.stem.split("-", 1)[1]))
-        except (IndexError, ValueError):
-            continue
-    return f"TKT-{highest + 1:04d}"
+    return store.next_ticket_id()
 
 
 def _activity(by_id: str, by_name: str, event: str, detail: str = "") -> dict:

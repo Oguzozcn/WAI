@@ -388,8 +388,7 @@ async def api_quiz_by_lesson(course_id: str, lesson_id: str, user_id: str = "emp
     lesson_content = None
     lesson_title = None
     found_lesson = None
-    for path_file in store.learning_paths_path.glob("*.json"):
-        path_data = _json.loads(path_file.read_text())
+    for path_data in store.list_learning_paths():
         for course in path_data.get("courses", []):
             if course["course_id"] == course_id:
                 for lesson in course.get("lessons", []):
@@ -456,8 +455,7 @@ async def api_quiz_by_course(course_id: str, type: str = "final_assessment", use
                         return sanitized
 
     found_course = None
-    for path_file in store.learning_paths_path.glob("*.json"):
-        path_data = _json.loads(path_file.read_text())
+    for path_data in store.list_learning_paths():
         for course in path_data.get("courses", []):
             if course["course_id"] == course_id:
                 found_course = course

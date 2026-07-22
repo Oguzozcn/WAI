@@ -14,7 +14,6 @@ developers have their own Documentation section. Deleting a whole project
 additionally requires the manager role.
 """
 
-import json
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
@@ -97,13 +96,7 @@ def _now() -> str:
 
 def _next_project_id(store: DepartmentScopedStore) -> str:
     """Sequential, human-readable project ids (PROJ-0001), like ticket ids."""
-    highest = 0
-    for existing in store.team_docs_path.glob("PROJ-*.json"):
-        try:
-            highest = max(highest, int(existing.stem.split("-", 1)[1]))
-        except (IndexError, ValueError):
-            continue
-    return f"PROJ-{highest + 1:04d}"
+    return store.next_team_project_id()
 
 
 def _get_project(store: DepartmentScopedStore, project_id: str) -> dict:
@@ -140,14 +133,12 @@ def _vault_sources(store: DepartmentScopedStore) -> list[dict]:
     """Uploads usable as page material: the *_chunks docs written at upload
     time (course docs and other KB shapes are skipped — they aren't uploads)."""
     sources = []
-    for path in store.knowledge_base_path.glob("*.json"):
-        if path.stem == ".gitkeep":
-            continue
-        doc = json.loads(path.read_text())
-        if "chunks" not in doc or "source_filename" not in doc:
+    for doc_id in store.list_knowledge_document_ids():
+        doc = store.read_knowledge_document(doc_id)
+        if not doc or "chunks" not in doc or "source_filename" not in doc:
             continue
         sources.append({
-            "doc_id": path.stem,
+            "doc_id": doc_id,
             "filename": doc["source_filename"],
             "uploaded_at": doc.get("uploaded_at", ""),
             "chunk_count": doc.get("chunk_count", len(doc.get("chunks", []))),

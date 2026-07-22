@@ -1,6 +1,4 @@
 import io
-import json
-import re
 import uuid
 from datetime import datetime, timezone
 
@@ -287,12 +285,11 @@ async def api_kb_resolve_conflict(conflict_id: str, req: ConflictResolutionReque
         # Retract the saved document that this conflict flagged.
         raw_filename = conflict.get("raw_filename")
         if raw_filename:
-            safe_name = raw_filename.replace("/", "_").replace("\\", "_")
-            (store.raw_documents_path / safe_name).unlink(missing_ok=True)
-            (store.catalog_inputs_path / safe_name).unlink(missing_ok=True)
+            store.delete_raw_document(raw_filename)
+            store.delete_catalog_input(raw_filename)
         chunks_doc_id = conflict.get("chunks_doc_id")
         if chunks_doc_id:
-            (store.knowledge_base_path / f"{chunks_doc_id}.json").unlink(missing_ok=True)
+            store.delete_knowledge_document(chunks_doc_id)
     else:
         raise HTTPException(status_code=400, detail="resolution must be 'approved' or 'rejected'")
 

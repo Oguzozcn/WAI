@@ -54,3 +54,19 @@ def test_profile_page_serves(client):
     resp = client.get("/profile")
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
+
+
+def test_iap_identity_disabled_by_default(client):
+    # WAI_TRUST_IAP is unset in tests, so the (spoofable) header must be ignored.
+    resp = client.get("/api/auth/iap",
+                      headers={"X-Goog-Authenticated-User-Email": "accounts.google.com:evil@x.com"})
+    assert resp.status_code == 200
+    assert resp.json() == {"authenticated": False, "reason": "iap_trust_disabled"}
+
+
+def test_iap_identity_reads_header_when_trusted(client, monkeypatch):
+    monkeypatch.setenv("WAI_TRUST_IAP", "true")
+    resp = client.get("/api/auth/iap",
+                      headers={"X-Goog-Authenticated-User-Email": "accounts.google.com:alex@corp.com"})
+    assert resp.status_code == 200
+    assert resp.json() == {"authenticated": True, "email": "alex@corp.com"}
