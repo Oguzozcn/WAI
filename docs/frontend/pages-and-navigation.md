@@ -35,13 +35,16 @@ Every page's `<head>` carries the same boilerplate (copy it from `dev-console.ht
 
 A single IIFE that renders into `<div id="sidebar-mount">` on every page.
 
-- `NAV_LINKS` — the base list (Dashboard, Learning Path, Knowledge Vault, Team Dashboards, Catalog, Team Docs).
+- `NAV_LINKS` — the base list, ordered to follow the learner's natural flow: Dashboard, Catalog, Learning Path, Knowledge Vault, Team Docs, Team Dashboards (manager-only oversight last, since it's an admin lens rather than part of an individual's own path).
 - `visibleNavLinks()` — role filtering: non-managers lose the manager-only hrefs; developers lose the team-only hrefs (`/team-documentation`) and get `Agent Console` (`/dev-console`), `Documentation` (`/documentation`) and `UAT Console` (`/qa-console`) appended.
 - Bottom block: account card (name/role/logout), theme toggle, Settings link. The Support link is role-aware: developers go to `/support-console`, everyone else to `/support`.
 - `isActive(href)` — **exact** pathname match (trailing slashes stripped; `/` only matches root). Query strings don't break matching — which is why multi-view pages (documentation, lesson, quiz) use query params, never sub-paths.
 - Collapse state persists in `localStorage`; the access-denied toast fires when the URL carries `?denied=…` (then strips it via `history.replaceState`).
-- Public surface: `window.WisdomSidebar = { toast, isActive, applyTheme, isDarkMode, initials }`.
-- Header avatar: a page adds `<div id="header-avatar-mount"></div>` to its TopAppBar and `sidebar.js` fills it with a session-driven initials circle linking to `/profile` — the single source for what used to be 10 pages' worth of hand-copied, unrelated-to-the-user stock-photo `<img>` tags.
+- Public surface: `window.WisdomSidebar = { toast, isActive, applyTheme, isDarkMode, initials, trackJob }`.
+- Header avatar: a page adds `<div id="header-avatar-mount"></div>` to its TopAppBar and `sidebar.js` fills it with a notification bell (background-job completions — see `docs/frontend/shared-modules.md`) plus a session-driven initials circle linking to `/profile` — the single source for what used to be 10 pages' worth of hand-copied, unrelated-to-the-user stock-photo `<img>` tags.
+- Chat launcher: a floating bottom-right button linking to `/chat`, mounted on every page with `#sidebar-mount` and a session, except `/chat` itself and `/quiz`.
+
+`/learning-materials`'s file table has a Download button per row (`GET /api/kb/documents/{filename}/download`) alongside version history and delete.
 
 ## Adding a new page — checklist
 

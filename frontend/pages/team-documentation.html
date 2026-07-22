@@ -716,9 +716,19 @@ document.getElementById('page-modal-save').addEventListener('click', async () =>
   }
 
   saveBtn.disabled = true;
-  saveLabel.textContent = body.mode === 'ai_draft' ? 'Drafting with AI…' : 'Adding…';
+  saveLabel.textContent = body.mode === 'ai_draft' ? 'Starting…' : 'Adding…';
   try {
     const data = await api('/projects/' + currentProject.project_id + '/pages', jsonBody(body));
+    if (data.status === 'processing') {
+      // AI drafting runs in the background — register it with the shared
+      // notification poller (frontend/js/sidebar.js) so completion surfaces
+      // even if the user has since left this page, then let go of the modal
+      // immediately instead of blocking on the LLM call.
+      window.WisdomSidebar.trackJob({ job_id: data.job_id, kind: 'team_docs_ai_draft', department: 'operations' });
+      showFlex('page-modal', false);
+      notify('Drafting with AI in the background — you’ll be notified when it’s ready');
+      return;
+    }
     currentProject = data.project;
     currentPageId = data.page_id;
     showFlex('page-modal', false);
@@ -732,6 +742,21 @@ document.getElementById('page-modal-save').addEventListener('click', async () =>
     saveBtn.disabled = false;
     saveLabel.textContent = 'Add page';
   }
+});
+
+// The shared notification poller (sidebar.js) fires this on any page once a
+// tracked background job finishes — refresh the project in place if we're
+// still looking at the project it belongs to.
+window.addEventListener('wai:job-done', async (e) => {
+  const job = e.detail;
+  if (!currentProject || job.project_id !== currentProject.project_id) return;
+  if (job.kind !== 'team_docs_ai_draft' && job.kind !== 'team_docs_generate') return;
+  if (job.status !== 'completed') return;
+  currentProject = await api('/projects/' + currentProject.project_id + '?' + roleQ);
+  if (job.page_id) currentPageId = job.page_id;
+  else if (currentProject.pages.length) currentPageId = currentProject.pages[currentProject.pages.length - 1].id;
+  renderPagesNav();
+  renderCurrentPage();
 });
 
 // ── Manage Sources modal ─────────────────────────────────────────────────────
@@ -794,16 +819,15 @@ document.getElementById('generate-docs-btn').addEventListener('click', async () 
     return;
   }
   btn.disabled = true;
-  label.textContent = 'Synthesizing full documentation… this can take a minute';
+  label.textContent = 'Starting…';
   try {
     const data = await api('/projects/' + currentProject.project_id + '/generate-documentation', jsonBody({}));
-    currentProject = data.project;
-    currentPageId = currentProject.pages.length ? currentProject.pages[currentProject.pages.length - 1].id : null;
-    renderPagesNav();
-    renderCurrentPage();
-    pushProjectUrl();
-    notify('Documentation generated: ' + data.pages_written.length + ' page' +
-          (data.pages_written.length === 1 ? '' : 's') + ' written');
+    // Runs in the background (can take a minute) — hand it to the shared
+    // notification poller and free up the button immediately rather than
+    // blocking the whole page on the LLM call. wai:job-done (wired above)
+    // refreshes the view if we're still on this project when it lands.
+    window.WisdomSidebar.trackJob({ job_id: data.job_id, kind: 'team_docs_generate', department: 'operations' });
+    notify('Synthesizing documentation in the background — you’ll be notified when it’s ready');
   } catch (err) {
     notify('Documentation generation failed: ' + err.message, 'warn');
   } finally {

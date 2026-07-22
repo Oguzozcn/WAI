@@ -22,13 +22,17 @@
   'use strict';
 
   // ── Canonical nav definition ────────────────────────────────────────────────
+  // Order follows the natural learner flow: overview, then browse/enroll
+  // (Catalog), then your assigned path, then shared reference material
+  // (Knowledge Vault, Team Docs) — manager-only oversight (Team Dashboards)
+  // comes last since it's an admin view, not part of an individual's path.
   const NAV_LINKS = [
     { href: '/', icon: 'dashboard', label: 'Dashboard' },
+    { href: '/catalog', icon: 'menu_book', label: 'Catalog' },
     { href: '/learning-path', icon: 'route', label: 'Learning Path', iconClass: 'rotate-90' },
     { href: '/knowledge-vault', icon: 'folder', label: 'Knowledge Vault' },
-    { href: '/manager-dashboard', icon: 'groups', label: 'Team Dashboards' },
-    { href: '/catalog', icon: 'menu_book', label: 'Catalog' },
     { href: '/team-documentation', icon: 'article', label: 'Team Docs' },
+    { href: '/manager-dashboard', icon: 'groups', label: 'Team Dashboards' },
   ];
   const SETTINGS_LINK = { href: '/settings', icon: 'settings', label: 'Settings' };
 
@@ -46,6 +50,216 @@
   const THEME_STORAGE_KEY = 'wai-theme';
   const ACTIVE_CLASSES = 'bg-secondary-container text-on-secondary-container rounded-xl font-bold translate-x-1 transition-transform duration-200';
   const INACTIVE_CLASSES = 'text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all';
+
+  // ── Background job notifications ────────────────────────────────────────────
+  // Long-running server-side work (e.g. Team Docs AI drafting/generation) is
+  // fire-and-forget from the browser's point of view: it returns a job_id
+  // immediately and finishes on the server regardless of navigation. Pending
+  // job IDs and finished notifications live in localStorage (not page state)
+  // specifically so that whichever page happens to be open when a job
+  // finishes — not necessarily the one that started it — is the one that
+  // notices and surfaces it; a full reload/navigation never loses track of it.
+  const PENDING_JOBS_KEY = 'wai-pending-jobs';
+  const NOTIFICATIONS_KEY = 'wai-notifications';
+  const JOB_POLL_MS = 4000;
+  const MAX_NOTIFICATIONS = 20;
+
+  // Where to poll a job's status, keyed by the `kind` the caller registers it
+  // with. Add an entry here for each new background-job subsystem.
+  const JOB_STATUS_URL = {
+    team_docs_ai_draft: function (job) { return '/api/team-docs/jobs/' + job.job_id + '?department=' + encodeURIComponent(job.department); },
+    team_docs_generate: function (job) { return '/api/team-docs/jobs/' + job.job_id + '?department=' + encodeURIComponent(job.department); },
+  };
+
+  function readJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function writeJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function getPendingJobs() { return readJSON(PENDING_JOBS_KEY, []); }
+  function getNotifications() { return readJSON(NOTIFICATIONS_KEY, []); }
+
+  // A job that can never resolve (server restart wiped it, a typo'd job_id,
+  // etc.) would otherwise poll every JOB_POLL_MS forever — cap how long
+  // we'll keep trying before quietly giving up on it.
+  const JOB_MAX_AGE_MS = 30 * 60 * 1000;
+
+  function trackJob(job) {
+    // job: { job_id, kind, department }
+    const pending = getPendingJobs();
+    if (pending.some(function (j) { return j.job_id === job.job_id; })) return;
+    job = Object.assign({ started_at: Date.now() }, job);
+    pending.push(job);
+    writeJSON(PENDING_JOBS_KEY, pending);
+    schedulePoll(0);
+  }
+
+  function addNotification(message) {
+    const notifications = getNotifications();
+    notifications.unshift({ id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), message: message, timestamp: new Date().toISOString(), seen: false });
+    writeJSON(NOTIFICATIONS_KEY, notifications.slice(0, MAX_NOTIFICATIONS));
+    renderNotifBell();
+  }
+
+  function unseenNotificationCount() {
+    return getNotifications().filter(function (n) { return !n.seen; }).length;
+  }
+
+  function markAllNotificationsSeen() {
+    const notifications = getNotifications().map(function (n) { return Object.assign({}, n, { seen: true }); });
+    writeJSON(NOTIFICATIONS_KEY, notifications);
+    renderNotifBell();
+  }
+
+  let pollTimer = null;
+  function schedulePoll(delay) {
+    if (pollTimer) clearTimeout(pollTimer);
+    if (getPendingJobs().length === 0) return;
+    pollTimer = setTimeout(pollPendingJobs, delay == null ? JOB_POLL_MS : delay);
+  }
+
+  function pollPendingJobs() {
+    const pending = getPendingJobs();
+    if (pending.length === 0) return;
+    Promise.all(pending.map(function (job) {
+      const urlFn = JOB_STATUS_URL[job.kind];
+      if (!urlFn) return null; // unknown kind — drop it rather than poll forever
+      return fetch(urlFn(job)).then(function (res) {
+        if (!res.ok) return null; // 404s etc. — leave it pending and retry later
+        return res.json().then(function (data) { return { job: job, data: data }; });
+      }).catch(function () { return null; });
+    })).then(function (results) {
+      let remaining = getPendingJobs();
+      results.forEach(function (result) {
+        if (!result) return;
+        const status = result.data.status;
+        if (status !== 'completed' && status !== 'error') return; // still processing
+        remaining = remaining.filter(function (j) { return j.job_id !== result.job.job_id; });
+        if (status === 'completed') {
+          addNotification(result.data.message || 'Background task finished.');
+          toast(result.data.message || 'Background task finished.');
+        } else {
+          addNotification(result.data.message || 'Background task failed.');
+          toast(result.data.message || 'Background task failed.', 'warn');
+        }
+        window.dispatchEvent(new CustomEvent('wai:job-done', { detail: Object.assign({ job_id: result.job.job_id }, result.data) }));
+      });
+      // Give up quietly on anything that's been unresolvable for too long
+      // (a wrong job_id, a job the server no longer knows about, etc.) so a
+      // single bad entry can't poll forever.
+      const now = Date.now();
+      remaining = remaining.filter(function (j) { return now - (j.started_at || 0) < JOB_MAX_AGE_MS; });
+      writeJSON(PENDING_JOBS_KEY, remaining);
+      schedulePoll();
+    });
+  }
+
+  function formatNotifTime(isoString) {
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hours = Math.round(mins / 60);
+    if (hours < 24) return hours + 'h ago';
+    return Math.round(hours / 24) + 'd ago';
+  }
+
+  function notifBellHtml() {
+    const count = unseenNotificationCount();
+    const badge = count > 0
+      ? '<span id="wai-notif-badge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[10px] font-bold flex items-center justify-center leading-none">' + count + '</span>'
+      : '';
+    return (
+      '<div class="relative">' +
+        '<button id="wai-notif-bell" type="button" aria-label="Notifications" title="Notifications" ' +
+          'class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors relative flex-shrink-0">' +
+          '<span class="material-symbols-outlined">notifications</span>' +
+          badge +
+        '</button>' +
+        '<div id="wai-notif-panel" class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50"></div>' +
+      '</div>'
+    );
+  }
+
+  function renderNotifPanelContents() {
+    const panel = document.getElementById('wai-notif-panel');
+    if (!panel) return;
+    const notifications = getNotifications();
+    panel.innerHTML = notifications.length
+      ? notifications.map(function (n) {
+          return (
+            '<div class="px-4 py-3 border-b border-outline-variant last:border-0' + (n.seen ? ' opacity-70' : '') + '">' +
+              '<p class="text-sm text-on-surface">' + n.message + '</p>' +
+              '<p class="text-xs text-on-surface-variant mt-1">' + formatNotifTime(n.timestamp) + '</p>' +
+            '</div>'
+          );
+        }).join('')
+      : '<div class="px-4 py-6 text-sm text-on-surface-variant text-center">No notifications yet.</div>';
+  }
+
+  // Re-render just the bell (badge count) without disturbing an open panel's
+  // scroll position — called whenever notifications change.
+  function renderNotifBell() {
+    const mount = document.getElementById('wai-notif-mount');
+    if (!mount) return;
+    const wasOpen = !document.getElementById('wai-notif-panel').classList.contains('hidden');
+    mount.innerHTML = notifBellHtml();
+    wireNotifBell();
+    if (wasOpen) {
+      document.getElementById('wai-notif-panel').classList.remove('hidden');
+      renderNotifPanelContents();
+    }
+  }
+
+  function wireNotifBell() {
+    const bell = document.getElementById('wai-notif-bell');
+    const panel = document.getElementById('wai-notif-panel');
+    if (!bell || !panel) return;
+    bell.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const opening = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden');
+      if (opening) {
+        renderNotifPanelContents();
+        markAllNotificationsSeen();
+      }
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== bell) {
+        panel.classList.add('hidden');
+      }
+    });
+  }
+
+  // ── Wisdom AI chat launcher (floating button, bottom-right) ────────────────
+  // Hidden on the chat page itself (redundant there) and on quiz/assessment
+  // pages, where an incoming chat message would distract from the assessment.
+  const CHAT_LAUNCHER_EXCLUDED_PATHS = ['/chat', '/quiz'];
+
+  function mountChatLauncher() {
+    if (document.getElementById('wai-chat-launcher')) return;
+    if (!(window.WisdomAuth && window.WisdomAuth.getSession())) return;
+    let path = window.location.pathname;
+    if (path.length > 1) path = path.replace(/\/+$/, '');
+    if (CHAT_LAUNCHER_EXCLUDED_PATHS.indexOf(path) !== -1) return;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = (
+      '<a href="/chat" id="wai-chat-launcher" aria-label="Open Wisdom AI chat" title="Wisdom AI Chat" ' +
+        'class="fixed bottom-24 right-6 md:bottom-6 z-40 w-14 h-14 rounded-full bg-primary text-on-primary ' +
+        'flex items-center justify-center shadow-lg hover:scale-105 transition-transform">' +
+        '<span class="material-symbols-outlined text-3xl">forum</span>' +
+      '</a>'
+    );
+    document.body.appendChild(wrapper.firstElementChild);
+  }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   function isCollapsed() {
@@ -315,10 +529,15 @@
     const mount = document.getElementById('sidebar-mount');
     if (mount) mount.innerHTML = renderSidebarHtml();
     const avatarMount = document.getElementById('header-avatar-mount');
-    if (avatarMount) avatarMount.innerHTML = headerAvatarHtml();
+    if (avatarMount) {
+      avatarMount.innerHTML = '<div class="flex items-center gap-2"><div id="wai-notif-mount">' + notifBellHtml() + '</div>' + headerAvatarHtml() + '</div>';
+      wireNotifBell();
+    }
+    mountChatLauncher();
     applyState(isCollapsed());
     wireEvents();
     showAccessDeniedToastIfNeeded();
+    schedulePoll(0);
     // Wait a frame (two, to be safe against browsers batching the first
     // paint) before allowing transitions, so the initial mount never animates.
     requestAnimationFrame(function () {
@@ -333,7 +552,11 @@
   // own theme toggle) can flip the theme and keep this sidebar's button in sync.
   // initials is exposed so Profile/Settings can render the same avatar math
   // instead of re-deriving it (see headerAvatarHtml above for the header copy).
-  window.WisdomSidebar = { toast: toast, isActive: isActive, applyTheme: applyTheme, isDarkMode: isDarkMode, initials: initials };
+  // trackJob(job) lets any page register a background job ({job_id, kind,
+  // department}) for the persistent notification system to poll — see the
+  // "Background job notifications" section above for why this lives here
+  // instead of in the page that started the job.
+  window.WisdomSidebar = { toast: toast, isActive: isActive, applyTheme: applyTheme, isDarkMode: isDarkMode, initials: initials, trackJob: trackJob };
 
   init();
 })();

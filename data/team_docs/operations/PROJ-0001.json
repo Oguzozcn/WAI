@@ -1,0 +1,18 @@
+{
+  "project_id": "PROJ-0001",
+  "department": "operations",
+  "name": "TEST",
+  "description": "",
+  "created_by": {
+    "user_id": "manager",
+    "display_name": "Jordan Lee",
+    "role": "manager"
+  },
+  "created_at": "2026-07-21T21:17:58.823262+00:00",
+  "next_page_seq": 1,
+  "pages": [],
+  "linked_sources": [
+    "NoteGPT_Transcript_Introduction to Vertex AI Studio_chunks"
+  ],
+  "updated_at": "2026-07-21T21:18:21.122778+00:00"
+}

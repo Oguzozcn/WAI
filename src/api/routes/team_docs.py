@@ -15,10 +15,11 @@ additionally requires the manager role.
 """
 
 import json
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -304,8 +305,67 @@ async def api_set_project_sources(project_id: str, body: SourcesUpdate,
 
 # ── Pages ────────────────────────────────────────────────────────────────────
 
+def _append_page(store: DepartmentScopedStore, project: dict, project_id: str,
+                  title: str, content: str, source: dict, drafted_by: str,
+                  created_by: str) -> dict:
+    seq = project.get("next_page_seq", len(project["pages"]) + 1)
+    page = {
+        "id": f"page-{seq:04d}",
+        "title": title,
+        "content": content,
+        "source": source,
+        "drafted_by": drafted_by,
+        "created_by": created_by,
+        "created_at": _now(),
+        "updated_at": _now(),
+    }
+    project["next_page_seq"] = seq + 1
+    project["pages"].append(page)
+    store.write_team_project(project_id, project)
+    return page
+
+
+def _run_ai_draft_page_job(job_id: str, project_id: str, department: str,
+                            project_name: str, source_doc_id: str, filename: str,
+                            source_text: str, explicit_title: str, created_by: str) -> None:
+    """Background counterpart of the ai_draft branch that used to run inline —
+    the LLM call can take long enough that a synchronous request risks being
+    cut off by client-side navigation, which would silently drop the page."""
+    store = DepartmentScopedStore(department)
+    title = explicit_title or _title_from_filename(filename)
+    content = source_text
+    drafted_by = "import"
+    try:
+        ai_title, ai_content = _ai_draft_page(project_name, filename, source_text)
+        title = explicit_title or ai_title
+        content = ai_content
+        drafted_by = "ai"
+    except Exception as e:
+        print(f"[add_team_doc_page job] LLM call failed ({e}), using import fallback.")
+
+    project = store.read_team_project(project_id)
+    if project is None:
+        store.write_kb_job(job_id, {
+            "job_id": job_id, "status": "error", "kind": "team_docs_ai_draft",
+            "project_id": project_id,
+            "message": f"Project '{project_id}' no longer exists.",
+        })
+        return
+    source = {"type": "vault", "doc_id": source_doc_id, "filename": filename}
+    page = _append_page(store, project, project_id, title, content, source, drafted_by, created_by)
+    store.write_kb_job(job_id, {
+        "job_id": job_id,
+        "status": "completed",
+        "kind": "team_docs_ai_draft",
+        "project_id": project_id,
+        "page_id": page["id"],
+        "drafted_by": drafted_by,
+        "message": f'"{title}" {"drafted with AI" if drafted_by == "ai" else "added"} in {project_name}.',
+    })
+
+
 @router.post("/projects/{project_id}/pages")
-async def api_add_page(project_id: str, body: PageCreate,
+async def api_add_page(project_id: str, body: PageCreate, background_tasks: BackgroundTasks,
                        department: str = DEFAULT_DEPARTMENT):
     _require_team_member(body.role)
     if body.mode not in PAGE_MODES:
@@ -320,42 +380,36 @@ async def api_add_page(project_id: str, body: PageCreate,
         if not title:
             raise HTTPException(status_code=400, detail="A blank page needs a title.")
         content = body.content.strip() or f"# {title}\n\n_Start writing this page..._"
-        source = {"type": "blank"}
-        drafted_by = "manual"
-    else:
-        if not body.source_doc_id.strip():
-            raise HTTPException(status_code=400,
-                                detail="Pick a Knowledge Vault document to build the page from.")
-        filename, text = _source_text(store, body.source_doc_id.strip())
-        title = body.title.strip() or _title_from_filename(filename)
-        content = text
-        drafted_by = "import"
-        if body.mode == "ai_draft":
-            try:
-                title, content = _ai_draft_page(project["name"], filename, text)
-                if body.title.strip():
-                    title = body.title.strip()  # an explicit title always wins
-                drafted_by = "ai"
-            except Exception as e:
-                print(f"[add_team_doc_page] LLM call failed ({e}), using import fallback.")
-        source = {"type": "vault", "doc_id": body.source_doc_id.strip(),
-                  "filename": filename}
+        page = _append_page(store, project, project_id, title, content,
+                            {"type": "blank"}, "manual", body.display_name or body.user_id)
+        return {"status": "created", "page_id": page["id"], "project": project}
 
-    seq = project.get("next_page_seq", len(project["pages"]) + 1)
-    page = {
-        "id": f"page-{seq:04d}",
-        "title": title,
-        "content": content,
-        "source": source,
-        "drafted_by": drafted_by,
-        "created_by": body.display_name or body.user_id,
-        "created_at": _now(),
-        "updated_at": _now(),
-    }
-    project["next_page_seq"] = seq + 1
-    project["pages"].append(page)
-    store.write_team_project(project_id, project)
-    return {"status": "created", "page_id": page["id"], "project": project}
+    if not body.source_doc_id.strip():
+        raise HTTPException(status_code=400,
+                            detail="Pick a Knowledge Vault document to build the page from.")
+    filename, text = _source_text(store, body.source_doc_id.strip())
+
+    if body.mode == "import":
+        title = body.title.strip() or _title_from_filename(filename)
+        source = {"type": "vault", "doc_id": body.source_doc_id.strip(), "filename": filename}
+        page = _append_page(store, project, project_id, title, text, source, "import",
+                            body.display_name or body.user_id)
+        return {"status": "created", "page_id": page["id"], "project": project}
+
+    # mode == "ai_draft": the LLM call can run long, so it's queued as a
+    # background job (mirrors the KB upload job/poll pattern) instead of
+    # blocking the request — a client that navigates away no longer loses it.
+    job_id = f"job_{uuid.uuid4().hex[:8]}"
+    store.write_kb_job(job_id, {
+        "job_id": job_id, "status": "processing", "kind": "team_docs_ai_draft",
+        "project_id": project_id,
+    })
+    background_tasks.add_task(
+        _run_ai_draft_page_job, job_id, project_id, department, project["name"],
+        body.source_doc_id.strip(), filename, text, body.title.strip(),
+        body.display_name or body.user_id,
+    )
+    return {"status": "processing", "job_id": job_id}
 
 
 @router.put("/projects/{project_id}/pages/{page_id}")
@@ -393,20 +447,65 @@ class GenerateDocsRequest(BaseModel):
     role: str = ""
 
 
+def _run_generate_docs_job(job_id: str, project_id: str, department: str) -> None:
+    store = DepartmentScopedStore(department)
+    result = generate_project_documentation(project_id, department=department)
+    if result["status"] != "success":
+        store.write_kb_job(job_id, {
+            "job_id": job_id, "status": "error", "kind": "team_docs_generate",
+            "project_id": project_id, "message": result["message"],
+        })
+        return
+    pages_written = result["pages_written"]
+    store.write_kb_job(job_id, {
+        "job_id": job_id,
+        "status": "completed",
+        "kind": "team_docs_generate",
+        "project_id": project_id,
+        "pages_written": pages_written,
+        "message": f'Documentation generated: {len(pages_written)} page{"" if len(pages_written) == 1 else "s"} written.',
+    })
+
+
 @router.post("/projects/{project_id}/generate-documentation")
 async def api_generate_project_documentation(project_id: str, body: GenerateDocsRequest,
+                                              background_tasks: BackgroundTasks,
                                               department: str = DEFAULT_DEPARTMENT):
     """Synthesize the project's full documentation set from its linked
     Knowledge Vault sources. Same underlying function the Documentation
-    Master ADK agent calls from chat — this is the direct, non-chat trigger."""
+    Master ADK agent calls from chat — this is the direct, non-chat trigger.
+
+    The synthesis LLM call ("this can take a minute") runs as a background
+    job rather than blocking the request, so navigating away doesn't abandon
+    it and doesn't lose the completion notification.
+    """
     _require_team_member(body.role)
-    _get_project(DepartmentScopedStore(department), project_id)  # 404 if unknown
-    result = generate_project_documentation(project_id, department=department)
-    if result["status"] == "no_sources":
-        raise HTTPException(status_code=400, detail=result["message"])
-    if result["status"] == "error":
-        raise HTTPException(status_code=502, detail=result["message"])
-    return result
+    store = DepartmentScopedStore(department)
+    project = _get_project(store, project_id)  # 404 if unknown
+    if not project.get("linked_sources"):
+        raise HTTPException(
+            status_code=400,
+            detail="This project has no linked Knowledge Vault sources yet. "
+                   "Link some sources in Team Docs, then generate documentation.",
+        )
+
+    job_id = f"job_{uuid.uuid4().hex[:8]}"
+    store.write_kb_job(job_id, {
+        "job_id": job_id, "status": "processing", "kind": "team_docs_generate",
+        "project_id": project_id,
+    })
+    background_tasks.add_task(_run_generate_docs_job, job_id, project_id, department)
+    return {"status": "processing", "job_id": job_id}
+
+
+@router.get("/jobs/{job_id}")
+async def api_team_docs_job_status(job_id: str, department: str = DEFAULT_DEPARTMENT):
+    """Poll the status of an ai_draft page or generate-documentation job."""
+    store = DepartmentScopedStore(department)
+    job = store.read_kb_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    return job
 
 
 # ── Export (TXT / PDF via the shared doc_export module) ──────────────────────

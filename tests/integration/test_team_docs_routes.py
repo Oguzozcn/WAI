@@ -24,6 +24,17 @@ def _add_page(client, project_id, role="individual_contributor", **fields):
     return client.post(f"/api/team-docs/projects/{project_id}/pages", json=body)
 
 
+def _poll_team_docs_job(client, job_id, department="operations", attempts=10):
+    job = None
+    for _ in range(attempts):
+        resp = client.get(f"/api/team-docs/jobs/{job_id}?department={department}")
+        assert resp.status_code == 200
+        job = resp.json()
+        if job["status"] in ("completed", "error"):
+            return job
+    return job
+
+
 def _seed_vault_upload(with_raw=True):
     """Seed a Knowledge Vault upload the way process_kb_upload_job stores it:
     a raw file plus a {stem}_chunks.json document."""
@@ -189,8 +200,16 @@ def test_ai_draft_uses_llm_title_and_content(client, mock_gemini):
         "content_markdown": "# Forklift Safety Rules\n\n## Daily Checks\n- Inspect before every shift.",
     }))
     project_id = _new_project(client).json()["project_id"]
-    page = _add_page(client, project_id, mode="ai_draft",
-                     source_doc_id="forklift_rules_chunks").json()["project"]["pages"][0]
+    resp = _add_page(client, project_id, mode="ai_draft", source_doc_id="forklift_rules_chunks")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "processing"
+    job = _poll_team_docs_job(client, body["job_id"])
+    assert job["status"] == "completed"
+    assert job["drafted_by"] == "ai"
+
+    project = client.get(f"/api/team-docs/projects/{project_id}?role=manager").json()
+    page = project["pages"][0]
     assert page["title"] == "Forklift Safety Rules"
     assert "## Daily Checks" in page["content"]
     assert page["drafted_by"] == "ai"
@@ -200,8 +219,14 @@ def test_ai_draft_falls_back_to_import_when_llm_fails(client, mock_gemini):
     _seed_vault_upload()
     mock_gemini(RuntimeError("gemini exploded"))
     project_id = _new_project(client).json()["project_id"]
-    page = _add_page(client, project_id, mode="ai_draft",
-                     source_doc_id="forklift_rules_chunks").json()["project"]["pages"][0]
+    resp = _add_page(client, project_id, mode="ai_draft", source_doc_id="forklift_rules_chunks")
+    body = resp.json()
+    job = _poll_team_docs_job(client, body["job_id"])
+    assert job["status"] == "completed"
+    assert job["drafted_by"] == "import"
+
+    project = client.get(f"/api/team-docs/projects/{project_id}?role=manager").json()
+    page = project["pages"][0]
     assert page["drafted_by"] == "import"
     assert "inspected daily" in page["content"]
     assert page["title"] == "Forklift Rules"
@@ -335,10 +360,13 @@ def test_generate_documentation_writes_pages_from_llm(client, mock_gemini):
     resp = client.post(f"/api/team-docs/projects/{project_id}/generate-documentation",
                        json={"role": "manager"})
     assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "success"
-    assert data["pages_written"] == ["Warehouse Safety Overview", "Operating Limits"]
-    pages = data["project"]["pages"]
+    assert resp.json()["status"] == "processing"
+    job = _poll_team_docs_job(client, resp.json()["job_id"])
+    assert job["status"] == "completed"
+    assert job["pages_written"] == ["Warehouse Safety Overview", "Operating Limits"]
+
+    project = client.get(f"/api/team-docs/projects/{project_id}?role=manager").json()
+    pages = project["pages"]
     assert [p["title"] for p in pages] == ["Warehouse Safety Overview", "Operating Limits"]
     assert all(p["drafted_by"] == "ai_synthesis" for p in pages)
     assert pages[0]["source"]["type"] == "vault_synthesis"
@@ -353,14 +381,18 @@ def test_generate_documentation_regeneration_replaces_only_synthesis_pages(clien
     _add_page(client, project_id, mode="blank", title="Manual Notes")
 
     mock_gemini(json.dumps({"pages": [{"title": "First Pass", "content_markdown": "# First Pass\n\nBody."}]}))
-    first = client.post(f"/api/team-docs/projects/{project_id}/generate-documentation",
-                        json={"role": "manager"}).json()
-    assert [p["title"] for p in first["project"]["pages"]] == ["Manual Notes", "First Pass"]
+    first_job_id = client.post(f"/api/team-docs/projects/{project_id}/generate-documentation",
+                               json={"role": "manager"}).json()["job_id"]
+    _poll_team_docs_job(client, first_job_id)
+    first_project = client.get(f"/api/team-docs/projects/{project_id}?role=manager").json()
+    assert [p["title"] for p in first_project["pages"]] == ["Manual Notes", "First Pass"]
 
     mock_gemini(json.dumps({"pages": [{"title": "Second Pass", "content_markdown": "# Second Pass\n\nBody."}]}))
-    second = client.post(f"/api/team-docs/projects/{project_id}/generate-documentation",
-                         json={"role": "manager"}).json()
-    titles = [p["title"] for p in second["project"]["pages"]]
+    second_job_id = client.post(f"/api/team-docs/projects/{project_id}/generate-documentation",
+                                json={"role": "manager"}).json()["job_id"]
+    _poll_team_docs_job(client, second_job_id)
+    second_project = client.get(f"/api/team-docs/projects/{project_id}?role=manager").json()
+    titles = [p["title"] for p in second_project["pages"]]
     assert titles == ["Manual Notes", "Second Pass"]  # First Pass replaced, Manual Notes kept
 
 
@@ -373,7 +405,10 @@ def test_generate_documentation_falls_back_to_error_on_llm_failure(client, mock_
 
     resp = client.post(f"/api/team-docs/projects/{project_id}/generate-documentation",
                        json={"role": "manager"})
-    assert resp.status_code == 502
+    assert resp.status_code == 200
+    job = _poll_team_docs_job(client, resp.json()["job_id"])
+    assert job["status"] == "error"
+    assert "gemini exploded" in job["message"]
 
 
 # ── Page ─────────────────────────────────────────────────────────────────────

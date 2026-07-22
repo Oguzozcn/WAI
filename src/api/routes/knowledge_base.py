@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi.responses import Response
 from pydantic import BaseModel
 from pathlib import Path
 from openpyxl import load_workbook
@@ -86,6 +87,22 @@ async def api_delete_kb_document(filename: str, req: DeleteDocumentRequest):
         raise HTTPException(status_code=404, detail=f"Document '{filename}' not found.")
 
     return {"status": "deleted", "filename": filename}
+
+
+@router.get("/documents/{filename}/download")
+async def api_download_kb_document(filename: str, department: str = DEFAULT_DEPARTMENT):
+    """Download the current raw file for an uploaded document."""
+    store = DepartmentScopedStore(department)
+    data = store.read_raw_document_bytes(filename)
+    if data is None:
+        raise HTTPException(status_code=404, detail=f"Document '{filename}' not found.")
+    ext = Path(filename).suffix.lower()
+    mime_type = SUPPORTED_MIME_TYPES.get(ext, ("application/octet-stream", "text"))[0]
+    return Response(
+        content=data,
+        media_type=mime_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/documents/{filename}/versions")

@@ -1,0 +1,308 @@
+{
+  "run_id": "UAT-0001",
+  "department": "operations",
+  "status": "in_progress",
+  "started_at": "2026-07-22T11:31:28.617785+00:00",
+  "completed_at": "",
+  "started_by": {
+    "user_id": "developer",
+    "display_name": "Sam Rivera"
+  },
+  "items": [
+    {
+      "id": "AUTH-01",
+      "area": "Login & Access",
+      "title": "Employee login",
+      "steps": "Open the login page and sign in with a seeded employee account (e.g. emp_001).",
+      "expected": "Redirected to the employee dashboard with course cards.",
+      "launch_url": "/login",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "AUTH-02",
+      "area": "Login & Access",
+      "title": "Role gate blocks employees",
+      "steps": "While logged in as an employee, open /manager-dashboard directly via the URL bar.",
+      "expected": "Bounced back to the dashboard with an 'access denied' toast.",
+      "launch_url": "/manager-dashboard",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "AUTH-03",
+      "area": "Login & Access",
+      "title": "Logout",
+      "steps": "Use the sidebar account card's Log out button, then try opening any page.",
+      "expected": "Returned to the login page; protected pages redirect to /login.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "DASH-01",
+      "area": "Dashboard",
+      "title": "Course cards render",
+      "steps": "On the dashboard Courses tab, review the lesson cards and the inline expand toggle.",
+      "expected": "Cards show correct progress; pagination appears past 5 cards.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "DASH-02",
+      "area": "Dashboard",
+      "title": "Paths tab",
+      "steps": "Switch to the Paths tab on the dashboard.",
+      "expected": "Enrolled paths are listed with overall progress.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "LP-01",
+      "area": "Learning Path & Lessons",
+      "title": "Learning path detail",
+      "steps": "Open Learning Path from the sidebar.",
+      "expected": "Courses and lessons are listed in order with completion states.",
+      "launch_url": "/learning-path",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "LES-01",
+      "area": "Learning Path & Lessons",
+      "title": "Lesson content",
+      "steps": "Open a lesson from the dashboard.",
+      "expected": "Lesson content renders (headings, lists, key points); Start quiz button is present.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "QUIZ-01",
+      "area": "Quiz Engine",
+      "title": "Take a lesson quiz",
+      "steps": "Start a lesson quiz and answer a few questions.",
+      "expected": "Inline feedback appears after each answer; progress advances.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "QUIZ-02",
+      "area": "Quiz Engine",
+      "title": "Wrong-answer reflection",
+      "steps": "Deliberately answer one question wrong.",
+      "expected": "A reflection prompt appears explaining the concept before moving on.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "QUIZ-03",
+      "area": "Quiz Engine",
+      "title": "Finish a quiz",
+      "steps": "Complete the quiz to the results screen.",
+      "expected": "Score shown with pass/fail and the correct next action (continue, gap review, or remedial course).",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "CAT-01",
+      "area": "Catalog & Enrollment",
+      "title": "Enroll from the catalog",
+      "steps": "Open Catalog and enroll in a published path.",
+      "expected": "Enrollment is confirmed and the path appears on the dashboard's Paths tab.",
+      "launch_url": "/catalog",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "CHAT-01",
+      "area": "AI Coach Chat",
+      "title": "Coach chat replies",
+      "steps": "Open the chat coach and ask a question about your learning path or progress.",
+      "expected": "Typing indicator while waiting; a relevant reply renders in the thread.",
+      "launch_url": "/chat",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "MGR-01",
+      "area": "Manager Tools",
+      "title": "Team dashboard KPIs",
+      "steps": "Log in as the manager and open Team Dashboards.",
+      "expected": "KPI cards and the per-report table populate with team data.",
+      "launch_url": "/manager-dashboard",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "MGR-02",
+      "area": "Manager Tools",
+      "title": "Excel report export",
+      "steps": "Press the export button on the manager dashboard.",
+      "expected": "An .xlsx file downloads and opens with formatted team data.",
+      "launch_url": "/manager-dashboard",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "KV-01",
+      "area": "Manager Tools",
+      "title": "Knowledge vault upload",
+      "steps": "Upload a document in the Knowledge Vault and watch the ingestion job.",
+      "expected": "The job completes; conflicts with existing documents are flagged for review.",
+      "launch_url": "/knowledge-vault",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "LM-01",
+      "area": "Manager Tools",
+      "title": "Learning materials & versions",
+      "steps": "Open Learning Materials; check the document list and a document's version history.",
+      "expected": "Documents are listed; version history shows snapshots with restore available.",
+      "launch_url": "/learning-materials",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "ELP-01",
+      "area": "Manager Tools",
+      "title": "Edit a learning path",
+      "steps": "Open a path in the editor, edit a lesson, check the markdown preview, save, reload.",
+      "expected": "The edit persists after reload; preview matches the rendered lesson.",
+      "launch_url": "/edit-learning-path",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "TDOC-01",
+      "area": "Team Documentation",
+      "title": "Project creation is manager-only",
+      "steps": "As the manager, open Team Documentation and create a new project. Then log in as an employee and confirm no 'New Project' control is offered.",
+      "expected": "The manager's project is created and listed; the employee view has no way to create or delete a project but can still open existing ones.",
+      "launch_url": "/team-documentation",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "TDOC-02",
+      "area": "Team Documentation",
+      "title": "Link Knowledge Vault sources & add a page",
+      "steps": "Open a project, use 'Manage Sources' to check a couple of Knowledge Vault uploads, then add a page via the vault or AI-draft mode.",
+      "expected": "Checked sources are saved and pre-checked on reopen; the new page renders with the correct origin badge.",
+      "launch_url": "/team-documentation",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "TDOC-03",
+      "area": "Team Documentation",
+      "title": "Documentation Master full synthesis",
+      "steps": "With sources linked (TDOC-02), press 'Generate Full Documentation' and wait for it to finish.",
+      "expected": "A multi-page doc set is written (overview, glossary, etc. as applicable) grounded in the linked sources, each page badged as synthesized by Documentation Master; re-running replaces only those pages.",
+      "launch_url": "/team-documentation",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "DEV-01",
+      "area": "Developer Tools",
+      "title": "Agent console",
+      "steps": "Log in as the developer and open the Agent Console; edit and save a prompt template.",
+      "expected": "The agent graph and config sections load; the template edit saves and persists.",
+      "launch_url": "/dev-console",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "DOC-01",
+      "area": "Developer Tools",
+      "title": "Documentation system",
+      "steps": "Open Documentation; browse pages; edit-save a page; download TXT and PDF.",
+      "expected": "The tree renders, markdown displays, the save persists, both downloads work.",
+      "launch_url": "/documentation",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "SUP-01",
+      "area": "Support",
+      "title": "Submit a support ticket",
+      "steps": "As an employee, submit a ticket from the Support form.",
+      "expected": "The ticket appears under 'My tickets' with status New.",
+      "launch_url": "/support",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "SUP-02",
+      "area": "Support",
+      "title": "Triage a ticket",
+      "steps": "As the developer, open the Support Console; set status/priority and add a work note.",
+      "expected": "Changes appear in the ticket's activity timeline and the reporter sees the update.",
+      "launch_url": "/support-console",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "UI-01",
+      "area": "Global UI",
+      "title": "Dark mode",
+      "steps": "Toggle dark mode from the sidebar and browse several pages.",
+      "expected": "All pages render correctly in dark mode; the choice persists on reload.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    },
+    {
+      "id": "UI-02",
+      "area": "Global UI",
+      "title": "Sidebar collapse & active state",
+      "steps": "Collapse the sidebar and navigate between pages.",
+      "expected": "The collapsed state persists across pages; the active nav item is highlighted.",
+      "launch_url": "/",
+      "result": "pending",
+      "note": "",
+      "marked_at": ""
+    }
+  ],
+  "report": null,
+  "summary": {
+    "pass": 0,
+    "fail": 0,
+    "blocked": 0,
+    "pending": 26,
+    "total": 26
+  },
+  "updated_at": "2026-07-22T11:31:35.100321+00:00"
+}

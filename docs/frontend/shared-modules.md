@@ -8,15 +8,26 @@ Session in `sessionStorage['wai-session']` (per-tab). API: `login`, `logout`, `g
 
 ## sidebar.js → `window.WisdomSidebar`
 
-Renders the sidebar, handles role-based link visibility, collapse state, theme, and toasts. Public API:
+Renders the sidebar, handles role-based link visibility, collapse state, theme, toasts, background-job notifications, and the chat launcher. Public API:
 
 - `toast(message, type)` — bottom-center pill for 3s (`'info'` | `'warn'`). Delegates to a page-level `window.showToast` if the page defines one.
 - `isActive(href)` — exact-path matcher used for nav highlighting.
 - `applyTheme(dark)` / `isDarkMode()` — the **only** correct way to toggle theme from a page. `applyTheme` flips the `dark` class on `<html>`, persists to `localStorage['wai-theme']`, and updates the sidebar toggle's own label. (Settings once duplicated this logic and drifted out of sync — don't repeat that; call the sidebar's functions.)
+- `trackJob({job_id, kind, department})` — register a background job for the persistent notification poller (see below).
+
+`NAV_LINKS` order (Dashboard → Catalog → Learning Path → Knowledge Vault → Team Docs → Team Dashboards) follows the learner's natural flow — browse/enroll, then your assigned path, then shared reference material — with the manager-only oversight view (Team Dashboards) last since it's an admin lens, not part of an individual's own path.
 
 Since this is a multi-page app, `sidebar.js` re-mounts the sidebar and re-applies the collapsed/expanded state (and the matching `.sidebar-offset`/`.sidebar-offset-header` margin on the page header) from scratch on every navigation. The collapse/expand CSS transition (`margin-left`/`width`, .3s) is gated behind a `body.sidebar-ready` class that's only added a couple of animation frames after the initial state is applied (`injectStyles`/`init` in `sidebar.js`). Without that gate, the very first state application on page load would itself animate — the header/search bar visibly sliding into its offset position on *every* page transition, looking like the sidebar re-opens each time. Only user-triggered collapse/expand clicks (which happen after `sidebar-ready` is set) should ever animate.
 
-`sidebar.js` also owns the header avatar: a page opts in with `<div id="header-avatar-mount"></div>` in its TopAppBar, and `init()` fills it with a session-driven initials circle (`headerAvatarHtml()`/`initials()`) linking to `/profile`. This replaced 10 pages' worth of hand-copied `<img src="https://...">` tags — five different hardcoded stock photos with no relationship to who was actually logged in, clickable on only 2 of those 10 pages. `initials` is exposed on `window.WisdomSidebar` so `profile.html`/`settings.html` can render the same avatar math in their own larger/smaller copies instead of re-deriving it (same reuse convention as `applyTheme`/`isDarkMode`).
+`sidebar.js` also owns the header avatar: a page opts in with `<div id="header-avatar-mount"></div>` in its TopAppBar, and `init()` fills it with a notification bell (see below) plus a session-driven initials circle (`headerAvatarHtml()`/`initials()`) linking to `/profile`. This replaced 10 pages' worth of hand-copied `<img src="https://...">` tags — five different hardcoded stock photos with no relationship to who was actually logged in, clickable on only 2 of those 10 pages. `initials` is exposed on `window.WisdomSidebar` so `profile.html`/`settings.html` can render the same avatar math in their own larger/smaller copies instead of re-deriving it (same reuse convention as `applyTheme`/`isDarkMode`).
+
+### Background job notifications (bell in `header-avatar-mount`)
+
+Some server work (Team Docs `ai_draft` pages, `generate-documentation`) runs too long to block a request, so those endpoints return a `job_id` immediately and finish on the server independent of the browser. A page that starts one calls `window.WisdomSidebar.trackJob({job_id, kind, department})`; `sidebar.js` persists pending jobs to `localStorage['wai-pending-jobs']` (not page state) specifically so that *whichever page happens to be open* when the job finishes — not necessarily the one that started it — is the one that notices, and a full navigation never loses track of it. `init()` resumes polling (`JOB_STATUS_URL`, keyed by `kind`) on every page load; on `completed`/`error` it records a `localStorage['wai-notifications']` entry, fires a toast, updates the bell's badge, and dispatches a `wai:job-done` window event carrying the job's result so a still-open page for the same project can refresh in place (`team-documentation.html` listens for this). A job unresolvable for more than `JOB_MAX_AGE_MS` (30 min) is dropped quietly rather than polled forever. Adding a new background-job subsystem means adding one `JOB_STATUS_URL[kind]` entry.
+
+### Wisdom AI chat launcher
+
+A floating bottom-right button (`#wai-chat-launcher`, linking to `/chat`) is mounted on every page that has `#sidebar-mount` and a logged-in session, except `/chat` itself (redundant there) and `/quiz` (an assessment page, where a chat prompt would be a distraction) — see `CHAT_LAUNCHER_EXCLUDED_PATHS`.
 
 ## css/entrance.css → `.fade-up` / `.fade-up-2` / `.fade-up-3` / `.fade-up-4`
 

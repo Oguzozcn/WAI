@@ -1,0 +1,36 @@
+{
+  "ticket_id": "TKT-0001",
+  "department": "operations",
+  "subject": "title fonts not matching",
+  "area": "learning-path",
+  "issue_type": "ui-visual",
+  "description": "bla bala",
+  "additional_comments": "",
+  "status": "new",
+  "priority": "medium",
+  "assignee": "",
+  "resolution_note": "next sprint",
+  "reporter": {
+    "user_id": "emp_001",
+    "display_name": "Alex Chen",
+    "role": "individual_contributor"
+  },
+  "created_at": "2026-07-22T14:52:32.594586+00:00",
+  "activity": [
+    {
+      "at": "2026-07-22T14:52:32.594617+00:00",
+      "by_user_id": "emp_001",
+      "by": "Alex Chen",
+      "event": "created",
+      "detail": "Ticket submitted"
+    },
+    {
+      "at": "2026-07-22T14:53:16.268061+00:00",
+      "by_user_id": "developer",
+      "by": "Sam Rivera",
+      "event": "work_note",
+      "detail": "next sprint"
+    }
+  ],
+  "updated_at": "2026-07-22T14:53:16.268099+00:00"
+}

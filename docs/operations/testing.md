@@ -35,7 +35,7 @@ python3 -m pytest tests/ -q          # the regression gate — keep it green
 python3 -m pytest tests/unit -q      # fast inner loop
 ```
 
-Suite status as of 2026-07-22: **187 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`.
+Suite status as of 2026-07-22: **189 passed, 2 deselected** (eval tests needing ADC). LLM-dependent code paths are tested through their deterministic fallbacks and by mocking `call_gemini_json`. `test_kb_routes.py` also covers the `/documents/{filename}/download` route; `test_team_docs_routes.py`'s `ai_draft`/`generate-documentation` tests poll `GET /api/team-docs/jobs/{job_id}` (FastAPI's `TestClient` runs `BackgroundTasks` synchronously, so the job is already resolved by the time the poll happens).
 
 ## Conventions
 

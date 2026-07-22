@@ -39,6 +39,31 @@ def test_upload_txt_processes_and_completes(client):
     assert job["status"] == "completed"
 
 
+def test_download_document_returns_raw_bytes(client):
+    content = (
+        b"This is a suitably long standalone operations knowledge document that "
+        b"describes daily standard procedures, safety steps, and handover routines "
+        b"for the operations team without overlapping any existing catalog entry."
+    )
+    resp = client.post(
+        "/api/kb/upload",
+        files={"file": ("downloadable.txt", content, "text/plain")},
+        data={"department": "operations", "role": "manager"},
+    )
+    _poll_job(client, resp.json()["job_id"])
+
+    resp = client.get("/api/kb/documents/downloadable.txt/download?department=operations")
+    assert resp.status_code == 200
+    assert resp.content == content
+    assert resp.headers["content-type"].startswith("text/plain")
+    assert 'attachment; filename="downloadable.txt"' in resp.headers["content-disposition"]
+
+
+def test_download_document_404_for_unknown_filename(client):
+    resp = client.get("/api/kb/documents/does-not-exist.txt/download?department=operations")
+    assert resp.status_code == 404
+
+
 def test_upload_xlsx_extracts_text_and_processes_like_any_text_file(client):
     import io
     from openpyxl import Workbook
